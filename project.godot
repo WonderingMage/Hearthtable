@@ -1,0 +1,30 @@
+; Hearthtable. Godot 4.5.1 desktop tabletop.
+config_version=5
+[application]
+config/name="Hearthtable"
+config/version="0.11.0"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.5", "GL Compatibility")
+config/icon="res://assets/icon.svg"
+[autoload]
+World="*res://scripts/world.gd"
+[display]
+window/size/viewport_width=1600
+window/size/viewport_height=1000
+window/size/window_width_override=1600
+window/size/window_height_override=1000
+window/stretch/mode="disabled"
+window/dpi/allow_hidpi=true
+window/size/min_width=1200
+window/size/min_height=760
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.045,0.065,0.067,1)
+textures/default_filters/use_nearest_mipmap_filter=false
+anti_aliasing/quality/msaa_3d=2
+textures/default_filters/anisotropic_filtering_level=3
+[audio]
+driver/enable_input=false
+[debug]
+gdscript/warnings/treat_warnings_as_errors=false
