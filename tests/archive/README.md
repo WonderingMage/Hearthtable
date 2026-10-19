@@ -1,0 +1,1 @@
+Historical camera-view tests for releases through 0.8. They deliberately require removed first-person/following/top-down/DM tactical modes and are not current regression entry points. Use ../build_ui.gd and ../magic_network.gd for the fixed role views introduced in 0.9. These scripts are preserved as historical source only.

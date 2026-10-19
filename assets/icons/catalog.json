@@ -1,0 +1,2547 @@
+{
+  "spells": {
+    "acidarrow": {
+      "path": "res://assets/icons/spells/acid-arrow.svg",
+      "name": "Acid Arrow",
+      "motif": "arrow",
+      "secondary": "flask",
+      "school": "Evocation"
+    },
+    "acidsplash": {
+      "path": "res://assets/icons/spells/acid-splash.svg",
+      "name": "Acid Splash",
+      "motif": "flask",
+      "secondary": "heart",
+      "school": "Conjuration"
+    },
+    "aid": {
+      "path": "res://assets/icons/spells/aid.svg",
+      "name": "Aid",
+      "motif": "heart",
+      "secondary": "key",
+      "school": "Abjuration"
+    },
+    "alarm": {
+      "path": "res://assets/icons/spells/alarm.svg",
+      "name": "Alarm",
+      "motif": "bell",
+      "secondary": "wing",
+      "school": "Abjuration"
+    },
+    "alterself": {
+      "path": "res://assets/icons/spells/alter-self.svg",
+      "name": "Alter Self",
+      "motif": "butterfly",
+      "secondary": "head",
+      "school": "Transmutation"
+    },
+    "animalfriendship": {
+      "path": "res://assets/icons/spells/animal-friendship.svg",
+      "name": "Animal Friendship",
+      "motif": "paw",
+      "secondary": "heart",
+      "school": "Enchantment"
+    },
+    "animalmessenger": {
+      "path": "res://assets/icons/spells/animal-messenger.svg",
+      "name": "Animal Messenger",
+      "motif": "paw",
+      "secondary": "bird",
+      "school": "Enchantment"
+    },
+    "animalshapes": {
+      "path": "res://assets/icons/spells/animal-shapes.svg",
+      "name": "Animal Shapes",
+      "motif": "butterfly",
+      "secondary": "head",
+      "school": "Transmutation"
+    },
+    "animatedead": {
+      "path": "res://assets/icons/spells/animate-dead.svg",
+      "name": "Animate Dead",
+      "motif": "skull",
+      "secondary": "hand",
+      "school": "Necromancy"
+    },
+    "animateobjects": {
+      "path": "res://assets/icons/spells/animate-objects.svg",
+      "name": "Animate Objects",
+      "motif": "wand",
+      "secondary": "rune",
+      "school": "Transmutation"
+    },
+    "antilifeshell": {
+      "path": "res://assets/icons/spells/antilife-shell.svg",
+      "name": "Antilife Shell",
+      "motif": "shield",
+      "secondary": "rune",
+      "school": "Abjuration"
+    },
+    "antimagicfield": {
+      "path": "res://assets/icons/spells/antimagic-field.svg",
+      "name": "Antimagic Field",
+      "motif": "shield",
+      "secondary": "rune",
+      "school": "Abjuration"
+    },
+    "antipathysympathy": {
+      "path": "res://assets/icons/spells/antipathy-sympathy.svg",
+      "name": "Antipathy/Sympathy",
+      "motif": "mask",
+      "secondary": "eye",
+      "school": "Enchantment"
+    },
+    "arcaneeye": {
+      "path": "res://assets/icons/spells/arcane-eye.svg",
+      "name": "Arcane Eye",
+      "motif": "eye",
+      "secondary": "wing",
+      "school": "Divination"
+    },
+    "arcanehand": {
+      "path": "res://assets/icons/spells/arcane-hand.svg",
+      "name": "Arcane Hand",
+      "motif": "hand",
+      "secondary": "eye",
+      "school": "Evocation"
+    },
+    "arcanelock": {
+      "path": "res://assets/icons/spells/arcane-lock.svg",
+      "name": "Arcane Lock",
+      "motif": "lock",
+      "secondary": "moon",
+      "school": "Abjuration"
+    },
+    "arcanesword": {
+      "path": "res://assets/icons/spells/arcane-sword.svg",
+      "name": "Arcane Sword",
+      "motif": "lock",
+      "secondary": "mouth",
+      "school": "Evocation"
+    },
+    "arcanistsmagicaura": {
+      "path": "res://assets/icons/spells/arcanists-magic-aura.svg",
+      "name": "Arcanist's Magic Aura",
+      "motif": "eye",
+      "secondary": "eye",
+      "school": "Illusion"
+    },
+    "astralprojection": {
+      "path": "res://assets/icons/spells/astral-projection.svg",
+      "name": "Astral Projection",
+      "motif": "portal",
+      "secondary": "star",
+      "school": "Necromancy"
+    },
+    "augury": {
+      "path": "res://assets/icons/spells/augury.svg",
+      "name": "Augury",
+      "motif": "book",
+      "secondary": "eye",
+      "school": "Divination"
+    },
+    "awaken": {
+      "path": "res://assets/icons/spells/awaken.svg",
+      "name": "Awaken",
+      "motif": "wand",
+      "secondary": "rune",
+      "school": "Transmutation"
+    },
+    "bane": {
+      "path": "res://assets/icons/spells/bane.svg",
+      "name": "Bane",
+      "motif": "head",
+      "secondary": "wing",
+      "school": "Enchantment"
+    },
+    "banishment": {
+      "path": "res://assets/icons/spells/banishment.svg",
+      "name": "Banishment",
+      "motif": "portal",
+      "secondary": "eye",
+      "school": "Abjuration"
+    },
+    "barkskin": {
+      "path": "res://assets/icons/spells/barkskin.svg",
+      "name": "Barkskin",
+      "motif": "shield",
+      "secondary": "heart",
+      "school": "Transmutation"
+    },
+    "beaconofhope": {
+      "path": "res://assets/icons/spells/beacon-of-hope.svg",
+      "name": "Beacon of Hope",
+      "motif": "sun",
+      "secondary": "crystal",
+      "school": "Abjuration"
+    },
+    "bestowcurse": {
+      "path": "res://assets/icons/spells/bestow-curse.svg",
+      "name": "Bestow Curse",
+      "motif": "head",
+      "secondary": "wing",
+      "school": "Necromancy"
+    },
+    "blacktentacles": {
+      "path": "res://assets/icons/spells/black-tentacles.svg",
+      "name": "Black Tentacles",
+      "motif": "tentacle",
+      "secondary": "rune",
+      "school": "Conjuration"
+    },
+    "bladebarrier": {
+      "path": "res://assets/icons/spells/blade-barrier.svg",
+      "name": "Blade Barrier",
+      "motif": "sword",
+      "secondary": "eye",
+      "school": "Evocation"
+    },
+    "bless": {
+      "path": "res://assets/icons/spells/bless.svg",
+      "name": "Bless",
+      "motif": "sun",
+      "secondary": "hand",
+      "school": "Enchantment"
+    },
+    "blight": {
+      "path": "res://assets/icons/spells/blight.svg",
+      "name": "Blight",
+      "motif": "skull",
+      "secondary": "sun",
+      "school": "Necromancy"
+    },
+    "blindnessdeafness": {
+      "path": "res://assets/icons/spells/blindness-deafness.svg",
+      "name": "Blindness/Deafness",
+      "motif": "head",
+      "secondary": "eye",
+      "school": "Necromancy"
+    },
+    "blink": {
+      "path": "res://assets/icons/spells/blink.svg",
+      "name": "Blink",
+      "motif": "mask",
+      "secondary": "moon",
+      "school": "Transmutation"
+    },
+    "blur": {
+      "path": "res://assets/icons/spells/blur.svg",
+      "name": "Blur",
+      "motif": "mask",
+      "secondary": "crystal",
+      "school": "Illusion"
+    },
+    "brandingsmite": {
+      "path": "res://assets/icons/spells/branding-smite.svg",
+      "name": "Branding Smite",
+      "motif": "sword",
+      "secondary": "rune",
+      "school": "Evocation"
+    },
+    "burninghands": {
+      "path": "res://assets/icons/spells/burning-hands.svg",
+      "name": "Burning Hands",
+      "motif": "handsfire",
+      "secondary": "flame",
+      "school": "Evocation"
+    },
+    "calllightning": {
+      "path": "res://assets/icons/spells/call-lightning.svg",
+      "name": "Call Lightning",
+      "motif": "bolt",
+      "secondary": "sun",
+      "school": "Conjuration"
+    },
+    "calmemotions": {
+      "path": "res://assets/icons/spells/calm-emotions.svg",
+      "name": "Calm Emotions",
+      "motif": "head",
+      "secondary": "crystal",
+      "school": "Enchantment"
+    },
+    "chainlightning": {
+      "path": "res://assets/icons/spells/chain-lightning.svg",
+      "name": "Chain Lightning",
+      "motif": "bolt",
+      "secondary": "sun",
+      "school": "Evocation"
+    },
+    "charmperson": {
+      "path": "res://assets/icons/spells/charm-person.svg",
+      "name": "Charm Person",
+      "motif": "head",
+      "secondary": "eye",
+      "school": "Enchantment"
+    },
+    "chilltouch": {
+      "path": "res://assets/icons/spells/chill-touch.svg",
+      "name": "Chill Touch",
+      "motif": "hand",
+      "secondary": "eye",
+      "school": "Necromancy"
+    },
+    "circleofdeath": {
+      "path": "res://assets/icons/spells/circle-of-death.svg",
+      "name": "Circle of Death",
+      "motif": "skull",
+      "secondary": "rune",
+      "school": "Necromancy"
+    },
+    "clairvoyance": {
+      "path": "res://assets/icons/spells/clairvoyance.svg",
+      "name": "Clairvoyance",
+      "motif": "eye",
+      "secondary": "wind",
+      "school": "Divination"
+    },
+    "clone": {
+      "path": "res://assets/icons/spells/clone.svg",
+      "name": "Clone",
+      "motif": "jar",
+      "secondary": "eye",
+      "school": "Necromancy"
+    },
+    "cloudkill": {
+      "path": "res://assets/icons/spells/cloudkill.svg",
+      "name": "Cloudkill",
+      "motif": "cloud",
+      "secondary": "skull",
+      "school": "Conjuration"
+    },
+    "colorspray": {
+      "path": "res://assets/icons/spells/color-spray.svg",
+      "name": "Color Spray",
+      "motif": "rune",
+      "secondary": "star",
+      "school": "Illusion"
+    },
+    "command": {
+      "path": "res://assets/icons/spells/command.svg",
+      "name": "Command",
+      "motif": "head",
+      "secondary": "mouth",
+      "school": "Enchantment"
+    },
+    "commune": {
+      "path": "res://assets/icons/spells/commune.svg",
+      "name": "Commune",
+      "motif": "book",
+      "secondary": "crystal",
+      "school": "Divination"
+    },
+    "communewithnature": {
+      "path": "res://assets/icons/spells/commune-with-nature.svg",
+      "name": "Commune With Nature",
+      "motif": "book",
+      "secondary": "leaf",
+      "school": "Divination"
+    },
+    "comprehendlanguages": {
+      "path": "res://assets/icons/spells/comprehend-languages.svg",
+      "name": "Comprehend Languages",
+      "motif": "book",
+      "secondary": "mouth",
+      "school": "Divination"
+    },
+    "compulsion": {
+      "path": "res://assets/icons/spells/compulsion.svg",
+      "name": "Compulsion",
+      "motif": "head",
+      "secondary": "crystal",
+      "school": "Enchantment"
+    },
+    "coneofcold": {
+      "path": "res://assets/icons/spells/cone-of-cold.svg",
+      "name": "Cone of Cold",
+      "motif": "snow",
+      "secondary": "moon",
+      "school": "Evocation"
+    },
+    "confusion": {
+      "path": "res://assets/icons/spells/confusion.svg",
+      "name": "Confusion",
+      "motif": "head",
+      "secondary": "star",
+      "school": "Enchantment"
+    },
+    "conjureanimals": {
+      "path": "res://assets/icons/spells/conjure-animals.svg",
+      "name": "Conjure Animals",
+      "motif": "paw",
+      "secondary": "leaf",
+      "school": "Conjuration"
+    },
+    "conjurecelestial": {
+      "path": "res://assets/icons/spells/conjure-celestial.svg",
+      "name": "Conjure Celestial",
+      "motif": "sun",
+      "secondary": "crystal",
+      "school": "Conjuration"
+    },
+    "conjureelemental": {
+      "path": "res://assets/icons/spells/conjure-elemental.svg",
+      "name": "Conjure Elemental",
+      "motif": "rune",
+      "secondary": "head",
+      "school": "Conjuration"
+    },
+    "conjurefey": {
+      "path": "res://assets/icons/spells/conjure-fey.svg",
+      "name": "Conjure Fey",
+      "motif": "rune",
+      "secondary": "crystal",
+      "school": "Conjuration"
+    },
+    "conjureminorelementals": {
+      "path": "res://assets/icons/spells/conjure-minor-elementals.svg",
+      "name": "Conjure Minor Elementals",
+      "motif": "rune",
+      "secondary": "head",
+      "school": "Conjuration"
+    },
+    "conjurewoodlandbeings": {
+      "path": "res://assets/icons/spells/conjure-woodland-beings.svg",
+      "name": "Conjure Woodland Beings",
+      "motif": "rune",
+      "secondary": "leaf",
+      "school": "Conjuration"
+    },
+    "contactotherplane": {
+      "path": "res://assets/icons/spells/contact-other-plane.svg",
+      "name": "Contact Other Plane",
+      "motif": "book",
+      "secondary": "wing",
+      "school": "Divination"
+    },
+    "contagion": {
+      "path": "res://assets/icons/spells/contagion.svg",
+      "name": "Contagion",
+      "motif": "flask",
+      "secondary": "rune",
+      "school": "Necromancy"
+    },
+    "contingency": {
+      "path": "res://assets/icons/spells/contingency.svg",
+      "name": "Contingency",
+      "motif": "book",
+      "secondary": "crystal",
+      "school": "Evocation"
+    },
+    "continualflame": {
+      "path": "res://assets/icons/spells/continual-flame.svg",
+      "name": "Continual Flame",
+      "motif": "flame",
+      "secondary": "rune",
+      "school": "Evocation"
+    },
+    "controlwater": {
+      "path": "res://assets/icons/spells/control-water.svg",
+      "name": "Control Water",
+      "motif": "wave",
+      "secondary": "heart",
+      "school": "Transmutation"
+    },
+    "controlweather": {
+      "path": "res://assets/icons/spells/control-weather.svg",
+      "name": "Control Weather",
+      "motif": "cloud",
+      "secondary": "star",
+      "school": "Transmutation"
+    },
+    "counterspell": {
+      "path": "res://assets/icons/spells/counterspell.svg",
+      "name": "Counterspell",
+      "motif": "counter",
+      "secondary": "rune",
+      "school": "Abjuration"
+    },
+    "createfoodandwater": {
+      "path": "res://assets/icons/spells/create-food-and-water.svg",
+      "name": "Create Food and Water",
+      "motif": "feast",
+      "secondary": "wave",
+      "school": "Conjuration"
+    },
+    "createundead": {
+      "path": "res://assets/icons/spells/create-undead.svg",
+      "name": "Create Undead",
+      "motif": "skull",
+      "secondary": "heart",
+      "school": "Necromancy"
+    },
+    "createordestroywater": {
+      "path": "res://assets/icons/spells/create-or-destroy-water.svg",
+      "name": "Create or Destroy Water",
+      "motif": "wave",
+      "secondary": "wing",
+      "school": "Transmutation"
+    },
+    "creation": {
+      "path": "res://assets/icons/spells/creation.svg",
+      "name": "Creation",
+      "motif": "wand",
+      "secondary": "moon",
+      "school": "Illusion"
+    },
+    "curewounds": {
+      "path": "res://assets/icons/spells/cure-wounds.svg",
+      "name": "Cure Wounds",
+      "motif": "heart",
+      "secondary": "hand",
+      "school": "Evocation"
+    },
+    "dancinglights": {
+      "path": "res://assets/icons/spells/dancing-lights.svg",
+      "name": "Dancing Lights",
+      "motif": "cloud",
+      "secondary": "sun",
+      "school": "Evocation"
+    },
+    "darkness": {
+      "path": "res://assets/icons/spells/darkness.svg",
+      "name": "Darkness",
+      "motif": "cloud",
+      "secondary": "heart",
+      "school": "Evocation"
+    },
+    "darkvision": {
+      "path": "res://assets/icons/spells/darkvision.svg",
+      "name": "Darkvision",
+      "motif": "eye",
+      "secondary": "rune",
+      "school": "Transmutation"
+    },
+    "daylight": {
+      "path": "res://assets/icons/spells/daylight.svg",
+      "name": "Daylight",
+      "motif": "sun",
+      "secondary": "wing",
+      "school": "Evocation"
+    },
+    "deathward": {
+      "path": "res://assets/icons/spells/death-ward.svg",
+      "name": "Death Ward",
+      "motif": "shield",
+      "secondary": "skull",
+      "school": "Abjuration"
+    },
+    "delayedblastfireball": {
+      "path": "res://assets/icons/spells/delayed-blast-fireball.svg",
+      "name": "Delayed Blast Fireball",
+      "motif": "fireball",
+      "secondary": "flame",
+      "school": "Evocation"
+    },
+    "demiplane": {
+      "path": "res://assets/icons/spells/demiplane.svg",
+      "name": "Demiplane",
+      "motif": "portal",
+      "secondary": "crystal",
+      "school": "Conjuration"
+    },
+    "detectevilandgood": {
+      "path": "res://assets/icons/spells/detect-evil-and-good.svg",
+      "name": "Detect Evil and Good",
+      "motif": "eye",
+      "secondary": "sun",
+      "school": "Divination"
+    },
+    "detectmagic": {
+      "path": "res://assets/icons/spells/detect-magic.svg",
+      "name": "Detect Magic",
+      "motif": "eye",
+      "secondary": "crystal",
+      "school": "Divination"
+    },
+    "detectpoisonanddisease": {
+      "path": "res://assets/icons/spells/detect-poison-and-disease.svg",
+      "name": "Detect Poison and Disease",
+      "motif": "flask",
+      "secondary": "eye",
+      "school": "Divination"
+    },
+    "detectthoughts": {
+      "path": "res://assets/icons/spells/detect-thoughts.svg",
+      "name": "Detect Thoughts",
+      "motif": "eye",
+      "secondary": "head",
+      "school": "Divination"
+    },
+    "dimensiondoor": {
+      "path": "res://assets/icons/spells/dimension-door.svg",
+      "name": "Dimension Door",
+      "motif": "portal",
+      "secondary": "rune",
+      "school": "Conjuration"
+    },
+    "disguiseself": {
+      "path": "res://assets/icons/spells/disguise-self.svg",
+      "name": "Disguise Self",
+      "motif": "mask",
+      "secondary": "head",
+      "school": "Illusion"
+    },
+    "disintegrate": {
+      "path": "res://assets/icons/spells/disintegrate.svg",
+      "name": "Disintegrate",
+      "motif": "bolt",
+      "secondary": "wing",
+      "school": "Transmutation"
+    },
+    "dispelevilandgood": {
+      "path": "res://assets/icons/spells/dispel-evil-and-good.svg",
+      "name": "Dispel Evil and Good",
+      "motif": "bolt",
+      "secondary": "sun",
+      "school": "Abjuration"
+    },
+    "dispelmagic": {
+      "path": "res://assets/icons/spells/dispel-magic.svg",
+      "name": "Dispel Magic",
+      "motif": "counter",
+      "secondary": "eye",
+      "school": "Abjuration"
+    },
+    "divination": {
+      "path": "res://assets/icons/spells/divination.svg",
+      "name": "Divination",
+      "motif": "eye",
+      "secondary": "key",
+      "school": "Divination"
+    },
+    "divinefavor": {
+      "path": "res://assets/icons/spells/divine-favor.svg",
+      "name": "Divine Favor",
+      "motif": "sword",
+      "secondary": "sun",
+      "school": "Evocation"
+    },
+    "divineword": {
+      "path": "res://assets/icons/spells/divine-word.svg",
+      "name": "Divine Word",
+      "motif": "sun",
+      "secondary": "mouth",
+      "school": "Evocation"
+    },
+    "dominatebeast": {
+      "path": "res://assets/icons/spells/dominate-beast.svg",
+      "name": "Dominate Beast",
+      "motif": "paw",
+      "secondary": "wing",
+      "school": "Enchantment"
+    },
+    "dominatemonster": {
+      "path": "res://assets/icons/spells/dominate-monster.svg",
+      "name": "Dominate Monster",
+      "motif": "head",
+      "secondary": "wing",
+      "school": "Enchantment"
+    },
+    "dominateperson": {
+      "path": "res://assets/icons/spells/dominate-person.svg",
+      "name": "Dominate Person",
+      "motif": "head",
+      "secondary": "heart",
+      "school": "Enchantment"
+    },
+    "dream": {
+      "path": "res://assets/icons/spells/dream.svg",
+      "name": "Dream",
+      "motif": "head",
+      "secondary": "key",
+      "school": "Illusion"
+    },
+    "druidcraft": {
+      "path": "res://assets/icons/spells/druidcraft.svg",
+      "name": "Druidcraft",
+      "motif": "wand",
+      "secondary": "wing",
+      "school": "Transmutation"
+    },
+    "earthquake": {
+      "path": "res://assets/icons/spells/earthquake.svg",
+      "name": "Earthquake",
+      "motif": "mountain",
+      "secondary": "star",
+      "school": "Evocation"
+    },
+    "eldritchblast": {
+      "path": "res://assets/icons/spells/eldritch-blast.svg",
+      "name": "Eldritch Blast",
+      "motif": "bolt",
+      "secondary": "heart",
+      "school": "Evocation"
+    },
+    "enhanceability": {
+      "path": "res://assets/icons/spells/enhance-ability.svg",
+      "name": "Enhance Ability",
+      "motif": "head",
+      "secondary": "eye",
+      "school": "Transmutation"
+    },
+    "enlargereduce": {
+      "path": "res://assets/icons/spells/enlarge-reduce.svg",
+      "name": "Enlarge/Reduce",
+      "motif": "foot",
+      "secondary": "moon",
+      "school": "Transmutation"
+    },
+    "entangle": {
+      "path": "res://assets/icons/spells/entangle.svg",
+      "name": "Entangle",
+      "motif": "leaf",
+      "secondary": "rune",
+      "school": "Conjuration"
+    },
+    "enthrall": {
+      "path": "res://assets/icons/spells/enthrall.svg",
+      "name": "Enthrall",
+      "motif": "head",
+      "secondary": "star",
+      "school": "Enchantment"
+    },
+    "etherealness": {
+      "path": "res://assets/icons/spells/etherealness.svg",
+      "name": "Etherealness",
+      "motif": "portal",
+      "secondary": "key",
+      "school": "Transmutation"
+    },
+    "expeditiousretreat": {
+      "path": "res://assets/icons/spells/expeditious-retreat.svg",
+      "name": "Expeditious Retreat",
+      "motif": "foot",
+      "secondary": "star",
+      "school": "Transmutation"
+    },
+    "eyebite": {
+      "path": "res://assets/icons/spells/eyebite.svg",
+      "name": "Eyebite",
+      "motif": "eye",
+      "secondary": "rune",
+      "school": "Necromancy"
+    },
+    "fabricate": {
+      "path": "res://assets/icons/spells/fabricate.svg",
+      "name": "Fabricate",
+      "motif": "anvil",
+      "secondary": "heart",
+      "school": "Transmutation"
+    },
+    "faeriefire": {
+      "path": "res://assets/icons/spells/faerie-fire.svg",
+      "name": "Faerie Fire",
+      "motif": "flame",
+      "secondary": "rune",
+      "school": "Evocation"
+    },
+    "faithfulhound": {
+      "path": "res://assets/icons/spells/faithful-hound.svg",
+      "name": "Faithful Hound",
+      "motif": "hound",
+      "secondary": "sun",
+      "school": "Conjuration"
+    },
+    "falselife": {
+      "path": "res://assets/icons/spells/false-life.svg",
+      "name": "False Life",
+      "motif": "heart",
+      "secondary": "crystal",
+      "school": "Necromancy"
+    },
+    "fear": {
+      "path": "res://assets/icons/spells/fear.svg",
+      "name": "Fear",
+      "motif": "mask",
+      "secondary": "key",
+      "school": "Illusion"
+    },
+    "featherfall": {
+      "path": "res://assets/icons/spells/feather-fall.svg",
+      "name": "Feather Fall",
+      "motif": "feather",
+      "secondary": "eye",
+      "school": "Transmutation"
+    },
+    "feeblemind": {
+      "path": "res://assets/icons/spells/feeblemind.svg",
+      "name": "Feeblemind",
+      "motif": "head",
+      "secondary": "heart",
+      "school": "Enchantment"
+    },
+    "findfamiliar": {
+      "path": "res://assets/icons/spells/find-familiar.svg",
+      "name": "Find Familiar",
+      "motif": "paw",
+      "secondary": "rune",
+      "school": "Conjuration"
+    },
+    "findsteed": {
+      "path": "res://assets/icons/spells/find-steed.svg",
+      "name": "Find Steed",
+      "motif": "horse",
+      "secondary": "moon",
+      "school": "Conjuration"
+    },
+    "findtraps": {
+      "path": "res://assets/icons/spells/find-traps.svg",
+      "name": "Find Traps",
+      "motif": "eye",
+      "secondary": "crystal",
+      "school": "Divination"
+    },
+    "findthepath": {
+      "path": "res://assets/icons/spells/find-the-path.svg",
+      "name": "Find the Path",
+      "motif": "foot",
+      "secondary": "rune",
+      "school": "Divination"
+    },
+    "fingerofdeath": {
+      "path": "res://assets/icons/spells/finger-of-death.svg",
+      "name": "Finger of Death",
+      "motif": "skull",
+      "secondary": "key",
+      "school": "Necromancy"
+    },
+    "firebolt": {
+      "path": "res://assets/icons/spells/fire-bolt.svg",
+      "name": "Fire Bolt",
+      "motif": "arrow",
+      "secondary": "flame",
+      "school": "Evocation"
+    },
+    "fireshield": {
+      "path": "res://assets/icons/spells/fire-shield.svg",
+      "name": "Fire Shield",
+      "motif": "shield",
+      "secondary": "flame",
+      "school": "Evocation"
+    },
+    "firestorm": {
+      "path": "res://assets/icons/spells/fire-storm.svg",
+      "name": "Fire Storm",
+      "motif": "flame",
+      "secondary": "heart",
+      "school": "Evocation"
+    },
+    "fireball": {
+      "path": "res://assets/icons/spells/fireball.svg",
+      "name": "Fireball",
+      "motif": "fireball",
+      "secondary": "flame",
+      "school": "Evocation"
+    },
+    "flameblade": {
+      "path": "res://assets/icons/spells/flame-blade.svg",
+      "name": "Flame Blade",
+      "motif": "sword",
+      "secondary": "flame",
+      "school": "Evocation"
+    },
+    "flamestrike": {
+      "path": "res://assets/icons/spells/flame-strike.svg",
+      "name": "Flame Strike",
+      "motif": "flame",
+      "secondary": "heart",
+      "school": "Evocation"
+    },
+    "flamingsphere": {
+      "path": "res://assets/icons/spells/flaming-sphere.svg",
+      "name": "Flaming Sphere",
+      "motif": "fireball",
+      "secondary": "rune",
+      "school": "Conjuration"
+    },
+    "fleshtostone": {
+      "path": "res://assets/icons/spells/flesh-to-stone.svg",
+      "name": "Flesh to Stone",
+      "motif": "mountain",
+      "secondary": "heart",
+      "school": "Transmutation"
+    },
+    "floatingdisk": {
+      "path": "res://assets/icons/spells/floating-disk.svg",
+      "name": "Floating Disk",
+      "motif": "mirror",
+      "secondary": "rune",
+      "school": "Conjuration"
+    },
+    "fly": {
+      "path": "res://assets/icons/spells/fly.svg",
+      "name": "Fly",
+      "motif": "feather",
+      "secondary": "eye",
+      "school": "Transmutation"
+    },
+    "fogcloud": {
+      "path": "res://assets/icons/spells/fog-cloud.svg",
+      "name": "Fog Cloud",
+      "motif": "cloud",
+      "secondary": "star",
+      "school": "Conjuration"
+    },
+    "forbiddance": {
+      "path": "res://assets/icons/spells/forbiddance.svg",
+      "name": "Forbiddance",
+      "motif": "shield",
+      "secondary": "eye",
+      "school": "Abjuration"
+    },
+    "forcecage": {
+      "path": "res://assets/icons/spells/forcecage.svg",
+      "name": "Forcecage",
+      "motif": "cage",
+      "secondary": "eye",
+      "school": "Evocation"
+    },
+    "foresight": {
+      "path": "res://assets/icons/spells/foresight.svg",
+      "name": "Foresight",
+      "motif": "eye",
+      "secondary": "rune",
+      "school": "Divination"
+    },
+    "freedomofmovement": {
+      "path": "res://assets/icons/spells/freedom-of-movement.svg",
+      "name": "Freedom of Movement",
+      "motif": "foot",
+      "secondary": "star",
+      "school": "Abjuration"
+    },
+    "freezingsphere": {
+      "path": "res://assets/icons/spells/freezing-sphere.svg",
+      "name": "Freezing Sphere",
+      "motif": "snow",
+      "secondary": "rune",
+      "school": "Evocation"
+    },
+    "gaseousform": {
+      "path": "res://assets/icons/spells/gaseous-form.svg",
+      "name": "Gaseous Form",
+      "motif": "cloud",
+      "secondary": "wing",
+      "school": "Transmutation"
+    },
+    "gate": {
+      "path": "res://assets/icons/spells/gate.svg",
+      "name": "Gate",
+      "motif": "portal",
+      "secondary": "wing",
+      "school": "Conjuration"
+    },
+    "geas": {
+      "path": "res://assets/icons/spells/geas.svg",
+      "name": "Geas",
+      "motif": "lock",
+      "secondary": "rune",
+      "school": "Enchantment"
+    },
+    "gentlerepose": {
+      "path": "res://assets/icons/spells/gentle-repose.svg",
+      "name": "Gentle Repose",
+      "motif": "skull",
+      "secondary": "key",
+      "school": "Necromancy"
+    },
+    "giantinsect": {
+      "path": "res://assets/icons/spells/giant-insect.svg",
+      "name": "Giant Insect",
+      "motif": "insect",
+      "secondary": "wing",
+      "school": "Transmutation"
+    },
+    "glibness": {
+      "path": "res://assets/icons/spells/glibness.svg",
+      "name": "Glibness",
+      "motif": "head",
+      "secondary": "moon",
+      "school": "Transmutation"
+    },
+    "globeofinvulnerability": {
+      "path": "res://assets/icons/spells/globe-of-invulnerability.svg",
+      "name": "Globe of Invulnerability",
+      "motif": "shield",
+      "secondary": "rune",
+      "school": "Abjuration"
+    },
+    "glyphofwarding": {
+      "path": "res://assets/icons/spells/glyph-of-warding.svg",
+      "name": "Glyph of Warding",
+      "motif": "book",
+      "secondary": "shield",
+      "school": "Abjuration"
+    },
+    "goodberry": {
+      "path": "res://assets/icons/spells/goodberry.svg",
+      "name": "Goodberry",
+      "motif": "feast",
+      "secondary": "leaf",
+      "school": "Transmutation"
+    },
+    "grease": {
+      "path": "res://assets/icons/spells/grease.svg",
+      "name": "Grease",
+      "motif": "flask",
+      "secondary": "rune",
+      "school": "Conjuration"
+    },
+    "greaterinvisibility": {
+      "path": "res://assets/icons/spells/greater-invisibility.svg",
+      "name": "Greater Invisibility",
+      "motif": "mask",
+      "secondary": "eye",
+      "school": "Illusion"
+    },
+    "greaterrestoration": {
+      "path": "res://assets/icons/spells/greater-restoration.svg",
+      "name": "Greater Restoration",
+      "motif": "heart",
+      "secondary": "crown",
+      "school": "Abjuration"
+    },
+    "guardianoffaith": {
+      "path": "res://assets/icons/spells/guardian-of-faith.svg",
+      "name": "Guardian of Faith",
+      "motif": "sun",
+      "secondary": "moon",
+      "school": "Conjuration"
+    },
+    "guardsandwards": {
+      "path": "res://assets/icons/spells/guards-and-wards.svg",
+      "name": "Guards and Wards",
+      "motif": "shield",
+      "secondary": "crystal",
+      "school": "Abjuration"
+    },
+    "guidance": {
+      "path": "res://assets/icons/spells/guidance.svg",
+      "name": "Guidance",
+      "motif": "sun",
+      "secondary": "moon",
+      "school": "Divination"
+    },
+    "guidingbolt": {
+      "path": "res://assets/icons/spells/guiding-bolt.svg",
+      "name": "Guiding Bolt",
+      "motif": "arrow",
+      "secondary": "star",
+      "school": "Evocation"
+    },
+    "gustofwind": {
+      "path": "res://assets/icons/spells/gust-of-wind.svg",
+      "name": "Gust of Wind",
+      "motif": "wind",
+      "secondary": "heart",
+      "school": "Evocation"
+    },
+    "hallow": {
+      "path": "res://assets/icons/spells/hallow.svg",
+      "name": "Hallow",
+      "motif": "shield",
+      "secondary": "eye",
+      "school": "Evocation"
+    },
+    "hallucinatoryterrain": {
+      "path": "res://assets/icons/spells/hallucinatory-terrain.svg",
+      "name": "Hallucinatory Terrain",
+      "motif": "mountain",
+      "secondary": "wing",
+      "school": "Illusion"
+    },
+    "harm": {
+      "path": "res://assets/icons/spells/harm.svg",
+      "name": "Harm",
+      "motif": "hand",
+      "secondary": "wing",
+      "school": "Necromancy"
+    },
+    "haste": {
+      "path": "res://assets/icons/spells/haste.svg",
+      "name": "Haste",
+      "motif": "foot",
+      "secondary": "clock",
+      "school": "Transmutation"
+    },
+    "heal": {
+      "path": "res://assets/icons/spells/heal.svg",
+      "name": "Heal",
+      "motif": "heart",
+      "secondary": "heart",
+      "school": "Evocation"
+    },
+    "healingword": {
+      "path": "res://assets/icons/spells/healing-word.svg",
+      "name": "Healing Word",
+      "motif": "heart",
+      "secondary": "mouth",
+      "school": "Evocation"
+    },
+    "heatmetal": {
+      "path": "res://assets/icons/spells/heat-metal.svg",
+      "name": "Heat Metal",
+      "motif": "flame",
+      "secondary": "key",
+      "school": "Transmutation"
+    },
+    "hellishrebuke": {
+      "path": "res://assets/icons/spells/hellish-rebuke.svg",
+      "name": "Hellish Rebuke",
+      "motif": "flame",
+      "secondary": "key",
+      "school": "Evocation"
+    },
+    "heroesfeast": {
+      "path": "res://assets/icons/spells/heroes-feast.svg",
+      "name": "Heroes' Feast",
+      "motif": "feast",
+      "secondary": "star",
+      "school": "Conjuration"
+    },
+    "heroism": {
+      "path": "res://assets/icons/spells/heroism.svg",
+      "name": "Heroism",
+      "motif": "sun",
+      "secondary": "wing",
+      "school": "Enchantment"
+    },
+    "hideouslaughter": {
+      "path": "res://assets/icons/spells/hideous-laughter.svg",
+      "name": "Hideous Laughter",
+      "motif": "head",
+      "secondary": "mouth",
+      "school": "Enchantment"
+    },
+    "holdmonster": {
+      "path": "res://assets/icons/spells/hold-monster.svg",
+      "name": "Hold Monster",
+      "motif": "lock",
+      "secondary": "head",
+      "school": "Enchantment"
+    },
+    "holdperson": {
+      "path": "res://assets/icons/spells/hold-person.svg",
+      "name": "Hold Person",
+      "motif": "lock",
+      "secondary": "head",
+      "school": "Enchantment"
+    },
+    "holyaura": {
+      "path": "res://assets/icons/spells/holy-aura.svg",
+      "name": "Holy Aura",
+      "motif": "shield",
+      "secondary": "sun",
+      "school": "Abjuration"
+    },
+    "huntersmark": {
+      "path": "res://assets/icons/spells/hunters-mark.svg",
+      "name": "Hunter's Mark",
+      "motif": "head",
+      "secondary": "heart",
+      "school": "Divination"
+    },
+    "hypnoticpattern": {
+      "path": "res://assets/icons/spells/hypnotic-pattern.svg",
+      "name": "Hypnotic Pattern",
+      "motif": "head",
+      "secondary": "heart",
+      "school": "Illusion"
+    },
+    "icestorm": {
+      "path": "res://assets/icons/spells/ice-storm.svg",
+      "name": "Ice Storm",
+      "motif": "snow",
+      "secondary": "heart",
+      "school": "Evocation"
+    },
+    "identify": {
+      "path": "res://assets/icons/spells/identify.svg",
+      "name": "Identify",
+      "motif": "eye",
+      "secondary": "star",
+      "school": "Divination"
+    },
+    "illusoryscript": {
+      "path": "res://assets/icons/spells/illusory-script.svg",
+      "name": "Illusory Script",
+      "motif": "book",
+      "secondary": "star",
+      "school": "Illusion"
+    },
+    "imprisonment": {
+      "path": "res://assets/icons/spells/imprisonment.svg",
+      "name": "Imprisonment",
+      "motif": "lock",
+      "secondary": "rune",
+      "school": "Abjuration"
+    },
+    "incendiarycloud": {
+      "path": "res://assets/icons/spells/incendiary-cloud.svg",
+      "name": "Incendiary Cloud",
+      "motif": "flame",
+      "secondary": "rune",
+      "school": "Conjuration"
+    },
+    "inflictwounds": {
+      "path": "res://assets/icons/spells/inflict-wounds.svg",
+      "name": "Inflict Wounds",
+      "motif": "hand",
+      "secondary": "key",
+      "school": "Necromancy"
+    },
+    "insectplague": {
+      "path": "res://assets/icons/spells/insect-plague.svg",
+      "name": "Insect Plague",
+      "motif": "insect",
+      "secondary": "key",
+      "school": "Conjuration"
+    },
+    "instantsummons": {
+      "path": "res://assets/icons/spells/instant-summons.svg",
+      "name": "Instant Summons",
+      "motif": "wand",
+      "secondary": "wing",
+      "school": "Conjuration"
+    },
+    "invisibility": {
+      "path": "res://assets/icons/spells/invisibility.svg",
+      "name": "Invisibility",
+      "motif": "mask",
+      "secondary": "moon",
+      "school": "Illusion"
+    },
+    "irresistibledance": {
+      "path": "res://assets/icons/spells/irresistible-dance.svg",
+      "name": "Irresistible Dance",
+      "motif": "head",
+      "secondary": "rune",
+      "school": "Enchantment"
+    },
+    "jump": {
+      "path": "res://assets/icons/spells/jump.svg",
+      "name": "Jump",
+      "motif": "foot",
+      "secondary": "wing",
+      "school": "Transmutation"
+    },
+    "knock": {
+      "path": "res://assets/icons/spells/knock.svg",
+      "name": "Knock",
+      "motif": "bell",
+      "secondary": "moon",
+      "school": "Transmutation"
+    },
+    "legendlore": {
+      "path": "res://assets/icons/spells/legend-lore.svg",
+      "name": "Legend Lore",
+      "motif": "book",
+      "secondary": "wing",
+      "school": "Divination"
+    },
+    "lesserrestoration": {
+      "path": "res://assets/icons/spells/lesser-restoration.svg",
+      "name": "Lesser Restoration",
+      "motif": "heart",
+      "secondary": "moon",
+      "school": "Abjuration"
+    },
+    "levitate": {
+      "path": "res://assets/icons/spells/levitate.svg",
+      "name": "Levitate",
+      "motif": "feather",
+      "secondary": "wing",
+      "school": "Transmutation"
+    },
+    "light": {
+      "path": "res://assets/icons/spells/light.svg",
+      "name": "Light",
+      "motif": "sun",
+      "secondary": "heart",
+      "school": "Evocation"
+    },
+    "lightningbolt": {
+      "path": "res://assets/icons/spells/lightning-bolt.svg",
+      "name": "Lightning Bolt",
+      "motif": "bolt",
+      "secondary": "sun",
+      "school": "Evocation"
+    },
+    "locateanimalsorplants": {
+      "path": "res://assets/icons/spells/locate-animals-or-plants.svg",
+      "name": "Locate Animals or Plants",
+      "motif": "paw",
+      "secondary": "leaf",
+      "school": "Divination"
+    },
+    "locatecreature": {
+      "path": "res://assets/icons/spells/locate-creature.svg",
+      "name": "Locate Creature",
+      "motif": "eye",
+      "secondary": "eye",
+      "school": "Divination"
+    },
+    "locateobject": {
+      "path": "res://assets/icons/spells/locate-object.svg",
+      "name": "Locate Object",
+      "motif": "eye",
+      "secondary": "heart",
+      "school": "Divination"
+    },
+    "longstrider": {
+      "path": "res://assets/icons/spells/longstrider.svg",
+      "name": "Longstrider",
+      "motif": "foot",
+      "secondary": "wing",
+      "school": "Transmutation"
+    },
+    "magearmor": {
+      "path": "res://assets/icons/spells/mage-armor.svg",
+      "name": "Mage Armor",
+      "motif": "shield",
+      "secondary": "head",
+      "school": "Abjuration"
+    },
+    "magehand": {
+      "path": "res://assets/icons/spells/mage-hand.svg",
+      "name": "Mage Hand",
+      "motif": "hand",
+      "secondary": "wing",
+      "school": "Conjuration"
+    },
+    "magiccircle": {
+      "path": "res://assets/icons/spells/magic-circle.svg",
+      "name": "Magic Circle",
+      "motif": "lock",
+      "secondary": "rune",
+      "school": "Abjuration"
+    },
+    "magicjar": {
+      "path": "res://assets/icons/spells/magic-jar.svg",
+      "name": "Magic Jar",
+      "motif": "mirror",
+      "secondary": "jar",
+      "school": "Necromancy"
+    },
+    "magicmissile": {
+      "path": "res://assets/icons/spells/magic-missile.svg",
+      "name": "Magic Missile",
+      "motif": "missiles",
+      "secondary": "rune",
+      "school": "Evocation"
+    },
+    "magicmouth": {
+      "path": "res://assets/icons/spells/magic-mouth.svg",
+      "name": "Magic Mouth",
+      "motif": "mirror",
+      "secondary": "mouth",
+      "school": "Illusion"
+    },
+    "magicweapon": {
+      "path": "res://assets/icons/spells/magic-weapon.svg",
+      "name": "Magic Weapon",
+      "motif": "sword",
+      "secondary": "eye",
+      "school": "Transmutation"
+    },
+    "magnificentmansion": {
+      "path": "res://assets/icons/spells/magnificent-mansion.svg",
+      "name": "Magnificent Mansion",
+      "motif": "door",
+      "secondary": "snow",
+      "school": "Conjuration"
+    },
+    "majorimage": {
+      "path": "res://assets/icons/spells/major-image.svg",
+      "name": "Major Image",
+      "motif": "rune",
+      "secondary": "heart",
+      "school": "Illusion"
+    },
+    "masscurewounds": {
+      "path": "res://assets/icons/spells/mass-cure-wounds.svg",
+      "name": "Mass Cure Wounds",
+      "motif": "heart",
+      "secondary": "hand",
+      "school": "Conjuration"
+    },
+    "massheal": {
+      "path": "res://assets/icons/spells/mass-heal.svg",
+      "name": "Mass Heal",
+      "motif": "heart",
+      "secondary": "rune",
+      "school": "Conjuration"
+    },
+    "masshealingword": {
+      "path": "res://assets/icons/spells/mass-healing-word.svg",
+      "name": "Mass Healing Word",
+      "motif": "heart",
+      "secondary": "mouth",
+      "school": "Evocation"
+    },
+    "masssuggestion": {
+      "path": "res://assets/icons/spells/mass-suggestion.svg",
+      "name": "Mass Suggestion",
+      "motif": "head",
+      "secondary": "rune",
+      "school": "Enchantment"
+    },
+    "maze": {
+      "path": "res://assets/icons/spells/maze.svg",
+      "name": "Maze",
+      "motif": "door",
+      "secondary": "eye",
+      "school": "Conjuration"
+    },
+    "meldintostone": {
+      "path": "res://assets/icons/spells/meld-into-stone.svg",
+      "name": "Meld Into Stone",
+      "motif": "mountain",
+      "secondary": "key",
+      "school": "Transmutation"
+    },
+    "mending": {
+      "path": "res://assets/icons/spells/mending.svg",
+      "name": "Mending",
+      "motif": "anvil",
+      "secondary": "rune",
+      "school": "Transmutation"
+    },
+    "message": {
+      "path": "res://assets/icons/spells/message.svg",
+      "name": "Message",
+      "motif": "book",
+      "secondary": "mouth",
+      "school": "Transmutation"
+    },
+    "meteorswarm": {
+      "path": "res://assets/icons/spells/meteor-swarm.svg",
+      "name": "Meteor Swarm",
+      "motif": "meteor",
+      "secondary": "rune",
+      "school": "Evocation"
+    },
+    "mindblank": {
+      "path": "res://assets/icons/spells/mind-blank.svg",
+      "name": "Mind Blank",
+      "motif": "shield",
+      "secondary": "head",
+      "school": "Abjuration"
+    },
+    "minorillusion": {
+      "path": "res://assets/icons/spells/minor-illusion.svg",
+      "name": "Minor Illusion",
+      "motif": "rune",
+      "secondary": "heart",
+      "school": "Illusion"
+    },
+    "miragearcane": {
+      "path": "res://assets/icons/spells/mirage-arcane.svg",
+      "name": "Mirage Arcane",
+      "motif": "mountain",
+      "secondary": "moon",
+      "school": "Illusion"
+    },
+    "mirrorimage": {
+      "path": "res://assets/icons/spells/mirror-image.svg",
+      "name": "Mirror Image",
+      "motif": "mirror",
+      "secondary": "key",
+      "school": "Illusion"
+    },
+    "mislead": {
+      "path": "res://assets/icons/spells/mislead.svg",
+      "name": "Mislead",
+      "motif": "mask",
+      "secondary": "heart",
+      "school": "Illusion"
+    },
+    "mistystep": {
+      "path": "res://assets/icons/spells/misty-step.svg",
+      "name": "Misty Step",
+      "motif": "portal",
+      "secondary": "cloud",
+      "school": "Conjuration"
+    },
+    "modifymemory": {
+      "path": "res://assets/icons/spells/modify-memory.svg",
+      "name": "Modify Memory",
+      "motif": "head",
+      "secondary": "key",
+      "school": "Enchantment"
+    },
+    "moonbeam": {
+      "path": "res://assets/icons/spells/moonbeam.svg",
+      "name": "Moonbeam",
+      "motif": "moon",
+      "secondary": "rune",
+      "school": "Evocation"
+    },
+    "moveearth": {
+      "path": "res://assets/icons/spells/move-earth.svg",
+      "name": "Move Earth",
+      "motif": "mountain",
+      "secondary": "wing",
+      "school": "Transmutation"
+    },
+    "nondetection": {
+      "path": "res://assets/icons/spells/nondetection.svg",
+      "name": "Nondetection",
+      "motif": "shield",
+      "secondary": "eye",
+      "school": "Abjuration"
+    },
+    "passwithouttrace": {
+      "path": "res://assets/icons/spells/pass-without-trace.svg",
+      "name": "Pass Without Trace",
+      "motif": "leaf",
+      "secondary": "key",
+      "school": "Abjuration"
+    },
+    "passwall": {
+      "path": "res://assets/icons/spells/passwall.svg",
+      "name": "Passwall",
+      "motif": "door",
+      "secondary": "rune",
+      "school": "Transmutation"
+    },
+    "phantasmalkiller": {
+      "path": "res://assets/icons/spells/phantasmal-killer.svg",
+      "name": "Phantasmal Killer",
+      "motif": "mask",
+      "secondary": "skull",
+      "school": "Illusion"
+    },
+    "phantomsteed": {
+      "path": "res://assets/icons/spells/phantom-steed.svg",
+      "name": "Phantom Steed",
+      "motif": "horse",
+      "secondary": "wing",
+      "school": "Illusion"
+    },
+    "planarally": {
+      "path": "res://assets/icons/spells/planar-ally.svg",
+      "name": "Planar Ally",
+      "motif": "lock",
+      "secondary": "crystal",
+      "school": "Conjuration"
+    },
+    "planarbinding": {
+      "path": "res://assets/icons/spells/planar-binding.svg",
+      "name": "Planar Binding",
+      "motif": "lock",
+      "secondary": "wing",
+      "school": "Abjuration"
+    },
+    "planeshift": {
+      "path": "res://assets/icons/spells/plane-shift.svg",
+      "name": "Plane Shift",
+      "motif": "portal",
+      "secondary": "crystal",
+      "school": "Conjuration"
+    },
+    "plantgrowth": {
+      "path": "res://assets/icons/spells/plant-growth.svg",
+      "name": "Plant Growth",
+      "motif": "leaf",
+      "secondary": "crystal",
+      "school": "Transmutation"
+    },
+    "poisonspray": {
+      "path": "res://assets/icons/spells/poison-spray.svg",
+      "name": "Poison Spray",
+      "motif": "flask",
+      "secondary": "crystal",
+      "school": "Conjuration"
+    },
+    "polymorph": {
+      "path": "res://assets/icons/spells/polymorph.svg",
+      "name": "Polymorph",
+      "motif": "butterfly",
+      "secondary": "hound",
+      "school": "Transmutation"
+    },
+    "powerwordkill": {
+      "path": "res://assets/icons/spells/power-word-kill.svg",
+      "name": "Power Word Kill",
+      "motif": "skull",
+      "secondary": "mouth",
+      "school": "Enchantment"
+    },
+    "powerwordstun": {
+      "path": "res://assets/icons/spells/power-word-stun.svg",
+      "name": "Power Word Stun",
+      "motif": "head",
+      "secondary": "mouth",
+      "school": "Enchantment"
+    },
+    "prayerofhealing": {
+      "path": "res://assets/icons/spells/prayer-of-healing.svg",
+      "name": "Prayer of Healing",
+      "motif": "heart",
+      "secondary": "crystal",
+      "school": "Evocation"
+    },
+    "prestidigitation": {
+      "path": "res://assets/icons/spells/prestidigitation.svg",
+      "name": "Prestidigitation",
+      "motif": "wand",
+      "secondary": "wing",
+      "school": "Transmutation"
+    },
+    "prismaticspray": {
+      "path": "res://assets/icons/spells/prismatic-spray.svg",
+      "name": "Prismatic Spray",
+      "motif": "rune",
+      "secondary": "eye",
+      "school": "Evocation"
+    },
+    "prismaticwall": {
+      "path": "res://assets/icons/spells/prismatic-wall.svg",
+      "name": "Prismatic Wall",
+      "motif": "rune",
+      "secondary": "eye",
+      "school": "Abjuration"
+    },
+    "privatesanctum": {
+      "path": "res://assets/icons/spells/private-sanctum.svg",
+      "name": "Private Sanctum",
+      "motif": "shield",
+      "secondary": "moon",
+      "school": "Abjuration"
+    },
+    "produceflame": {
+      "path": "res://assets/icons/spells/produce-flame.svg",
+      "name": "Produce Flame",
+      "motif": "flame",
+      "secondary": "star",
+      "school": "Conjuration"
+    },
+    "programmedillusion": {
+      "path": "res://assets/icons/spells/programmed-illusion.svg",
+      "name": "Programmed Illusion",
+      "motif": "rune",
+      "secondary": "moon",
+      "school": "Illusion"
+    },
+    "projectimage": {
+      "path": "res://assets/icons/spells/project-image.svg",
+      "name": "Project Image",
+      "motif": "mirror",
+      "secondary": "moon",
+      "school": "Illusion"
+    },
+    "protectionfromenergy": {
+      "path": "res://assets/icons/spells/protection-from-energy.svg",
+      "name": "Protection From Energy",
+      "motif": "shield",
+      "secondary": "key",
+      "school": "Abjuration"
+    },
+    "protectionfromevilandgood": {
+      "path": "res://assets/icons/spells/protection-from-evil-and-good.svg",
+      "name": "Protection from Evil and Good",
+      "motif": "shield",
+      "secondary": "sun",
+      "school": "Abjuration"
+    },
+    "protectionfrompoison": {
+      "path": "res://assets/icons/spells/protection-from-poison.svg",
+      "name": "Protection from Poison",
+      "motif": "flask",
+      "secondary": "shield",
+      "school": "Abjuration"
+    },
+    "purifyfoodanddrink": {
+      "path": "res://assets/icons/spells/purify-food-and-drink.svg",
+      "name": "Purify Food and Drink",
+      "motif": "flask",
+      "secondary": "eye",
+      "school": "Transmutation"
+    },
+    "raisedead": {
+      "path": "res://assets/icons/spells/raise-dead.svg",
+      "name": "Raise Dead",
+      "motif": "skull",
+      "secondary": "sun",
+      "school": "Necromancy"
+    },
+    "rayofenfeeblement": {
+      "path": "res://assets/icons/spells/ray-of-enfeeblement.svg",
+      "name": "Ray of Enfeeblement",
+      "motif": "arrow",
+      "secondary": "moon",
+      "school": "Necromancy"
+    },
+    "rayoffrost": {
+      "path": "res://assets/icons/spells/ray-of-frost.svg",
+      "name": "Ray of Frost",
+      "motif": "arrow",
+      "secondary": "snow",
+      "school": "Evocation"
+    },
+    "regenerate": {
+      "path": "res://assets/icons/spells/regenerate.svg",
+      "name": "Regenerate",
+      "motif": "heart",
+      "secondary": "rune",
+      "school": "Transmutation"
+    },
+    "reincarnate": {
+      "path": "res://assets/icons/spells/reincarnate.svg",
+      "name": "Reincarnate",
+      "motif": "butterfly",
+      "secondary": "heart",
+      "school": "Transmutation"
+    },
+    "removecurse": {
+      "path": "res://assets/icons/spells/remove-curse.svg",
+      "name": "Remove Curse",
+      "motif": "head",
+      "secondary": "moon",
+      "school": "Abjuration"
+    },
+    "resilientsphere": {
+      "path": "res://assets/icons/spells/resilient-sphere.svg",
+      "name": "Resilient Sphere",
+      "motif": "cage",
+      "secondary": "rune",
+      "school": "Evocation"
+    },
+    "resistance": {
+      "path": "res://assets/icons/spells/resistance.svg",
+      "name": "Resistance",
+      "motif": "shield",
+      "secondary": "heart",
+      "school": "Abjuration"
+    },
+    "resurrection": {
+      "path": "res://assets/icons/spells/resurrection.svg",
+      "name": "Resurrection",
+      "motif": "skull",
+      "secondary": "wing",
+      "school": "Necromancy"
+    },
+    "reversegravity": {
+      "path": "res://assets/icons/spells/reverse-gravity.svg",
+      "name": "Reverse Gravity",
+      "motif": "feather",
+      "secondary": "crystal",
+      "school": "Transmutation"
+    },
+    "revivify": {
+      "path": "res://assets/icons/spells/revivify.svg",
+      "name": "Revivify",
+      "motif": "skull",
+      "secondary": "heart",
+      "school": "Conjuration"
+    },
+    "ropetrick": {
+      "path": "res://assets/icons/spells/rope-trick.svg",
+      "name": "Rope Trick",
+      "motif": "rope",
+      "secondary": "key",
+      "school": "Transmutation"
+    },
+    "sacredflame": {
+      "path": "res://assets/icons/spells/sacred-flame.svg",
+      "name": "Sacred Flame",
+      "motif": "sun",
+      "secondary": "flame",
+      "school": "Evocation"
+    },
+    "sanctuary": {
+      "path": "res://assets/icons/spells/sanctuary.svg",
+      "name": "Sanctuary",
+      "motif": "shield",
+      "secondary": "rune",
+      "school": "Abjuration"
+    },
+    "scorchingray": {
+      "path": "res://assets/icons/spells/scorching-ray.svg",
+      "name": "Scorching Ray",
+      "motif": "missiles",
+      "secondary": "flame",
+      "school": "Evocation"
+    },
+    "scrying": {
+      "path": "res://assets/icons/spells/scrying.svg",
+      "name": "Scrying",
+      "motif": "eye",
+      "secondary": "crystal",
+      "school": "Divination"
+    },
+    "secretchest": {
+      "path": "res://assets/icons/spells/secret-chest.svg",
+      "name": "Secret Chest",
+      "motif": "chest",
+      "secondary": "rune",
+      "school": "Conjuration"
+    },
+    "seeinvisibility": {
+      "path": "res://assets/icons/spells/see-invisibility.svg",
+      "name": "See Invisibility",
+      "motif": "eye",
+      "secondary": "wing",
+      "school": "Divination"
+    },
+    "seeming": {
+      "path": "res://assets/icons/spells/seeming.svg",
+      "name": "Seeming",
+      "motif": "mask",
+      "secondary": "key",
+      "school": "Illusion"
+    },
+    "sending": {
+      "path": "res://assets/icons/spells/sending.svg",
+      "name": "Sending",
+      "motif": "book",
+      "secondary": "heart",
+      "school": "Evocation"
+    },
+    "sequester": {
+      "path": "res://assets/icons/spells/sequester.svg",
+      "name": "Sequester",
+      "motif": "lock",
+      "secondary": "rune",
+      "school": "Transmutation"
+    },
+    "shapechange": {
+      "path": "res://assets/icons/spells/shapechange.svg",
+      "name": "Shapechange",
+      "motif": "butterfly",
+      "secondary": "head",
+      "school": "Transmutation"
+    },
+    "shatter": {
+      "path": "res://assets/icons/spells/shatter.svg",
+      "name": "Shatter",
+      "motif": "bell",
+      "secondary": "crystal",
+      "school": "Evocation"
+    },
+    "shield": {
+      "path": "res://assets/icons/spells/shield.svg",
+      "name": "Shield",
+      "motif": "shield",
+      "secondary": "moon",
+      "school": "Abjuration"
+    },
+    "shieldoffaith": {
+      "path": "res://assets/icons/spells/shield-of-faith.svg",
+      "name": "Shield of Faith",
+      "motif": "shield",
+      "secondary": "sun",
+      "school": "Abjuration"
+    },
+    "shillelagh": {
+      "path": "res://assets/icons/spells/shillelagh.svg",
+      "name": "Shillelagh",
+      "motif": "sword",
+      "secondary": "moon",
+      "school": "Transmutation"
+    },
+    "shockinggrasp": {
+      "path": "res://assets/icons/spells/shocking-grasp.svg",
+      "name": "Shocking Grasp",
+      "motif": "hand",
+      "secondary": "bolt",
+      "school": "Evocation"
+    },
+    "silence": {
+      "path": "res://assets/icons/spells/silence.svg",
+      "name": "Silence",
+      "motif": "bell",
+      "secondary": "crystal",
+      "school": "Illusion"
+    },
+    "silentimage": {
+      "path": "res://assets/icons/spells/silent-image.svg",
+      "name": "Silent Image",
+      "motif": "rune",
+      "secondary": "rune",
+      "school": "Illusion"
+    },
+    "simulacrum": {
+      "path": "res://assets/icons/spells/simulacrum.svg",
+      "name": "Simulacrum",
+      "motif": "snow",
+      "secondary": "eye",
+      "school": "Illusion"
+    },
+    "sleep": {
+      "path": "res://assets/icons/spells/sleep.svg",
+      "name": "Sleep",
+      "motif": "moon",
+      "secondary": "head",
+      "school": "Enchantment"
+    },
+    "sleetstorm": {
+      "path": "res://assets/icons/spells/sleet-storm.svg",
+      "name": "Sleet Storm",
+      "motif": "snow",
+      "secondary": "crystal",
+      "school": "Conjuration"
+    },
+    "slow": {
+      "path": "res://assets/icons/spells/slow.svg",
+      "name": "Slow",
+      "motif": "foot",
+      "secondary": "clock",
+      "school": "Transmutation"
+    },
+    "sparethedying": {
+      "path": "res://assets/icons/spells/spare-the-dying.svg",
+      "name": "Spare the Dying",
+      "motif": "heart",
+      "secondary": "skull",
+      "school": "Necromancy"
+    },
+    "speakwithanimals": {
+      "path": "res://assets/icons/spells/speak-with-animals.svg",
+      "name": "Speak with Animals",
+      "motif": "paw",
+      "secondary": "mouth",
+      "school": "Divination"
+    },
+    "speakwithdead": {
+      "path": "res://assets/icons/spells/speak-with-dead.svg",
+      "name": "Speak with Dead",
+      "motif": "skull",
+      "secondary": "mouth",
+      "school": "Necromancy"
+    },
+    "speakwithplants": {
+      "path": "res://assets/icons/spells/speak-with-plants.svg",
+      "name": "Speak with Plants",
+      "motif": "leaf",
+      "secondary": "mouth",
+      "school": "Transmutation"
+    },
+    "spiderclimb": {
+      "path": "res://assets/icons/spells/spider-climb.svg",
+      "name": "Spider Climb",
+      "motif": "spider",
+      "secondary": "wing",
+      "school": "Transmutation"
+    },
+    "spikegrowth": {
+      "path": "res://assets/icons/spells/spike-growth.svg",
+      "name": "Spike Growth",
+      "motif": "leaf",
+      "secondary": "wing",
+      "school": "Transmutation"
+    },
+    "spiritguardians": {
+      "path": "res://assets/icons/spells/spirit-guardians.svg",
+      "name": "Spirit Guardians",
+      "motif": "sun",
+      "secondary": "wing",
+      "school": "Conjuration"
+    },
+    "spiritualweapon": {
+      "path": "res://assets/icons/spells/spiritual-weapon.svg",
+      "name": "Spiritual Weapon",
+      "motif": "sword",
+      "secondary": "key",
+      "school": "Evocation"
+    },
+    "stinkingcloud": {
+      "path": "res://assets/icons/spells/stinking-cloud.svg",
+      "name": "Stinking Cloud",
+      "motif": "cloud",
+      "secondary": "moon",
+      "school": "Conjuration"
+    },
+    "stoneshape": {
+      "path": "res://assets/icons/spells/stone-shape.svg",
+      "name": "Stone Shape",
+      "motif": "mountain",
+      "secondary": "head",
+      "school": "Transmutation"
+    },
+    "stoneskin": {
+      "path": "res://assets/icons/spells/stoneskin.svg",
+      "name": "Stoneskin",
+      "motif": "shield",
+      "secondary": "star",
+      "school": "Abjuration"
+    },
+    "stormofvengeance": {
+      "path": "res://assets/icons/spells/storm-of-vengeance.svg",
+      "name": "Storm of Vengeance",
+      "motif": "bolt",
+      "secondary": "moon",
+      "school": "Conjuration"
+    },
+    "suggestion": {
+      "path": "res://assets/icons/spells/suggestion.svg",
+      "name": "Suggestion",
+      "motif": "head",
+      "secondary": "heart",
+      "school": "Enchantment"
+    },
+    "sunbeam": {
+      "path": "res://assets/icons/spells/sunbeam.svg",
+      "name": "Sunbeam",
+      "motif": "sun",
+      "secondary": "moon",
+      "school": "Evocation"
+    },
+    "sunburst": {
+      "path": "res://assets/icons/spells/sunburst.svg",
+      "name": "Sunburst",
+      "motif": "sun",
+      "secondary": "wing",
+      "school": "Evocation"
+    },
+    "symbol": {
+      "path": "res://assets/icons/spells/symbol.svg",
+      "name": "Symbol",
+      "motif": "book",
+      "secondary": "moon",
+      "school": "Abjuration"
+    },
+    "telekinesis": {
+      "path": "res://assets/icons/spells/telekinesis.svg",
+      "name": "Telekinesis",
+      "motif": "hand",
+      "secondary": "key",
+      "school": "Transmutation"
+    },
+    "telepathicbond": {
+      "path": "res://assets/icons/spells/telepathic-bond.svg",
+      "name": "Telepathic Bond",
+      "motif": "head",
+      "secondary": "rune",
+      "school": "Divination"
+    },
+    "teleport": {
+      "path": "res://assets/icons/spells/teleport.svg",
+      "name": "Teleport",
+      "motif": "portal",
+      "secondary": "heart",
+      "school": "Conjuration"
+    },
+    "teleportationcircle": {
+      "path": "res://assets/icons/spells/teleportation-circle.svg",
+      "name": "Teleportation Circle",
+      "motif": "portal",
+      "secondary": "rune",
+      "school": "Conjuration"
+    },
+    "thaumaturgy": {
+      "path": "res://assets/icons/spells/thaumaturgy.svg",
+      "name": "Thaumaturgy",
+      "motif": "wand",
+      "secondary": "rune",
+      "school": "Transmutation"
+    },
+    "thunderwave": {
+      "path": "res://assets/icons/spells/thunderwave.svg",
+      "name": "Thunderwave",
+      "motif": "bell",
+      "secondary": "star",
+      "school": "Evocation"
+    },
+    "timestop": {
+      "path": "res://assets/icons/spells/time-stop.svg",
+      "name": "Time Stop",
+      "motif": "clock",
+      "secondary": "eye",
+      "school": "Transmutation"
+    },
+    "tinyhut": {
+      "path": "res://assets/icons/spells/tiny-hut.svg",
+      "name": "Tiny Hut",
+      "motif": "door",
+      "secondary": "crystal",
+      "school": "Evocation"
+    },
+    "tongues": {
+      "path": "res://assets/icons/spells/tongues.svg",
+      "name": "Tongues",
+      "motif": "book",
+      "secondary": "mouth",
+      "school": "Divination"
+    },
+    "transportviaplants": {
+      "path": "res://assets/icons/spells/transport-via-plants.svg",
+      "name": "Transport via Plants",
+      "motif": "portal",
+      "secondary": "leaf",
+      "school": "Conjuration"
+    },
+    "treestride": {
+      "path": "res://assets/icons/spells/tree-stride.svg",
+      "name": "Tree Stride",
+      "motif": "portal",
+      "secondary": "key",
+      "school": "Conjuration"
+    },
+    "truepolymorph": {
+      "path": "res://assets/icons/spells/true-polymorph.svg",
+      "name": "True Polymorph",
+      "motif": "butterfly",
+      "secondary": "crown",
+      "school": "Transmutation"
+    },
+    "trueresurrection": {
+      "path": "res://assets/icons/spells/true-resurrection.svg",
+      "name": "True Resurrection",
+      "motif": "skull",
+      "secondary": "crown",
+      "school": "Necromancy"
+    },
+    "trueseeing": {
+      "path": "res://assets/icons/spells/true-seeing.svg",
+      "name": "True Seeing",
+      "motif": "eye",
+      "secondary": "eye",
+      "school": "Divination"
+    },
+    "truestrike": {
+      "path": "res://assets/icons/spells/true-strike.svg",
+      "name": "True Strike",
+      "motif": "arrow",
+      "secondary": "eye",
+      "school": "Divination"
+    },
+    "unseenservant": {
+      "path": "res://assets/icons/spells/unseen-servant.svg",
+      "name": "Unseen Servant",
+      "motif": "wand",
+      "secondary": "eye",
+      "school": "Conjuration"
+    },
+    "vampirictouch": {
+      "path": "res://assets/icons/spells/vampiric-touch.svg",
+      "name": "Vampiric Touch",
+      "motif": "hand",
+      "secondary": "star",
+      "school": "Necromancy"
+    },
+    "viciousmockery": {
+      "path": "res://assets/icons/spells/vicious-mockery.svg",
+      "name": "Vicious Mockery",
+      "motif": "head",
+      "secondary": "mouth",
+      "school": "Enchantment"
+    },
+    "walloffire": {
+      "path": "res://assets/icons/spells/wall-of-fire.svg",
+      "name": "Wall of Fire",
+      "motif": "flame",
+      "secondary": "moon",
+      "school": "Evocation"
+    },
+    "wallofforce": {
+      "path": "res://assets/icons/spells/wall-of-force.svg",
+      "name": "Wall of Force",
+      "motif": "cage",
+      "secondary": "heart",
+      "school": "Evocation"
+    },
+    "wallofice": {
+      "path": "res://assets/icons/spells/wall-of-ice.svg",
+      "name": "Wall of Ice",
+      "motif": "snow",
+      "secondary": "rune",
+      "school": "Evocation"
+    },
+    "wallofstone": {
+      "path": "res://assets/icons/spells/wall-of-stone.svg",
+      "name": "Wall of Stone",
+      "motif": "mountain",
+      "secondary": "star",
+      "school": "Evocation"
+    },
+    "wallofthorns": {
+      "path": "res://assets/icons/spells/wall-of-thorns.svg",
+      "name": "Wall of Thorns",
+      "motif": "leaf",
+      "secondary": "heart",
+      "school": "Conjuration"
+    },
+    "wardingbond": {
+      "path": "res://assets/icons/spells/warding-bond.svg",
+      "name": "Warding Bond",
+      "motif": "shield",
+      "secondary": "wing",
+      "school": "Abjuration"
+    },
+    "waterbreathing": {
+      "path": "res://assets/icons/spells/water-breathing.svg",
+      "name": "Water Breathing",
+      "motif": "wave",
+      "secondary": "moon",
+      "school": "Transmutation"
+    },
+    "waterwalk": {
+      "path": "res://assets/icons/spells/water-walk.svg",
+      "name": "Water Walk",
+      "motif": "wave",
+      "secondary": "eye",
+      "school": "Transmutation"
+    },
+    "web": {
+      "path": "res://assets/icons/spells/web.svg",
+      "name": "Web",
+      "motif": "spider",
+      "secondary": "eye",
+      "school": "Conjuration"
+    },
+    "weird": {
+      "path": "res://assets/icons/spells/weird.svg",
+      "name": "Weird",
+      "motif": "mask",
+      "secondary": "star",
+      "school": "Illusion"
+    },
+    "windwalk": {
+      "path": "res://assets/icons/spells/wind-walk.svg",
+      "name": "Wind Walk",
+      "motif": "cloud",
+      "secondary": "wind",
+      "school": "Transmutation"
+    },
+    "windwall": {
+      "path": "res://assets/icons/spells/wind-wall.svg",
+      "name": "Wind Wall",
+      "motif": "wind",
+      "secondary": "wing",
+      "school": "Evocation"
+    },
+    "wish": {
+      "path": "res://assets/icons/spells/wish.svg",
+      "name": "Wish",
+      "motif": "wand",
+      "secondary": "crown",
+      "school": "Conjuration"
+    },
+    "wordofrecall": {
+      "path": "res://assets/icons/spells/word-of-recall.svg",
+      "name": "Word of Recall",
+      "motif": "portal",
+      "secondary": "mouth",
+      "school": "Conjuration"
+    },
+    "zoneoftruth": {
+      "path": "res://assets/icons/spells/zone-of-truth.svg",
+      "name": "Zone of Truth",
+      "motif": "scales",
+      "secondary": "rune",
+      "school": "Enchantment"
+    }
+  },
+  "weapons": {
+    "club": {
+      "path": "res://assets/icons/weapons/club.svg",
+      "name": "club"
+    },
+    "dagger": {
+      "path": "res://assets/icons/weapons/dagger.svg",
+      "name": "dagger"
+    },
+    "greatclub": {
+      "path": "res://assets/icons/weapons/greatclub.svg",
+      "name": "greatclub"
+    },
+    "handaxe": {
+      "path": "res://assets/icons/weapons/handaxe.svg",
+      "name": "handaxe"
+    },
+    "javelin": {
+      "path": "res://assets/icons/weapons/javelin.svg",
+      "name": "javelin"
+    },
+    "lighthammer": {
+      "path": "res://assets/icons/weapons/lighthammer.svg",
+      "name": "lighthammer"
+    },
+    "mace": {
+      "path": "res://assets/icons/weapons/mace.svg",
+      "name": "mace"
+    },
+    "quarterstaff": {
+      "path": "res://assets/icons/weapons/quarterstaff.svg",
+      "name": "quarterstaff"
+    },
+    "sickle": {
+      "path": "res://assets/icons/weapons/sickle.svg",
+      "name": "sickle"
+    },
+    "spear": {
+      "path": "res://assets/icons/weapons/spear.svg",
+      "name": "spear"
+    },
+    "lightcrossbow": {
+      "path": "res://assets/icons/weapons/lightcrossbow.svg",
+      "name": "lightcrossbow"
+    },
+    "dart": {
+      "path": "res://assets/icons/weapons/dart.svg",
+      "name": "dart"
+    },
+    "shortbow": {
+      "path": "res://assets/icons/weapons/shortbow.svg",
+      "name": "shortbow"
+    },
+    "sling": {
+      "path": "res://assets/icons/weapons/sling.svg",
+      "name": "sling"
+    },
+    "battleaxe": {
+      "path": "res://assets/icons/weapons/battleaxe.svg",
+      "name": "battleaxe"
+    },
+    "flail": {
+      "path": "res://assets/icons/weapons/flail.svg",
+      "name": "flail"
+    },
+    "glaive": {
+      "path": "res://assets/icons/weapons/glaive.svg",
+      "name": "glaive"
+    },
+    "greataxe": {
+      "path": "res://assets/icons/weapons/greataxe.svg",
+      "name": "greataxe"
+    },
+    "greatsword": {
+      "path": "res://assets/icons/weapons/greatsword.svg",
+      "name": "greatsword"
+    },
+    "halberd": {
+      "path": "res://assets/icons/weapons/halberd.svg",
+      "name": "halberd"
+    },
+    "lance": {
+      "path": "res://assets/icons/weapons/lance.svg",
+      "name": "lance"
+    },
+    "longsword": {
+      "path": "res://assets/icons/weapons/longsword.svg",
+      "name": "longsword"
+    },
+    "maul": {
+      "path": "res://assets/icons/weapons/maul.svg",
+      "name": "maul"
+    },
+    "morningstar": {
+      "path": "res://assets/icons/weapons/morningstar.svg",
+      "name": "morningstar"
+    },
+    "pike": {
+      "path": "res://assets/icons/weapons/pike.svg",
+      "name": "pike"
+    },
+    "rapier": {
+      "path": "res://assets/icons/weapons/rapier.svg",
+      "name": "rapier"
+    },
+    "scimitar": {
+      "path": "res://assets/icons/weapons/scimitar.svg",
+      "name": "scimitar"
+    },
+    "shortsword": {
+      "path": "res://assets/icons/weapons/shortsword.svg",
+      "name": "shortsword"
+    },
+    "trident": {
+      "path": "res://assets/icons/weapons/trident.svg",
+      "name": "trident"
+    },
+    "warpick": {
+      "path": "res://assets/icons/weapons/warpick.svg",
+      "name": "warpick"
+    },
+    "warhammer": {
+      "path": "res://assets/icons/weapons/warhammer.svg",
+      "name": "warhammer"
+    },
+    "whip": {
+      "path": "res://assets/icons/weapons/whip.svg",
+      "name": "whip"
+    },
+    "blowgun": {
+      "path": "res://assets/icons/weapons/blowgun.svg",
+      "name": "blowgun"
+    },
+    "handcrossbow": {
+      "path": "res://assets/icons/weapons/handcrossbow.svg",
+      "name": "handcrossbow"
+    },
+    "heavycrossbow": {
+      "path": "res://assets/icons/weapons/heavycrossbow.svg",
+      "name": "heavycrossbow"
+    },
+    "longbow": {
+      "path": "res://assets/icons/weapons/longbow.svg",
+      "name": "longbow"
+    },
+    "net": {
+      "path": "res://assets/icons/weapons/net.svg",
+      "name": "net"
+    },
+    "unarmedstrike": {
+      "path": "res://assets/icons/weapons/unarmedstrike.svg",
+      "name": "unarmedstrike"
+    }
+  },
+  "actions": {
+    "attack": {
+      "path": "res://assets/icons/actions/attack.svg"
+    },
+    "spell": {
+      "path": "res://assets/icons/actions/spell.svg"
+    },
+    "move": {
+      "path": "res://assets/icons/actions/move.svg"
+    },
+    "shield": {
+      "path": "res://assets/icons/actions/shield.svg"
+    },
+    "hand": {
+      "path": "res://assets/icons/actions/hand.svg"
+    },
+    "heal": {
+      "path": "res://assets/icons/actions/heal.svg"
+    },
+    "eye": {
+      "path": "res://assets/icons/actions/eye.svg"
+    },
+    "dash": {
+      "path": "res://assets/icons/actions/dash.svg"
+    },
+    "dodge": {
+      "path": "res://assets/icons/actions/dodge.svg"
+    },
+    "disengage": {
+      "path": "res://assets/icons/actions/disengage.svg"
+    },
+    "stand": {
+      "path": "res://assets/icons/actions/stand.svg"
+    },
+    "shortrest": {
+      "path": "res://assets/icons/actions/shortrest.svg"
+    },
+    "longrest": {
+      "path": "res://assets/icons/actions/longrest.svg"
+    },
+    "secondwind": {
+      "path": "res://assets/icons/actions/secondwind.svg"
+    },
+    "actionsurge": {
+      "path": "res://assets/icons/actions/actionsurge.svg"
+    },
+    "rage": {
+      "path": "res://assets/icons/actions/rage.svg"
+    },
+    "layonhands": {
+      "path": "res://assets/icons/actions/layonhands.svg"
+    },
+    "bardicinspiration": {
+      "path": "res://assets/icons/actions/bardicinspiration.svg"
+    },
+    "ki": {
+      "path": "res://assets/icons/actions/ki.svg"
+    },
+    "channeldivinity": {
+      "path": "res://assets/icons/actions/channeldivinity.svg"
+    },
+    "wildshape": {
+      "path": "res://assets/icons/actions/wildshape.svg"
+    },
+    "sneakattack": {
+      "path": "res://assets/icons/actions/sneakattack.svg"
+    }
+  },
+  "classes": {
+    "fighter": {
+      "path": "res://assets/icons/classes/fighter.svg"
+    },
+    "wizard": {
+      "path": "res://assets/icons/classes/wizard.svg"
+    },
+    "rogue": {
+      "path": "res://assets/icons/classes/rogue.svg"
+    },
+    "cleric": {
+      "path": "res://assets/icons/classes/cleric.svg"
+    },
+    "paladin": {
+      "path": "res://assets/icons/classes/paladin.svg"
+    },
+    "ranger": {
+      "path": "res://assets/icons/classes/ranger.svg"
+    },
+    "druid": {
+      "path": "res://assets/icons/classes/druid.svg"
+    },
+    "barbarian": {
+      "path": "res://assets/icons/classes/barbarian.svg"
+    },
+    "bard": {
+      "path": "res://assets/icons/classes/bard.svg"
+    },
+    "monk": {
+      "path": "res://assets/icons/classes/monk.svg"
+    },
+    "sorcerer": {
+      "path": "res://assets/icons/classes/sorcerer.svg"
+    },
+    "warlock": {
+      "path": "res://assets/icons/classes/warlock.svg"
+    }
+  },
+  "creatures": {
+    "bite": {
+      "path": "res://assets/icons/creatures/bite.svg"
+    },
+    "claw": {
+      "path": "res://assets/icons/creatures/claw.svg"
+    },
+    "talon": {
+      "path": "res://assets/icons/creatures/talon.svg"
+    },
+    "slam": {
+      "path": "res://assets/icons/creatures/slam.svg"
+    },
+    "tail": {
+      "path": "res://assets/icons/creatures/tail.svg"
+    },
+    "sting": {
+      "path": "res://assets/icons/creatures/sting.svg"
+    },
+    "gore": {
+      "path": "res://assets/icons/creatures/gore.svg"
+    },
+    "tentacle": {
+      "path": "res://assets/icons/creatures/tentacle.svg"
+    },
+    "breath": {
+      "path": "res://assets/icons/creatures/breath.svg"
+    },
+    "fist": {
+      "path": "res://assets/icons/creatures/fist.svg"
+    },
+    "rock": {
+      "path": "res://assets/icons/creatures/rock.svg"
+    },
+    "horn": {
+      "path": "res://assets/icons/creatures/horn.svg"
+    },
+    "constrict": {
+      "path": "res://assets/icons/creatures/constrict.svg"
+    },
+    "beak": {
+      "path": "res://assets/icons/creatures/beak.svg"
+    },
+    "pseudopod": {
+      "path": "res://assets/icons/creatures/pseudopod.svg"
+    },
+    "web": {
+      "path": "res://assets/icons/creatures/web.svg"
+    }
+  }
+}

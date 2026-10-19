@@ -1,0 +1,51 @@
+AUTOMATION IN HEARTHTABLE 0.9
+
+Original 2014 fifth edition remains the rules baseline. The action dock takes inspiration from cinematic RPG hotbars; the program does not reproduce all of Baldur's Gate 3 or D&D Beyond.
+
+AUTOMATED
+• Host-resolved weapon and supported spell attack rolls against effective AC, natural 1/20, critical dice and basic damage.
+• Weapon reach/normal/long range, nearest occupied squares, scene scale, elevations, solid barriers and closed doors. Long range and nearby active hostile creatures impose ranged disadvantage.
+• Supported attack-condition advantage/disadvantage, prone targets, critical hits on paralyzed/unconscious targets within 5 feet, and Dodge.
+• Selected half/three-quarters cover adds +2/+5 AC. The DM selects cover; scenery does not automatically infer it.
+• Exact simple configured damage-type resistance, immunity and vulnerability. Conditional resistance descriptions and extra damage types/riders require review.
+• Core Extra Attack class levels, recognized named Multiattack patterns, actions, bonus actions, reactions, Action Surge and own-turn completion. Configure attack counts for class/subclass exceptions in 3D setup.
+• A routed ground path, movement budgets, Dash, difficult ground, prone crawling, standing and stairs/step limits. The DM can reposition with Ctrl-drag.
+• Slot spending, upcasting, cantrip scaling, beam/dart allocation, eligible ritual and configured innate-use casting, and the 2014 bonus-action spell restriction.
+• The previously supported simple attack spells, healing spells and damage-save spells. Default automatic-save mode rolls for heroes and NPCs and displays results; the DM can choose manual pending saves instead.
+• Temporary HP, hero unconscious/death-save state, basic massive damage, healing and concentration damage checks. Auto-save mode handles concentration without a separate player confirmation.
+• Shield's +5 AC and Magic Missile immunity until the next own turn; Shield of Faith's +2 AC; Bless's attack/save d4; Guidance's next-check d4; Resistance's next-save d4; Mage Armor's unarmored AC floor; Invisibility's supported condition and break on attacks/casting. Concentration removal cleans up linked effects. Elapsed non-turn durations need the DM.
+• Second Wind healing and bonus-action use, Action Surge's extra action, Lay on Hands touch healing/action/pool, and Rage's casting/concentration restriction, physical resistance and supported early ending. Rage's extra melee damage/STR-check advantages and special subclass benefits still need DM adjustment.
+• Shared structured results, damage/healing text, attack presentation, individual player ownership, lobby assignment/readiness and DM character approval.
+
+MANUAL OR PARTIAL
+Opportunity attacks and other reaction timing are not automatic. Disengage is tracked, but the DM resolves opportunity attacks and Ready triggers. Ammunition/loading, versatile/off-hand damage, feats, spell riders, all class/subclass/racial rules, summons, auras, uncommon resistances, magic weapons, regeneration, legendary/lair actions, charm/frightened source restrictions, special senses, light/darkvision, flight/climbing/jumping/grappling and environmental damage are not fully modeled. Extra damage types on a monster attack are not automatically added to its basic attack expression.
+
+Area selection uses a cell-center approximation over occupied squares. Cone/line direction follows the chosen ground point. Quick-cast area targets are recomputed by the host; Fireball spreads through connected cells within its radius while respecting solid walls/closed doors. Cover, unusual shapes, heights and specific area exceptions need DM review. Do not assume every printed map object has collision: paint the corresponding geometry.
+
+Effects outside the listed automation spend their resources and enter a clearly labeled DM-resolution log. Buff durations outside supported turn expiry are manual. Armor state must be confirmed before Mage Armor. Healing does not handle every creature-type or magical exception. Skill/save situational modifiers and class reaction choices may require disabling automatic saves temporarily.
+
+Imported PDFs preserve final skill/save totals, coins, spell names and printed preparation marks. Unknown spells need DM level/range/time review. Class level-up choices, spells known/class access, multiclass preparation/slot pools, special recovery and rest eligibility remain editable with DM oversight. A full D&D Beyond account integration or paid-book library is not included.
+
+PORTABILITY AND TESTING
+The downloadable program is a single Windows executable with embedded resources. Normal autosaves are working files in user data. Portable campaign copies embed a snapshot in a new executable; they do not silently rewrite the running file. Use a fresh copy to carry updated campaign state to another computer. Keep a campaign copy private because it includes DM information.
+
+Build validation uses the matching Godot runtime on Linux, native OpenGL rendering and actual local host/player UDP sessions. Native Windows execution and the user's router/firewall/GPU need local testing. Internet play depends on manual UDP port forwarding or a reachable trusted virtual LAN.
+
+BUILD COVERAGE IN 0.9
+Solid object footprints block walking; modeled object heights block attack rays. Bridges/docks make otherwise unsafe floor cells walkable. Shallow water/mud/ice are difficult ground; lava and deep water are avoided by ordinary walking. Environmental damage, swimming/drowning, slippery-ice checks and special movement require DM decisions. Build objects persist in campaign/scene/portable formats. Only the host can edit them. Views are fixed to DM Isometric and player Tactical.
+
+
+ENCOUNTERS AND LIGHTING IN 0.10
+Enemy HUD gives the DM monster cards, target selection and turn resources without changing the isometric camera. Automatic initiative precedes legal hostile attack/spell declarations. Opening actions must be confirmed on their turn, preserving slots and preventing a free first hit. Hostile proximity checks clear lines at a configurable feet radius; DM-only rectangular battle zones trigger once and can be rearmed. Their geometry is stripped from player snapshots. Long routes stop at the first alert square or boundary. All living active-scene creatures participate; the DM resolves ties, surprise and special ambush exceptions. Proximity is an optional encounter aid, not a new 2014 rule.
+
+Movement costs accumulate across a turn. Standard speed 30 allows 30 feet normally; Dash adds the current speed and spends an action. Creature speeds, terrain and configured map scale remain authoritative. Visible dice publish the actual resolving rolls, bounded to the last 80, filtering hidden-creature rolls for players. Strict-turn enforcement defaults on.
+
+Day/dusk/night settings synchronize per scene. Conventional sun/moon shadows and capped warm local lights provide visual illumination. Local Low/Balanced/High quality caps lights at 8/16/24 and shadow-casting local lights at 0/2/4. Fog and concealed rooms remain authoritative. Light/darkvision, stealth modifiers, surprise, reactions and opportunity-attack exceptions still require DM adjudication.
+
+
+DOORS AND SCENE CONTENT IN 0.11
+Open door cells are walkable. Closed-door clicks can approach a reachable adjacent square, then open; Door/E controls closing. Occupied doorways cannot close. Linked double gates change atomically; strict player turn/ownership and movement checks remain authoritative.
+
+Scene packages version 2 include validated procedural asset definitions, collision fields and preferred spawn points; version 1 remains supported. The two supplied references are in Scene library → Prepared maps. Their original PNGs are preserved and reusable native geometry is provided. Map features and grid-curved walls are authored approximations; hazard damage, unusual traversal and special senses remain DM adjudication.
+
+Joining and changing scenes automatically downloads the active PNG and custom design definitions. Transfers use bounded chunks, integrity checks, an on-disk content cache and a loading overlay. Players receive no future scene packages, DM notes or private battle zones. Custom content contains data only and never executes imported scripts. Host and guests must all run 0.11/protocol 9.

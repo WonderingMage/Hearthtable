@@ -1,0 +1,90 @@
+Hearthtable 0.11 · Original 2014 fifth edition
+
+A SINGLE-FILE PROGRAM
+Run Hearthtable_Portable.exe directly. No installer, ZIP extraction, Godot installation or external asset folder is required. The program embeds the engine, models, rules, reference data and this help.
+
+Ordinary autosaves are kept in your Windows user-data folder. Use the menu → Open saves folder to find them. They are separate working saves while the program runs.
+
+Portable copy… writes a NEW standalone program containing the current campaign, all imported maps, characters, notes and scenes. Carry that new file to another computer to continue from that snapshot. Each embedded snapshot has its own autosave history. Save a fresh portable copy after your next session to carry the latest changes. The running executable is never overwritten. Campaign copies contain DM notes and hidden scenes: keep them as DM backups, and give players the plain program to join your lobby.
+
+JOIN AND PLAY
+The DM opens Session, chooses a port (UDP 24680 by default) and passphrase, and hosts. Players enter a name, the host's address, matching port and passphrase. The host assigns heroes or accepts player PDF submissions. Players mark ready; the DM starts the table. For internet play, manually forward that UDP port to the DM's LAN IPv4 address and allow it through Windows Firewall. Internet guests use the public IPv4/hostname; LAN guests use the LAN address. CGNAT may require ISP help or a trusted virtual LAN. No cloud relay or encryption is included.
+
+VIEWS AND MOVEMENT
+The DM has one isometric camera: Shift+drag rotates, right/middle-drag pans, the wheel zooms, F frames the scene and C focuses a miniature. Preview party fog keeps that isometric camera and shows room/fog visibility. Players have only Tactical view with visible 3D heroes, camera pan/orbit and point-and-click movement. No camera-mode selector or first-person/following views remain.
+
+Players hover ground to preview a route, its cost and remaining movement, then left-click to walk. W/A/S/D pans the camera, Q/E orbits, middle-drag or Shift+drag rotates and the wheel zooms. C/Home recenters and O changes the tactical viewing angle. Party portraits select controlled heroes. Right-click/Escape cancels targeting. Camera motion never reveals concealed cells or moves a character. Combat still requires your turn and available movement.
+
+BUILD MODE · DM ONLY
+Press F2 or B, or choose Build mode, to open the modeless catalog below the board. The isometric camera stays rotatable. Choose a category or search all 77 entries. Actual 3D thumbnails show floors, walls, doors, architecture, furnishings, decor/lighting, wilderness, volcanic, waterfront, and snow/ruin objects. Every object shows its grid footprint. Map scale remains in Grid settings and the board's square/feet reference.
+
+Select a prop, hover for a green/red 3D placement preview and click to place. R rotates by 90 degrees, including its footprint; four swatches change its appearance. The editor refuses solid overlap, off-map placement and solid furniture on occupied creature squares. Move picks an existing prop up without deleting its data; the next click commits it. Duplicate copies its design. Eyedropper samples an object or material. Delete bulldozes the clicked object or terrain cell. Right-click/Escape cancels placement. Ctrl+Z/Undo reverses one whole operation.
+
+For floors, Area drags a rectangle, Single paints one tile, and Fill follows matching connected floor material without crossing walls/doors. For walls, Line draws a connected stroke and Room drags a rectangular room perimeter. Select a door and click an existing wall; it aligns with the wall automatically. Walls/closed doors seal rooms; props have separate walking/attack-line footprints. Raise/Lower changes a clicked terrain cell by the selected feet step, including a creature standing there.
+
+New themed scene creates a separate editable map: Throne hall, Volcanic crossing, Tidal ruins, Woodland camp or Frozen pass. The prior map stays in the library. The party transfers to safe, unoccupied landing cells. Thrones, banquet furniture, pillars, portals, a volcanic crater, basalt columns, lava, bridges, docks, boats, waterfall, coral, trees, camp gear and frozen scenery can also be placed individually.
+
+Shallow water, mud and ice use difficult movement. Ordinary walking avoids lava and deep water; bridges/docks make crossings. The DM resolves environmental damage, swimming/drowning, slippery-ice exceptions and special movement. No terrain hazard damage is silently rolled. Raised terrain and tall objects affect attack lines; whole-cell footprints remain an approximation. Room visibility is shared by the party.
+
+Scenes, exports, normal saves and portable campaign copies include objects, rotation, swatches, surfaces and elevation. Players receive the current scene's authored scenery, but cannot open the editor or issue build commands. Exit build or F2 returns to the DM's character/encounter controls.
+
+TACTICAL HUD
+Gilded metal frames, raised controls and illustrated slots now replace the flat panels. The same original spell and weapon artwork appears throughout the hotbar, spellbook, casting dialogs and reference list. Spell imagery follows its effect and color family. Hover a slot for its full name, casting cost and rules summary; number-key badges still show shortcuts. All 319 included spells and all 37 standard weapons plus unarmed have dedicated icons. Custom content gets a stable generated sigil. The new styling does not change any 2014 rules.
+
+Party portraits, HP and character-sheet/spellbook buttons sit on the left. The top initiative strip shows the round, current turn and visible combatants. The bottom hotbar shows HP, AC, action, bonus action, reaction, movement and remaining attacks. Actions / Cantrips / Spells / Features switch the available cards. Number keys 1–9 select the corresponding visible card. I opens the character sheet, K opens the spellbook, and Space or End turn advances your active turn. Short/long rests are in Features; spell levels show remaining slot counts. Unavailable actions dim. The combat log and floating labels show the host's results.
+
+For an attack, select its hotbar card, hover a visible creature to preview range, barriers and hit chance, then click the creature to perform the attack. The bottom Attack button also confirms the currently selected target. Invalid attacks are refused without spending resources. A successful submitted action exits targeting so your next ground click is movement. Hover alone never rolls an attack.
+
+ACTION CARDS
+Actions lists individual weapon attacks, Move, Dash, Dodge, Disengage and Stand. Cantrips and Spells show prepared/available spells. Features opens use counters and rest controls. An action card shows its cost, reach/range and basic damage. Select a target to see hit chance, range and barriers, then confirm Attack or Cast. In Tactical, clicking a creature with an armed, legal action also confirms it. The host rolls and updates HP/resources. The dock and floating results show hits, misses, criticals, damage and saves. Attack animations and tracers are presentation; the host's roll is authoritative.
+
+A spell card uses the chosen slot and selected target. Components / trigger ready confirms casting requirements. Details / split targets… opens the full casting dialog for multiple targets, dart allocations, innate uses, rituals and upcasting. For area spells, select the card and click ground to place/aim the area; the colored ground preview and target count update. Review area/cover before casting. The host recomputes quick-cast area targets. Token-center/occupied-cell geometry approximates grid area selection; use Details for DM-approved exceptions.
+
+The dock displays action, bonus action, reaction, remaining movement and remaining attacks. End turn advances only your current creature. The host can disable strict turn/budget checks for manual adjudication. Original 2014 bonus-action spell rules apply; this does not adopt Baldur's Gate 3's changed tabletop rules or 2024 spellcasting.
+
+DM VIEW
+The isometric board keeps roster, combat, fog, journal and character tools. The Build catalog replaces the small terrain dropdown. Enemy HUD opens monster attacks, spells, features and turn resources while retaining the isometric camera. Select an enemy in its roster or the board, choose an attack, then click a player or use the target selector. Close enemy HUD returns the ordinary DM panels. Ctrl-drag permits DM repositioning without spending guided movement. 3D setup configures heights, automatic saves, strict play, cover and damage traits.
+
+ENCOUNTERS, MOVEMENT AND VISIBLE DICE
+Enemy HUD is the DM's monster-control button. Its top strip also offers Roll initiative outside combat. Players can request initiative for their own assigned living hero. All living creatures in the current scene roll d20 plus their sheet's initiative modifier, including private hidden creatures. Highest goes first; the DM edits/re-sorts tied scores. Initiative cannot be rerolled while that encounter is active.
+
+Automatic initiative is enabled by default. A legal attack declaration, including a hostile spell, starts turn order before rolling the attack, damaging anything or spending a slot/action. Confirm the action on your turn. An instigator who loses initiative waits. Invalid out-of-range attacks do not start combat. Proximity defaults to 15 feet and checks clear sight lines, walls, doors, creature sides and the map's scale. Moving either side into alert range, or opening a nearby hostile's door, can start combat. Hidden or neutral creatures do not trigger proximity.
+
+Battle zones opens the private encounter manager. Set an encounter title and introduction, then Draw battle zone on map and drag two opposite room corners. A hero crossing into an armed zone stops at the entry square, the introduction banner plays and initiative is rolled. The player camera eases toward the encounter in Tactical view; the DM remains Isometric. A long route checks every traversed square so it cannot skip a boundary or alert radius. Zone outlines, names and coordinates remain off player snapshots until the intended title/introduction is triggered. Disable, edit, delete or rearm a zone in its manager. Zones fire once until rearmed. Ctrl-drag is the DM's explicit relocation override and bypasses automatic movement triggers. Hostile alert distance 0 disables proximity while retaining attacks and zones. The master automatic-initiative toggle can pause all automatic triggers.
+
+During combat, every ordinary move spends the host-calculated route cost cumulatively. A speed-30 character can normally spend 30 feet in a turn. Splitting movement across several clicks does not reset that budget. Dash spends an action and grants movement equal to the current speed; different listed speeds, difficult ground and elevation still apply. Turn start restores the normal budget. The optional alternating diagonal metric remembers parity across split moves. Strict play is on by default; the DM can disable it in 3D setup for manual adjudication.
+
+The visible dice tray shows the actual host-generated dice, modifier and total for initiative, attacks, damage, spells, checks, saves, death saves and free rolls. Its brief animation never rerolls the result. Roll history lists the last 80 rolls; the combat log retains the resolved hit/miss, AC, damage and effects. Hidden-creature rolls stay private. Everyone must use this release (network protocol 9).
+
+SCENE LIGHTING
+Lighting opens Day, Dusk and Night, brightness and sun/moon direction. Apply lighting to the table saves the setting per scene and sends it to connected players. Add torches, campfires, braziers, candles or lanterns through Build mode. Day casts directional sun shadows; night combines blue moonlight with warm, softly flickering local lights. Lights do not reveal concealed map cells.
+
+Graphics quality applies only to this computer and is remembered: Low caps local lights at 8 and removes shadows; Balanced caps at 16 with 2 local shadow casters; High caps at 24 with 4. All use ordinary raster lighting and shadow maps. No ray tracing, real-time GI, screen-space reflection or expensive bloom is enabled. Light sources nearest the current view are prioritized. Per-character darkvision, lighting-based stealth and tabletop visibility rulings remain DM decisions; these visual lights do not change attack or sight rules automatically.
+
+BATTLEMAPS IN 3D
+Scene library… imports PNG/JPG/WebP as new scenes, preserving the active scene. Set columns, rows, feet per square and optional source pixels per square. Grid… calibrates offsets. Use the Build catalog for full-cell walls, aligned doors, objects and surfaces. 3D setup sets wall/door height. Raise/Lower changes ground elevation; use Lower to return to base ground. Raised floors reuse the corresponding imported-map texture. Consider the floor's printed grid when calibrating.
+
+A flat battlemap remains a floor image. It cannot supply unseen wall heights, stairs, ceilings or objects automatically. Mark those features explicitly before play. Walls and closed doors conceal connected rooms and block movement. Attack paths account for wall height and raised terrain, so attacks can clear a lower wall from sufficient height. Whole-cell barriers and selected cover are approximations, not pixel-perfect scenery collision. Shared party room visibility is still used; per-character light/darkvision is not simulated.
+
+Export/import .hearthscene packages to preserve the image, scale, walls, doors, elevation, terrain, fog, notes and scene creatures. Creature IDs and temporary combat/effect state reset on import. Lighting and battle zones are included; imported boundaries are rearmed. The DM can prepare future supplied maps with these same tools.
+
+MORE RULES
+See Learn → Automation coverage & current limits for the exact automated effects and remaining manual rules. Host Undo corrects the last table change. Campaign saves remain compatible with earlier Hearthtable schema-1 files. Use the same release on the host and all players.
+
+
+DOORWAYS IN 0.11
+Click a closed door to approach and open it. If you are farther away, the host checks a route to an adjacent square within your remaining movement before opening it. Then click the open doorway or the floor beyond to walk through. Clicking an open doorway no longer closes it. Use Door · E in the HUD, or E while beside a door, to close or reopen it. E continues to orbit the player camera away from doorways. Closing an occupied doorway is refused. Linked double gates open both leaves together and permit two-square creatures when clearance is available. Closed doors, walls and occupied squares still block movement normally. In combat, players interact on their active turn.
+
+PREPARED MAPS AND REUSABLE ASSETS
+Scene library → Prepared maps offers both supplied references. Add one to this campaign, then Activate it. This does not replace your saved scenes. You can also import Ember_Rift.hearthscene or Sanctum_of_the_Crown.hearthscene through Import .hearthscene. The original map image is embedded unchanged, with calibrated 5-foot squares, collision, elevation, light settings, spawn locations and reusable 3D designs.
+
+Sanctum of the Crown uses 32 × 46 squares at 33.75 source pixels per square. It includes a linked southern gate, raised upper nave and throne dais, real gothic windows, a rose window, ivory columns, royal throne and walkable floor inlays. The 7 imported designs appear under Imported · Crown hall in Build mode. The square-grid wall footprints approximate the illustrated curves. Editable walls/objects still govern movement and attack lines.
+
+Ember Rift uses 32 × 32 squares at 17.8125 source pixels per square. Original lava pixels emit light; crags, pinnacles and slag boulders have collision and height. The 5 designs appear under Imported · Ember Rift. A newly modeled basalt causeway at M27–N29 supplies the southern river crossing. It is an added feature rather than part of the original picture. The DM resolves heat, lava damage, smoke and special movement. No encounters or monsters are assumed in either map.
+
+Version-2 scene packages carry their reusable design recipes. Importing mounts them in the catalog; reusing a design in another scene carries its recipe into that scene and its exports. Scene assets are bounded built-in model recipes with material colors; scene packages never install or run scripts. Version-1 scenes still import. The volcanic image remains at its supplied 570 × 570 resolution; the modeled geometry renders at the viewport's native resolution.
+
+AUTOMATIC PLAYER SCENE DOWNLOADS
+Players join with the same updated program and need no manual map or asset installation. The host automatically sends the active scene's PNG artwork and custom asset definitions over the existing UDP connection. A Preparing your table overlay shows progress and blocks table input until the data validates. Scene changes run the same transfer. Returning to a scene or rejoining reuses the local verified cache; changed content receives a new download.
+
+Artwork and assets transfer in bounded chunks with SHA-256 checks, at a capped aggregate host rate. The cache lives under user data/scene_cache and can be deleted when disconnected to reclaim disk space; missing or damaged cache entries download again. Future scenes, DM notes and private battle-zone geometry are not included in player downloads. Portable campaign copies also embed custom design recipes and map art; keep campaign copies private and distribute the plain program to players. Use protocol-9/0.11 on the host and all guests.

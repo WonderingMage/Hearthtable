@@ -1,0 +1,45 @@
+Hearthtable 0.2.0 — third-party notices
+
+SRD 5.1 rules and reference content
+This work includes material taken from the System Reference Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at https://creativecommons.org/licenses/by/4.0/legalcode.
+
+Rules are adapted, abridged and reformatted for the interface. The bundled Reference/SRD_5.1_2014.pdf is the unmodified Creative Commons reference PDF. Original starter adventure, maps, interface and application logic were created for Hearthtable.
+
+Official SRD landing page and the selected 5.1 PDF:
+https://www.dndbeyond.com/srd
+https://www.dndbeyond.com/attachments/39j2li89/SRD5.1-CCBY4.0_License_live%20links.pdf
+
+Structured spell/creature data:
+https://github.com/5e-bits/5e-database/tree/main/src/2014/en
+Only the 2014 English spell and monster files are included. Retrieved 2026-10-18. The dataset structure is provided under the MIT license (Reference/DATABASE_LICENSE.txt). Underlying SRD 5.1 game material is used here under the Creative Commons license above. The data is copied locally; the app does not call a public API or load the external monster-image URLs.
+
+Godot Engine 4.5.1 stable:
+https://godotengine.org/
+Godot license: Reference/GODOT_LICENSE.txt
+Godot bundled third-party copyright and license notices: Reference/GODOT_COPYRIGHT.txt
+
+Inter font family:
+https://github.com/google/fonts/tree/main/ofl/inter
+SIL Open Font License: Reference/INTER_LICENSE.txt
+
+Kenney Mini Dungeon 2.0:
+https://kenney.nl/assets/mini-dungeon
+3D characters, weapons, shields, furniture and dungeon props are CC0.
+License included at Reference/KENNEY_LICENSE.txt and Source/assets/models/KENNEY_LICENSE.txt.
+Original procedural terrain, trees, miniature bases, skeleton/beast/dragon shapes,
+UI and camera/measurement code remain original Hearthtable assets/code.
+
+Source-code design references reviewed (not copied into the application):
+PlanarAlly (MIT), RPTools MapTool (AGPL-3.0), Forge's public integration module.
+See VTT_REFERENCE_NOTES.md for exact files and review notes.
+
+KayKit Character Pack: Adventurers 1.0 by Kay Lousberg (CC0):
+https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0
+Knight, Mage, Rogue_Hooded and Barbarian GLBs are adapted for the tabletop.
+Idle, two-handed idle, walk and death animations are retained; unused animation
+buffers are removed. Accessories are selected at runtime. These are cosmetic
+archetypes, not a simulation of every item in a character's inventory.
+License: Reference/KAYKIT_LICENSE.txt and Source/assets/models/KAYKIT_LICENSE.txt.
+
+
+Version 0.8 additions: original vector UI/icons use Hearthtable MIT; unmodified DejaVu Serif uses its included Bitstream Vera license (Reference/DEJAVU_LICENSE.txt). Full license text is also embedded under Learn.
