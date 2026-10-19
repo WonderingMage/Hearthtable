@@ -1,4 +1,4 @@
-Hearthtable 0.11 · Original 2014 fifth edition
+Hearthtable 0.11.1 · Original 2014 fifth edition
 
 A SINGLE-FILE PROGRAM
 Run Hearthtable_Portable.exe directly. No installer, ZIP extraction, Godot installation or external asset folder is required. The program embeds the engine, models, rules, reference data and this help.

@@ -13,6 +13,10 @@ func run():
 		if arg.begins_with("--destination="):destination=arg.trim_prefix("--destination=")
 		if arg=="--verify":mode="verify"
 	if mode=="verify":
+		for arg in OS.get_cmdline_user_args():
+			if arg.begins_with("--portable-source="):
+				var expected=arg.trim_prefix("--portable-source=") if OS.has_feature("editor") else OS.get_executable_path()
+				check(w.PORTABLE.program_path()==expected,"Snapshot source overrides apply only to the editor; exported programs inspect themselves")
 		check(w.data.title=="Portable campaign verification","Launching a packed copy restores the embedded campaign")
 		check(w.SAVE_PATH.begins_with("user://portable_"),"Each embedded snapshot has an isolated autosave path")
 		var image=Image.new();check(image.load_png_from_buffer(Marshalls.base64_to_raw(w.scene().get("image","")))==OK and image.get_width()==8,"Embedded snapshot retains a valid map image")

@@ -1,6 +1,6 @@
 # Hearthtable development handoff
 
-Hearthtable is a native Godot **4.5.1** tabletop for **original 2014 D&D 5e**, currently **0.11.0**, campaign schema **1**, network protocol **9**. Open the folder containing `project.godot` in Codex and Godot. In the source companion this is `Hearthtable/Source`.
+Hearthtable is a native Godot **4.5.1** tabletop for **original 2014 D&D 5e**, currently **0.11.1**, campaign schema **1**, network protocol **9**. Open the folder containing `project.godot` in Codex and Godot. In the source companion this is `Hearthtable/Source`.
 
 ## Product requirements
 

@@ -1,6 +1,6 @@
 # Hearthtable
 
-An editable Godot **4.5.1** virtual tabletop for original **2014 D&D 5e**. This source baseline is **0.11.0**, campaign schema **1**, multiplayer protocol **9**.
+An editable Godot **4.5.1** virtual tabletop for original **2014 D&D 5e**. The current version is **0.11.1**, campaign schema **1**, multiplayer protocol **9**.
 
 The repository root is the Godot project directory: open `project.godot` here. The complete source is in `scripts/`, `assets/`, `tests/`, `art/` and `tools/`; there is no additional `Source` wrapper in this checkout.
 
@@ -14,6 +14,8 @@ The repository root is the Godot project directory: open `project.godot` here. T
 Tests intentionally reset their campaign. Use isolated user data; never use real campaign saves as fixtures. On Linux, set `XDG_DATA_HOME` to a fresh disposable directory for each test process. Native Windows needs a verified Windows isolation method, as described in the workflow guide.
 
 The Windows export preset embeds the engine/game pack in a single executable. Generated programs, caches, personal characters and campaign snapshots do not belong in source commits. Native Windows launch and external port-forwarded play remain separate validation tasks.
+
+Releases attach `Hearthtable_Portable.exe` directly for a one-file player download. New releases are published only on request; see `docs/releases.md`.
 
 ## Source and notices
 

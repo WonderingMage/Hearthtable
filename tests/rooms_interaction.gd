@@ -27,6 +27,7 @@ func run():
 	await create_timer(0.5).timeout;app.close_modal()
 	root.size=Vector2i(1920,1200);await frames();b=app.board
 	w.command("new_campaign",{"title":"The Door Between","heroes":true});w.command("resize",{"width":17,"height":11})
+	w.encounter.ensure_data();w.data.automation.auto_initiative=false
 	for a in w.data.actors:a.x=4;a.y=4
 	w.actor("hero2").x=3;w.actor("hero2").y=5;w.actor("hero3").x=5;w.actor("hero3").y=5;w.actor("hero4").x=4;w.actor("hero4").y=6
 	for x in range(2,15):
@@ -35,7 +36,7 @@ func run():
 	for y in range(2,9):
 		for x in [1,8,15]:w.command("tile",{"x":x,"y":y,"tile":3})
 	w.command("tile",{"x":8,"y":5,"tile":6});w.command("tile",{"x":4,"y":1,"tile":6});w.command("tile",{"x":3,"y":3,"tile":7})
-	var foe=w.read_json("res://assets/starter.json",{}).actors[4].duplicate(true);foe.id="hidden_guard";foe.scene=w.data.scene;foe.x=11;foe.y=5;w.data.actors.append(foe)
+	var foe=w.read_json("res://assets/starter.json",{}).actors[4].duplicate(true);foe.id="hidden_guard";foe.scene=w.data.scene;foe.x=9;foe.y=5;w.data.actors.append(foe)
 	w.mark_changed();await frames();b.set_view("Isometric");await frames()
 	check(is_equal_approx(b.terrain.get_node("Door_8,5").rotation.y,PI/2),"3D door aligns with north/south wall")
 	check(b.terrain.has_node("Wall_1,1"),"Connected corner masonry built")
@@ -44,7 +45,7 @@ func run():
 	button(pos,true,true)
 	var motion=InputEventMouseMotion.new();motion.position=pos+Vector2(65,20);motion.relative=Vector2(65,20);b._gui_input(motion)
 	button(motion.position,false,false)
-	check(not is_equal_approx(b.yaw,yaw_before) and not is_equal_approx(b.pitch,pitch_before),"Shift + left drag orbits isometric camera")
+	check(not is_equal_approx(b.yaw,yaw_before) and is_equal_approx(b.pitch,pitch_before),"Shift + left drag rotates isometric yaw while preserving its pitch")
 	check(not b.rotating and not b.painting and b.drag_id=="","Releasing mouse after Shift release ends rotation cleanly")
 	check(w.scene().tiles.hash()==tiles_before and w.ping_time==ping_before and Vector2i(w.actor("hero1").x,w.actor("hero1").y)==hero_before,"Camera gesture does not paint, move a hero or send a ping")
 	b.tool="Select";b.set_view("Isometric");await frames()
@@ -62,11 +63,13 @@ func run():
 	root.get_texture().get_image().save_png("user://rooms_open.png")
 	w.selected="hidden_guard";app.refresh();await frames()
 	button(door_pos,true);button(door_pos,false);await frames()
+	check(w.scene().doors_open.get("8,5",false) and b.actors.has("hidden_guard"),"Clicking an open doorway does not close it or conceal the room")
+	check(app.battle_ui.interact_door(),"The separate Door control closes a nearby empty doorway");await frames()
 	check(not b.actors.has("hidden_guard"),"Closing door removes hidden model immediately")
 	check(w.selected!="hidden_guard","Closing door clears a newly concealed inspector selection")
 	# Imported images must not show through the opaque room masks.
 	var image=Image.create(256,256,false,Image.FORMAT_RGBA8);image.fill(Color.RED)
-	w.command("image",{"image":Marshalls.raw_to_base64(image.save_png_to_buffer())});b.set_view("Top down");await frames()
+	w.command("image",{"image":Marshalls.raw_to_base64(image.save_png_to_buffer())});b.set_view("Isometric");await frames()
 	var at=b.project(Vector3(11.5,0.11,5.5));var image3d=b.viewport.get_texture().get_image();var sample=at*Vector2(b.viewport.size)/b.size
 	var color=image3d.get_pixel(clampi(int(sample.x),0,image3d.get_width()-1),clampi(int(sample.y),0,image3d.get_height()-1))
 	check(color.r<0.12 and color.b<0.2,"Concealment covers imported image without seams or image bleed")

@@ -6,6 +6,7 @@ signal target_selected(id: String)
 signal ground_selected(cell: Vector2i)
 signal tactical_cancelled
 signal tactical_hovered(id: String)
+signal scene_synchronized
 var tool="Select"
 var tile=1
 var grid=true
@@ -398,11 +399,12 @@ func clear_node(node: Node):
 
 func sync_state():
 	var s=World.scene()
+	var changed_scene=last_scene!=s.id
 	World.refresh_rooms()
 	var mask=s.get("room_mask",{}) if World.client else World.room_info.concealed
 	var sig=str([s.id,s.tiles.hash(),s.fog.hash(),mask.hash(),s.get("doors_open",{}).hash(),World.preview,World.client,s.get("image","").hash(),cutaway,grid,camera_mode,s.get("wall_height_ft",10),s.get("elevations",{}).hash(),s.get("grid_pixels",0),s.get("grid_offset_x",0),s.get("grid_offset_y",0),s.width,s.height,s.get("props",[]).hash(),s.get("surfaces",{}).hash(),s.get("asset_pack",[]).hash(),s.get("terrain_blocks",{}).hash(),s.get("preserve_map_art",false)])
 	if terrain_signature!=sig:terrain_signature=sig;build_terrain();lighting.rebuild()
-	if last_scene!=s.id:
+	if changed_scene:
 		last_scene=s.id;clear_node(minis);actors={};movement_preview={};movement_signature="";tactical_actor="";tactical_tracking=true;attack_preview={};spell_preview={};target_id="";targeting=false;fit_map();float_events=[];tactical_cancelled.emit()
 		for event in World.data.get("resolutions",[]):seen_events[event.id]=true
 	var alive={}
@@ -416,6 +418,8 @@ func sync_state():
 			var mini=create_mini(a);mini.set_meta("signature",signature);actors[a.id]=mini
 	for id in actors.keys():
 		if not alive.has(id):minis.remove_child(actors[id]);actors[id].queue_free();actors.erase(id)
+	# Recalculate inspector targeting after this board resets the old scene.
+	if changed_scene:scene_synchronized.emit()
 
 func build_terrain():
 	clear_node(terrain)

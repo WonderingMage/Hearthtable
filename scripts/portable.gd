@@ -4,9 +4,12 @@ extends RefCounted
 const MAGIC="HEARTHPORTABLE06"
 const LIMIT=200000000
 static func program_path() -> String:
-	var args=OS.get_cmdline_args()
-	for i in args.size()-1:
-		if args[i]=="--main-pack":return args[i+1]
+	# The editor consumes --main-pack before exposing command-line arguments.
+	# An explicit QA source lets the editor inspect that pack's appended snapshot.
+	# Exported programs always inspect themselves, regardless of user arguments.
+	if OS.has_feature("editor"):
+		for arg in OS.get_cmdline_user_args():
+			if arg.begins_with("--portable-source="):return arg.trim_prefix("--portable-source=")
 	return OS.get_executable_path()
 static func inspect(path: String) -> Dictionary:
 	var f=FileAccess.open(path,FileAccess.READ)

@@ -16,6 +16,8 @@ Set XDG_DATA_HOME to a temporary directory on Linux; use separate OS/user data f
 
 Graphical tests require an OpenGL-capable display. `features_ui.gd` covers actual slot-spending through the casting UI, character pages, equipment editors, scene image/package import and custom-port DM lobby controls. Other graphical tests preserve native rendering, room/camera behavior, PDF review and attack-range coverage. Pass `-- --qa` to suppress the welcome dialog.
 
+The casting UI fixture checks that an opening hostile spell starts initiative without spending resources, then confirms that spell on the caster's turn. Room UI checks preserve isometric pitch and use the separate Door control to close doorways. The attack-range UI suite also checks that scene loading retains the inspector's preview.
+
 `magic_network.gd` runs in two processes: start the host with `-- --host`, then a client without that flag. It uses UDP 24705 and a test-only passphrase. Both processes must share the same network namespace. Adding `-- --ui --qa` to the client renders the real player lobby/sheet and verifies disabled host controls. The host waits for a client acknowledgement before stopping. Older networking tests use UDP 24680 and must be run separately.
 
 Tests cover ownership, rejected-cast resource integrity, range/area-origin checks, upcasting, 2014 bonus-action restrictions, ritual/innate casts, damage/concentration, saving throws, recovery, attunement, serialization, lobby admission/ready/submission, scene-only snapshots, cached maps and disconnect cleanup.
@@ -37,3 +39,18 @@ director.gd verifies initiative ordering, opening weapon/spell resource integrit
 ## Version 0.11
 
 prepared.gd imports both supplied map packages, verifies calibrated routes and batched native designs, checks double-gate/large-creature traversal, imported-design reuse and malformed-pack rejection. maps_ui.gd renders both maps and exercises actual closed/open doorway click handling. maps_network.gd uses a host/client pair on UDP 24720; pass -- --host to the host, and optionally -- --ui --qa to a graphical client. It verifies cold-download progress, custom art/assets, door traversal, private-data exclusion, scene changes, cache return and reconnect from the disk cache. Portable snapshot tests include a reusable imported design. Run each suite with isolated user data.
+
+`maps_network.gd` acknowledges initial scene validation separately from the rendered gate walkthrough. Its client waits for transport/authority state have 30-second wall-clock deadlines; host acknowledgements that include rendering and screenshots have a 120-second budget for software OpenGL. A timeout reports its stage, fails the process and stops the scenario rather than switching scenes after a failed prerequisite. Allow at least 600 seconds for an outer graphical-pair runner timeout; run pairs serially. These are functional checks, not a network or rendering performance benchmark.
+
+## Portable snapshot validation
+
+Use `portable.gd` to create a synthetic campaign copy from an exported program, passing `-- --source=/absolute/path/plain-program --destination=/absolute/path/new-copy`. Launch the resulting native executable with an external absolute test-script path and `-- --verify` to check restoration. Always use fresh isolated user data for each process.
+
+To inspect a Windows campaign copy using the matching Linux **editor** instead, specify both the engine pack and the editor-only snapshot source:
+
+```sh
+# Linux only; set XDG_DATA_HOME, XDG_CONFIG_HOME and XDG_CACHE_HOME to disposable directories first.
+godot --headless --main-pack /absolute/path/campaign.exe --script /absolute/path/tests/portable.gd -- --verify --portable-source=/absolute/path/campaign.exe
+```
+
+Godot consumes `--main-pack` before exposing engine arguments to application scripts. `--portable-source` supplies the appended snapshot to the editor explicitly. Exported programs ignore that override and always inspect their own executable. Testing Windows resources and embedded snapshots with Linux does not establish native Windows launch, GPU or firewall behavior.

@@ -214,7 +214,7 @@ func build_ui():
 	dm_controls.append(button(left,"+ New hero",show_creator,"Create a sheet and miniature",true))
 	button(left,"Import hero PDF…",func():file_picker("character"),"Import an exported D&D Beyond character sheet PDF")
 	dm_controls.append(button(left,"+ Creature",func():side_tab="Library";library_kind="Monsters";refresh_side(),"Browse the SRD creature library"))
-	status_label=label(World.network_label,11,MOSS);status_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;left.add_child(status_label);left.add_child(label("AUTOSAVE ON · v0.11",10,MUTED))
+	status_label=label(World.network_label,11,MOSS);status_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;left.add_child(status_label);left.add_child(label("AUTOSAVE ON · v"+str(ProjectSettings.get_setting("application/config/version","development")),10,MUTED))
 	var workspace=col(main);expand(workspace);workspace.add_theme_constant_override("separation",8)
 	var upper=row(workspace);upper.size_flags_vertical=Control.SIZE_EXPAND_FILL;upper.add_theme_constant_override("separation",10)
 	var map_col=col(upper);expand(map_col)
@@ -238,6 +238,7 @@ func build_ui():
 		var b=button(rail,item[1],func():set_tool(item[0]),item[2]);b.custom_minimum_size=Vector2(35,35);tool_buttons[item[0]]=b
 	board=MAP.new();board.size_flags_vertical=Control.SIZE_EXPAND_FILL;expand(board);board.custom_minimum_size=Vector2(360,340);play_area.add_child(board)
 	board.token_selected.connect(func(_id):refresh_roster();side_tab="Character";refresh_side();battle_ui.refresh())
+	board.scene_synchronized.connect(refresh)
 	board.map_hint.connect(func(text):hint.text=text)
 	hint=label("Drag miniature · Shift+drag rotate · Right-drag pan · Wheel zoom",11,MUTED);map_col.add_child(hint)
 	guide_label=label("",10,MUTED);guide_label.visible=false;map_col.add_child(guide_label)

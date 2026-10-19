@@ -27,6 +27,8 @@ func run():
 	app=load("res://main.tscn").instantiate();root.add_child(app);root.size=Vector2i(2560,1440)
 	await create_timer(1).timeout;app.close_modal();await frames()
 	var mage=w.data.actors.filter(func(a):return a.class=="Wizard")[0]
+	# Keep initiative deterministic while exercising the real opening-cast flow.
+	mage.initiative_bonus=100
 	w.selected=mage.id;app.character_ui.show_book(mage.id);await frames()
 	check(app.modal_tag=="spellbook" and find_text(app.modal_overlay,"+ Add spell")!=null,"Spellbook opens with add and casting controls")
 	root.get_texture().get_image().save_png("user://spellbook.png")
@@ -38,10 +40,15 @@ func run():
 	root.get_texture().get_image().save_png("user://cast.png")
 	find_text(app.modal_overlay,"Cast & spend slot").pressed.emit();await frames()
 	check(is_instance_valid(app.modal_overlay),"Invalid cast stays open for correction")
-	var before_slots=int(mage.slots[0]);var spins=all_spins(app.modal_overlay)
+	var before_slots=int(mage.slots[0]);var target=w.data.actors[4];var before_hp=int(target.hp);var spins=all_spins(app.modal_overlay)
 	spins[4].value=3;find_text(app.modal_overlay,"I have the required components; DM confirms costs / reaction trigger").button_pressed=true
 	find_text(app.modal_overlay,"Cast & spend slot").pressed.emit();await frames()
-	check(mage.slots[0]==before_slots-1 and not is_instance_valid(app.modal_overlay),"Casting through the UI spends a slot and returns to the table")
+	check(w.data.combat.active and mage.slots[0]==before_slots and target.hp==before_hp,"Opening hostile cast rolls initiative without spending a slot or damaging its target")
+	check(w.encounter.is_turn(mage),"The fixture's initiative modifier gives the caster the first turn")
+	app.character_ui.cast_dialog(mage.id,"magicmissile");await frames()
+	spins=all_spins(app.modal_overlay);spins[4].value=3;find_text(app.modal_overlay,"I have the required components; DM confirms costs / reaction trigger").button_pressed=true
+	find_text(app.modal_overlay,"Cast & spend slot").pressed.emit();await frames()
+	check(mage.slots[0]==before_slots-1 and target.hp<before_hp and not is_instance_valid(app.modal_overlay),"Confirming the cast on the caster's turn spends one slot, deals damage and returns to the table")
 	for page in ["Overview","Skills","Equipment","Features"]:
 		app.character_ui.full_sheet(mage.id,page);await frames();check(is_instance_valid(app.modal_overlay),"Full sheet page opens: "+page)
 		if page=="Overview":root.get_texture().get_image().save_png("user://character_sheet.png")
