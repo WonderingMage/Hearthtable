@@ -1,6 +1,6 @@
 # Hearthtable
 
-An editable Godot **4.5.1** virtual tabletop for original **2014 D&D 5e**. The current version is **0.11.1**, campaign schema **1**, multiplayer protocol **9**.
+An editable Godot **4.5.1** virtual tabletop for original **2014 D&D 5e**. The development version is **0.12.0-dev**, campaign schema **1**, multiplayer protocol **10**. The last published release is **0.11.1** (protocol 9); this development branch requires matching protocol-10 hosts and guests.
 
 The repository root is the Godot project directory: open `project.godot` here. The complete source is in `scripts/`, `assets/`, `tests/`, `art/` and `tools/`; there is no additional `Source` wrapper in this checkout.
 
@@ -16,6 +16,12 @@ Tests intentionally reset their campaign. Use isolated user data; never use real
 The Windows export preset embeds the engine/game pack in a single executable. Generated programs, caches, personal characters and campaign snapshots do not belong in source commits. Native Windows launch and external port-forwarded play remain separate validation tasks.
 
 Releases attach `Hearthtable_Portable.exe` directly for a one-file player download. New releases are published only on request; see `docs/releases.md`.
+
+## Characters and actions
+
+New hero opens a draft-based character creator with identity, attributes, skills, equipment/features, spells, a rotatable 3D miniature and a review step. PDF import uses the same menu, preserving printed bonuses and spell selections. Players create or import through Session and submit the reviewed character for DM acceptance. Full character sheet → Customize miniature allows owners to change cosmetic body styles, colors, props and proportions without changing combat stats.
+
+Combat actions adds 2014 grapple, shove prone/push, attack/skill Help, escape and free release alongside Dodge, Dash, Disengage and Stand. The host validates turn, ownership, size, reach, hands and resources. See in-app help and `docs/character-actions.md` for behavior and limits.
 
 ## Source and notices
 

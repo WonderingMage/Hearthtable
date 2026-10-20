@@ -6,6 +6,27 @@ var query: LineEdit
 var prepared_only: CheckBox
 var book_actor=""
 func _init(app: Control,world: Node):u=app;w=world
+func combat_actions(id: String):
+	var a=w.actor(id)
+	if a.is_empty() or not w.can_control(a):return
+	var body=u.modal(a.name+" · Combat actions",850,690)
+	u.paragraph(body,"2014 rules: grapple and shove replace one attack, not your whole Attack action. Defender uses the better Athletics/Acrobatics total. No damage is rolled. Set free grappling hands in Edit sheet after readying or stowing equipment.",u.GOLD,14)
+	var actions=["Grapple","Shove prone","Shove push","Help attack","Help check","Escape grapple","Release grapple","Dodge","Dash","Disengage","Stand"]
+	var action=u.options(body,actions);var ids=[""];var names=["Choose target…"]
+	for unit in w.data.actors:
+		if unit.id!=id and unit.scene==a.scene and (not w.client or w.visible(unit)):ids.append(unit.id);names.append(unit.name)
+	var target=u.options(body,names);var skill=u.options(body,u.R.SKILLS.keys())
+	var reviewed=CheckBox.new();reviewed.text="DM confirms this task can be performed and assisted";body.add_child(reviewed)
+	var mode=u.options(body,["Normal","Advantage","Disadvantage"],w.roll_mode)
+	var status=u.paragraph(body,"Choose an action and target.",u.INK,14)
+	var submit=u.button(body,"Perform action",func():
+		w.command("combat_action",{"id":id,"target":ids[target.selected],"action":actions[action.selected],"skill":skill.get_item_text(skill.selected),"task_reviewed":reviewed.button_pressed,"mode":mode.selected});u.close_modal(),"The host validates before spending resources",true)
+	var refresh=func():
+		var chosen=actions[action.selected];var targeted=chosen in w.encounter.actions.TARGETED
+		target.visible=targeted;skill.visible=chosen=="Help check";reviewed.visible=chosen=="Help check";mode.visible=chosen in ["Grapple","Shove prone","Shove push","Escape grapple"]
+		var preview=w.encounter.actions.assessment(a,w.actor(ids[target.selected]),chosen,{"skill":skill.get_item_text(skill.selected),"task_reviewed":reviewed.button_pressed}) if targeted else {"ok":not w.COMBAT.incapacitated(a) and w.encounter.is_turn(a),"reason":"Dodge: attacks you can see have disadvantage; DEX saves have advantage until your next turn. Benefits end if incapacitated or speed becomes 0." if chosen=="Dodge" else "Host validates turn and available resources."}
+		status.text=preview.reason;submit.disabled=not preview.ok
+	action.item_selected.connect(func(_i):refresh.call());target.item_selected.connect(func(_i):refresh.call());skill.item_selected.connect(func(_i):refresh.call());reviewed.toggled.connect(func(_v):refresh.call());refresh.call()
 func summary(parent: Node,a: Dictionary,show_sheet_button: bool=true):
 	w.magic.ensure(a)
 	var control=w.can_control(a)
@@ -215,6 +236,8 @@ func full_sheet(id: String,tab: String="Overview"):
 	u.paragraph(body,a.race+" · "+a.class+" · Original 2014 fifth edition",u.GOLD)
 	var tabs=u.row(body)
 	for name in ["Overview","Skills","Equipment","Features"]:u.button(tabs,name,func():full_sheet(id,name))
+	u.button(tabs,"Customize miniature…",func():u.creator.customize(id)).disabled=not w.can_control(a) or not a.hero
+	u.button(body,"Combat actions…",func():combat_actions(id)).disabled=not w.can_control(a)
 	u.button(tabs,"Spells",func():show_book(id),"",true)
 	match tab:
 		"Overview":

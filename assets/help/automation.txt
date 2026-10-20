@@ -1,4 +1,4 @@
-AUTOMATION IN HEARTHTABLE 0.9
+AUTOMATION IN HEARTHTABLE 0.12.0-dev
 
 Original 2014 fifth edition remains the rules baseline. The action dock takes inspiration from cinematic RPG hotbars; the program does not reproduce all of Baldur's Gate 3 or D&D Beyond.
 
@@ -14,11 +14,11 @@ AUTOMATED
 • The previously supported simple attack spells, healing spells and damage-save spells. Default automatic-save mode rolls for heroes and NPCs and displays results; the DM can choose manual pending saves instead.
 • Temporary HP, hero unconscious/death-save state, basic massive damage, healing and concentration damage checks. Auto-save mode handles concentration without a separate player confirmation.
 • Shield's +5 AC and Magic Missile immunity until the next own turn; Shield of Faith's +2 AC; Bless's attack/save d4; Guidance's next-check d4; Resistance's next-save d4; Mage Armor's unarmored AC floor; Invisibility's supported condition and break on attacks/casting. Concentration removal cleans up linked effects. Elapsed non-turn durations need the DM.
-• Second Wind healing and bonus-action use, Action Surge's extra action, Lay on Hands touch healing/action/pool, and Rage's casting/concentration restriction, physical resistance and supported early ending. Rage's extra melee damage/STR-check advantages and special subclass benefits still need DM adjustment.
+• Second Wind healing and bonus-action use, Action Surge's extra action, Lay on Hands touch healing/action/pool, and Rage's casting/concentration restriction, physical resistance and supported early ending. Rage's extra melee damage/STR-save advantages and special subclass benefits still need DM adjustment.
 • Shared structured results, damage/healing text, attack presentation, individual player ownership, lobby assignment/readiness and DM character approval.
 
 MANUAL OR PARTIAL
-Opportunity attacks and other reaction timing are not automatic. Disengage is tracked, but the DM resolves opportunity attacks and Ready triggers. Ammunition/loading, versatile/off-hand damage, feats, spell riders, all class/subclass/racial rules, summons, auras, uncommon resistances, magic weapons, regeneration, legendary/lair actions, charm/frightened source restrictions, special senses, light/darkvision, flight/climbing/jumping/grappling and environmental damage are not fully modeled. Extra damage types on a monster attack are not automatically added to its basic attack expression.
+Opportunity attacks and other reaction timing are not automatic. Disengage is tracked, but the DM resolves opportunity attacks and Ready triggers. Ammunition/loading, versatile/off-hand damage, feats, spell riders, all class/subclass/racial rules, summons, auras, uncommon resistances, magic weapons, regeneration, legendary/lair actions, charm/frightened source restrictions, special senses, light/darkvision, flight/climbing/jumping/special grapple exceptions and environmental damage are not fully modeled. Extra damage types on a monster attack are not automatically added to its basic attack expression.
 
 Area selection uses a cell-center approximation over occupied squares. Cone/line direction follows the chosen ground point. Quick-cast area targets are recomputed by the host; Fireball spreads through connected cells within its radius while respecting solid walls/closed doors. Cover, unusual shapes, heights and specific area exceptions need DM review. Do not assume every printed map object has collision: paint the corresponding geometry.
 
@@ -48,4 +48,12 @@ Open door cells are walkable. Closed-door clicks can approach a reachable adjace
 
 Scene packages version 2 include validated procedural asset definitions, collision fields and preferred spawn points; version 1 remains supported. The two supplied references are in Scene library → Prepared maps. Their original PNGs are preserved and reusable native geometry is provided. Map features and grid-curved walls are authored approximations; hazard damage, unusual traversal and special senses remain DM adjudication.
 
-Joining and changing scenes automatically downloads the active PNG and custom design definitions. Transfers use bounded chunks, integrity checks, an on-disk content cache and a loading overlay. Players receive no future scene packages, DM notes or private battle zones. Custom content contains data only and never executes imported scripts. Host and guests must all run 0.11/protocol 9.
+Joining and changing scenes automatically downloads the active PNG and custom design definitions. Transfers use bounded chunks, integrity checks, an on-disk content cache and a loading overlay. Players receive no future scene packages, DM notes or private battle zones. Custom content contains data only and never executes imported scripts. Host and guests must all run the same protocol-10 development build.
+
+
+CHARACTERS AND CONTESTED ACTIONS IN 0.12 DEVELOPMENT
+Grapple and shove use host-rolled Athletics versus the defender's better Athletics/Acrobatics, with imported final bonuses, supported Rage/Poisoned/Help/Guidance check modifiers and non-stacking advantage. These replace one Attack-action attack, never a named Multiattack component. Size, 5-foot clear reach, free hands, turn and resources are validated before rolling. Ties preserve the existing situation; failed valid attempts spend their attack. Holds have source identities and end on release, escape, grappler incapacitation or forced separation. Grappled speed is zero. Level-route dragging halves speed unless the target is at least two sizes smaller. Basic shove push is 5 feet on representable grids into a clear level square; hazards, ledges and unusual movement remain manual.
+
+Help attack grants the next eligible ally's weapon/spell attack advantage against the distracted enemy before the helper's next turn. Help check grants one specified skill check advantage, subject to manual task eligibility. First eligible rolls consume all matching assistance; previews do not. Dodge loses its benefits at speed zero or incapacitation. Source-specific frightened/sight/special-feature modifiers remain manual through roll mode or DM adjustment.
+
+The shared creator records final sheet values and preserves import provenance, bonuses, notes and spell choices. It is not an automatic class progression or point-buy/racial-trait engine. New/imported player characters require host acceptance. Owners can change bounded cosmetic miniature data, never gameplay stats, through the appearance command. Cosmetics persist in ordinary saves and portable copies; new identity details follow existing owner privacy filtering.

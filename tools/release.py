@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 VERSION = '4.5.1'
 ENGINE_NAME = f'Godot_v{VERSION}-stable_linux.x86_64'
 BASE_URL = f'https://github.com/godotengine/godot/releases/download/{VERSION}-stable'
-SUITES = ['smoke', 'combat_range', 'encounter', 'magic', 'rooms', 'build', 'director', 'prepared', 'pdf_import']
+SUITES = ['actions', 'smoke', 'combat_range', 'encounter', 'magic', 'rooms', 'build', 'director', 'prepared', 'pdf_import']
 ERROR = re.compile(r'(?m)^(?:SCRIPT ERROR:|ERROR:|.*Parse Error:|.*FAIL )')
 SUMMARY = re.compile(r'\w+ (\d+) passed, (\d+) failed')
 
@@ -146,9 +146,9 @@ def main():
 
 Download **Hearthtable_Portable.exe** and run it directly. The engine, game resources, prepared maps and notices are embedded. No ZIP, installer or Godot installation is required. The checksum and manifest are optional verification files.
 
-This release fixes disappearing attack previews after scene changes, updates regression tests for initiative-first casting and explicit door closing, and supports editor validation of portable snapshots. The HUD displays the configured version. Original 2014 rules, campaign schema 1 and multiplayer protocol {protocol} are preserved.
+This build includes original-2014 grapple, shove, Help and Dodge support, a shared character creator/import review menu, and persistent cosmetic miniatures. Campaign schema remains 1. Multiplayer protocol is {protocol}; hosts and guests must use a matching build. See the included help for supported rules and DM adjudication.
 
-Built from clean commit `{commit}` with official Godot {VERSION} and checksum-verified export templates. This automated run passed **{sum(results.values())} assertions** across nine exported headless suites and Windows/Linux portable creation and restoration. Local graphical UI and actual UDP host/player checks also passed for these runtime changes; this automated run does not repeat those graphical/network suites.
+Built from clean commit `{commit}` with official Godot {VERSION} and checksum-verified export templates. This automated run passed **{sum(results.values())} assertions** across {len(SUITES)} exported headless suites and Windows/Linux portable creation and restoration. This automated run does not validate graphical UI or actual UDP sessions; their separate results belong in the release checklist.
 
 Native Windows launch, GPU/audio and external internet play remain untested, so this is a prerelease. This is the plain player program; synthetic or private campaign copies are not release assets.
 

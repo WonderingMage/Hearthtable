@@ -1,6 +1,6 @@
 # Working on Hearthtable
 
-Read `CODEX_HANDOFF.md`, `tests/README.md` and the in-app help before changing behavior. This is Godot 4.5.1, original 2014 fifth edition, release 0.11.1/protocol 9.
+Read `CODEX_HANDOFF.md`, `tests/README.md` and the in-app help before changing behavior. This is Godot 4.5.1, original 2014 fifth edition, development 0.12.0-dev/protocol 10 (last published release: 0.11.1/protocol 9).
 
 - Preserve host authority and player ownership checks. Filter DM secrets before producing player snapshots or asset manifests.
 - Preserve the DM isometric and player tactical views. Do not reintroduce archived camera modes without a user request.

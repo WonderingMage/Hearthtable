@@ -120,6 +120,9 @@ func build_bottom(a: Dictionary):
 			for item in [["Dash","move"],["Dodge","shield"],["Disengage","move"],["Stand","hand"]]:
 				var locked=not w.encounter.is_turn(a) or (w.encounter.strict() and not w.encounter.has_action(a) and item[0]!="Stand") or (item[0]=="Stand" and not a.conditions.has("Prone"))
 				action_card(cards,item[0],"½ speed" if item[0]=="Stand" else "Action",item[1],func():w.command("combat_action",{"id":a.id,"action":item[0]}),false,locked,item[0]+" · 2014 5e combat action")
+			for action in ["Grapple","Shove prone","Shove push","Help attack"]:
+				action_card(cards,action,"One attack" if action.begins_with("Shove") or action=="Grapple" else "Action","hand",func():b.choose_action(action),b.selected_kind=="action" and b.selected_key==action,false,"Select, then click a creature. Host validates size, reach and resources.")
+			action_card(cards,"More actions…","Help / escape","hand",func():u.character_ui.combat_actions(a.id))
 		"Cantrips","Spells":
 			var count=0
 			for entry in a.get("known_spells",[]):
@@ -172,5 +175,5 @@ func build_targeting(column: Node,a: Dictionary):
 				var area=CheckBox.new();area.text="Area reviewed";area.button_pressed=b.area_confirmed;line.add_child(area);area.toggled.connect(func(on):b.area_confirmed=on;b.refresh())
 			btn(line,"Details…",func():u.character_ui.cast_dialog(a.id,b.selected_key))
 	var fill=Control.new();u.expand(fill);line.add_child(fill)
-	btn(line,"Attack" if b.selected_kind=="weapon" else "Cast",func():b.execute_selection(),"Confirm the selected action",true).disabled=not b.selection_preview.get("ok",false)
+	btn(line,"Attack" if b.selected_kind=="weapon" else b.selected_key if b.selected_kind=="action" else "Cast",func():b.execute_selection(),"Confirm the selected action",true).disabled=not b.selection_preview.get("ok",false)
 	var reason=text(column,str(b.selection_preview.get("reason","Choose a target.")),12,GREEN if b.selection_preview.get("ok",false) else GOLD);reason.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART

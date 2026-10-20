@@ -57,7 +57,7 @@ func controlled() -> Dictionary:
 	return a
 func pick_target(id: String):
 	target_id=id;u.board.target_id=id;refresh()
-	if (u.board.camera_mode=="Tactical" or enemy_mode) and u.board.targeting and selected_kind=="weapon":execute_selection()
+	if (u.board.camera_mode=="Tactical" or enemy_mode) and u.board.targeting and selected_kind in ["weapon","action"]:execute_selection()
 	elif (u.board.camera_mode=="Tactical" or enemy_mode) and u.board.targeting and selected_kind=="spell":
 		var s=w.magic.definition(controlled(),selected_key)
 		if not s.has("area_of_effect"):execute_selection()
@@ -140,6 +140,8 @@ func refresh():
 				card(cards,p.label,"Action · "+w.COMBAT.summary(p),str(p.damage)+" "+str(p.get("damage_type","")),"attack",func():selected_kind="weapon";selected_key=str(i);u.board.targeting=true;refresh(),selected_kind=="weapon" and selected_key==str(i))
 			card(cards,"Move","Movement","Click ground / WASD","move",func():selected_kind="move";u.board.targeting=false;refresh(),selected_kind=="move")
 			for item in [["Dash","move"],["Dodge","shield"],["Disengage","move"],["Stand","hand"]]:card(cards,item[0],"Movement" if item[0]=="Stand" else "Action","2014 combat action",item[1],func():w.command("combat_action",{"id":a.id,"action":item[0]}))
+			for action in ["Grapple","Shove prone","Shove push","Help attack"]:card(cards,action,"One attack" if action.begins_with("Shove") or action=="Grapple" else "Action","Choose a creature","hand",func():choose_action(action),selected_kind=="action" and selected_key==action)
+			card(cards,"More actions…","Help / escape / release","Review targets and task","hand",func():u.character_ui.combat_actions(a.id))
 		"Cantrips","Spells":
 			for e in a.get("known_spells",[]):
 				var s=w.magic.definition(a,e.key)
@@ -171,6 +173,9 @@ func refresh():
 			if not type.is_empty() and target.get("damage_immunities",[]).has(type):preview.reason+=" · IMMUNE to "+type
 			elif not type.is_empty() and target.get("damage_resistances",[]).has(type):preview.reason+=" · Resists "+type
 		payload={"id":a.id,"target":target_id,"attack_index":index,"mode":w.roll_mode}
+	elif selected_kind=="action":
+		payload={"id":a.id,"target":target_id,"action":selected_key,"mode":w.roll_mode}
+		preview=w.encounter.actions.assessment(a,target,selected_key,payload)
 	elif selected_kind=="spell":
 		var s=w.magic.definition(a,selected_key)
 		if not s.is_empty():
@@ -198,7 +203,7 @@ func refresh():
 	selection_preview=preview;selection_payload=payload
 	if selected_kind!="weapon":u.board.attack_preview={}
 	if selected_kind!="spell":u.board.spell_preview={}
-	u.button(target_row,"Attack" if selected_kind=="weapon" else "Cast" if selected_kind=="spell" else "Move",func():w.command("attack" if selected_kind=="weapon" else "cast_spell",payload),"Resources are spent only after the host validates the action",true).disabled=not preview.ok
+	u.button(target_row,"Attack" if selected_kind=="weapon" else selected_key if selected_kind=="action" else "Cast" if selected_kind=="spell" else "Move",execute_selection,"Resources are spent only after the host validates the action",true).disabled=not preview.ok
 	u.paragraph(root,str(preview.reason),u.MOSS if preview.ok else u.GOLD,12)
 	if selected_kind=="weapon" and not target.is_empty():
 		preview.attacker=a.id;preview.target=target.id;u.board.attack_preview=preview
@@ -212,10 +217,12 @@ func cancel_selection():
 	selected_kind="move";u.board.targeting=false;u.board.attack_preview={};u.board.spell_preview={};origin=Vector2i(-1,-1);area_confirmed=false;refresh()
 func execute_selection():
 	if not selection_preview.get("ok",false):u.toast(str(selection_preview.get("reason","Choose a target.")));return
-	w.command("attack" if selected_kind=="weapon" else "cast_spell",selection_payload.duplicate(true))
+	w.command("attack" if selected_kind=="weapon" else "combat_action" if selected_kind=="action" else "cast_spell",selection_payload.duplicate(true))
 	if u.board.camera_mode=="Tactical" or enemy_mode:cancel_selection()
 func choose_weapon(index: int):
 	selected_kind="weapon";selected_key=str(index);u.board.targeting=true;refresh()
+func choose_action(action: String):
+	selected_kind="action";selected_key=action;u.board.targeting=true;refresh()
 func choose_spell(key: String):
 	var a=controlled();var s=w.magic.definition(a,key)
 	if s.is_empty():return

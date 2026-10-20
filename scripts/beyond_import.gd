@@ -71,6 +71,9 @@ static func from_fields(raw: Dictionary,loadouts: Dictionary,filename: String="c
 	a.hp=clampi(integer(current,a.max_hp),0,a.max_hp);a.temp=clampi(integer(first(fields,["TempHP","HPTemp"])),0,9999)
 	a.xp=maxi(0,integer(first(fields,["EXPERIENCE POINTS","XP"])))
 	a.token_size=int({"large":2,"huge":3,"gargantuan":4}.get(first(fields,["SIZE"]).to_lower(),1))
+	a.size_category=first(fields,["SIZE"],"Medium").capitalize()
+	if a.size_category not in ["Tiny","Small","Medium","Large","Huge","Gargantuan"]:a.size_category="Medium"
+	for field in [["background","BACKGROUND"],["alignment","ALIGNMENT"],["age","AGE"],["height_text","HEIGHT"],["weight_text","WEIGHT"],["languages","ProficienciesLang"]]:a[field[0]]=first(fields,[field[1]]).left(500)
 	if current.is_empty():issues.append("Current HP is blank; it starts at maximum HP unless you change it below.")
 	a.initiative_bonus=integer(first(fields,["Init","Initiative"]),R.modifier(a.abilities[1]));a.initiative=0
 	var hit=first(fields,["Total","TotalHitDice","HitDice"])

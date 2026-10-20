@@ -1,4 +1,4 @@
-Hearthtable 0.11.1 · Original 2014 fifth edition
+Hearthtable 0.12.0-dev · Original 2014 fifth edition
 
 A SINGLE-FILE PROGRAM
 Run Hearthtable_Portable.exe directly. No installer, ZIP extraction, Godot installation or external asset folder is required. The program embeds the engine, models, rules, reference data and this help.
@@ -54,7 +54,7 @@ Battle zones opens the private encounter manager. Set an encounter title and int
 
 During combat, every ordinary move spends the host-calculated route cost cumulatively. A speed-30 character can normally spend 30 feet in a turn. Splitting movement across several clicks does not reset that budget. Dash spends an action and grants movement equal to the current speed; different listed speeds, difficult ground and elevation still apply. Turn start restores the normal budget. The optional alternating diagonal metric remembers parity across split moves. Strict play is on by default; the DM can disable it in 3D setup for manual adjudication.
 
-The visible dice tray shows the actual host-generated dice, modifier and total for initiative, attacks, damage, spells, checks, saves, death saves and free rolls. Its brief animation never rerolls the result. Roll history lists the last 80 rolls; the combat log retains the resolved hit/miss, AC, damage and effects. Hidden-creature rolls stay private. Everyone must use this release (network protocol 9).
+The visible dice tray shows the actual host-generated dice, modifier and total for initiative, attacks, damage, spells, checks, saves, death saves and free rolls. Its brief animation never rerolls the result. Roll history lists the last 80 rolls; the combat log retains the resolved hit/miss, AC, damage and effects. Hidden-creature rolls stay private. Everyone must use this release (network protocol 10).
 
 SCENE LIGHTING
 Lighting opens Day, Dusk and Night, brightness and sun/moon direction. Apply lighting to the table saves the setting per scene and sends it to connected players. Add torches, campfires, braziers, candles or lanterns through Build mode. Day casts directional sun shadows; night combines blue moonlight with warm, softly flickering local lights. Lights do not reveal concealed map cells.
@@ -87,4 +87,27 @@ Version-2 scene packages carry their reusable design recipes. Importing mounts t
 AUTOMATIC PLAYER SCENE DOWNLOADS
 Players join with the same updated program and need no manual map or asset installation. The host automatically sends the active scene's PNG artwork and custom asset definitions over the existing UDP connection. A Preparing your table overlay shows progress and blocks table input until the data validates. Scene changes run the same transfer. Returning to a scene or rejoining reuses the local verified cache; changed content receives a new download.
 
-Artwork and assets transfer in bounded chunks with SHA-256 checks, at a capped aggregate host rate. The cache lives under user data/scene_cache and can be deleted when disconnected to reclaim disk space; missing or damaged cache entries download again. Future scenes, DM notes and private battle-zone geometry are not included in player downloads. Portable campaign copies also embed custom design recipes and map art; keep campaign copies private and distribute the plain program to players. Use protocol-9/0.11 on the host and all guests.
+Artwork and assets transfer in bounded chunks with SHA-256 checks, at a capped aggregate host rate. The cache lives under user data/scene_cache and can be deleted when disconnected to reclaim disk space; missing or damaged cache entries download again. Future scenes, DM notes and private battle-zone geometry are not included in player downloads. Portable campaign copies also embed custom design recipes and map art; keep campaign copies private and distribute the plain program to players. Use the same protocol-10 development build on the host and all guests.
+
+
+CHARACTER CREATION, IMPORT REVIEW & MINIATURES
+New hero opens the character creator. Choose a class starting loadout, name and origin, then review Attributes, Skills, Equipment, Magic, Miniature and Review. Class loadouts are level-1 starting sheets with final human scores. Level/race changes do not silently recalculate HP, AC, equipment, proficiencies or spells; finish these with your DM. Applying a class loadout replaces the mechanical sections.
+
+Import a Beyond character PDF opens the same creator, populated from the sheet. Review import warnings, final skill/save totals, attacks, slots, spells, notes and equipment. Keep imported final bonuses to preserve printed totals, or disable that option to calculate from abilities and training. Imported missing spells stay missing, and custom spells still need DM configuration. Confirm that you reviewed the draft before adding it. Cancel leaves the campaign unchanged.
+
+Players use Session → Create my character / Import my Beyond character PDF. Submitted drafts are pending until the DM accepts them. The host assigns accepted heroes to the submitting player.
+
+Full character sheet → Customize miniature changes your owned hero's body style (Knight, Mage, Hooded rogue or Barbarian), clothing/head/cloak/base colors, supported headwear/cloak, weapon/shield props, and visual height/build. Rotate the live 3D preview. The board uses the same model choices. Changes persist in campaign saves, network snapshots and portable campaign copies. Props are cosmetic: they do not equip gear, grant AC or change occupied squares.
+
+GRAPPLE, SHOVE, HELP & DODGE
+Use the Actions hotbar (scroll for more cards), or Character → Combat actions. Select Grapple, Shove prone, Shove push or Help attack, then click a creature. More actions opens the skill Help, Escape grapple and Release grapple controls.
+
+Grapple and shove replace ONE attack in an Attack action. The target must be within a clear 5 feet and at most one size larger; weapon reach does not extend this. STR (Athletics) contests the defender's better Athletics/Acrobatics bonus. Imported final bonuses apply. Ties keep the current situation, and a failed valid attempt still spends the attack. Named monster Multiattack components cannot be substituted. Opening hostile attempts start initiative without giving a free contest.
+
+A grapple requires a free hand; the DM sets Hands available for grappling in Edit sheet after readying/stowing gear. Each hold uses one hand. Grappled creatures have speed 0. Escape uses a full action and the escapee's better Athletics/Acrobatics against the grappler's Athletics. Release your hold for free, including outside your turn. Incapacitation or separation beyond reach ends a hold. Movement drags held creatures along the same clear, level route at half speed unless they are two sizes smaller. Walls, occupied landings and elevation changes can block dragging. More unusual repositioning needs the DM.
+
+Shove can knock prone or push 5 feet directly away into a clear level square. Unrepresentable grid scales, ledges and unusual forced movement need DM adjudication. No damage is automatically rolled. A speed-zero creature cannot stand up.
+
+Help attack spends an action to distract an enemy within a clear 5 feet. The first eligible ally's weapon or spell attack against it gets advantage before the helper's next turn. Previewing does not consume Help; the first actual roll does, including a miss. Help check assists an ally's next chosen skill check before the helper's next turn; confirm task eligibility and positioning with the DM. Assistance does not stack.
+
+Dodge spends an action until your next turn: attacks from creatures you can see have disadvantage, and your DEX saves have advantage. Incapacitation or speed becoming 0 ends the benefits. Dash, Disengage and Stand remain available. Opportunity attacks, Ready triggers, Hide/Search adjudication and unusual class exceptions still need the DM.

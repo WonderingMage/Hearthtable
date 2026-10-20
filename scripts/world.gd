@@ -6,6 +6,7 @@ signal connection_status(text: String)
 const RULES = preload("res://scripts/rules.gd")
 const ROOMS = preload("res://scripts/room_geometry.gd")
 const COMBAT = preload("res://scripts/combat_rules.gd")
+const APPEARANCE=preload("res://scripts/mini_appearance.gd")
 const MAGIC = preload("res://scripts/magic.gd")
 var magic
 const DEFAULT_SAVE_PATH = "user://campaign.json"
@@ -49,7 +50,7 @@ var client_images={}
 var scene_loading=false
 var scene_sync
 const SCENE_SYNC=preload("res://scripts/scene_sync.gd")
-const PROTOCOL=9
+const PROTOCOL=10
 const SCENE_FILES=preload("res://scripts/scene_files.gd")
 
 func _ready():
@@ -118,6 +119,9 @@ func valid_campaign(d) -> bool:
 		if not a.get("conditions") is Array or not a.get("skills") is Dictionary or not a.get("save_profs") is Array: return false
 		if not a.get("slots") is Array or not a.get("slots_max") is Array or a["slots"].size()!=9 or a["slots_max"].size()!=9: return false
 		if not a.get("hero") is bool: return false
+		if a.has("appearance") and not APPEARANCE.valid(a.appearance):return false
+		if a.has("size_category") and a.size_category not in ["Tiny","Small","Medium","Large","Huge","Gargantuan"]:return false
+		if a.has("grapple_hands") and (not (a.grapple_hands is int or a.grapple_hands is float) or int(a.grapple_hands)<0 or int(a.grapple_hands)>2):return false
 		if a.has("attack_type") and a.attack_type not in ["melee","ranged"]:return false
 		for field in ["reach_ft","range_normal_ft","range_long_ft","elevation_ft"]:
 			if a.has(field) and (not (a[field] is int or a[field] is float) or absf(float(a[field]))>528000):return false
@@ -308,7 +312,8 @@ func attack_assessment(a: Dictionary,target: Dictionary,index: int=0,mode: int=0
 		if a.conditions.has(condition):result.disadvantage.append("Attacker "+condition.to_lower())
 	if a.conditions.has("Invisible"):result.advantage.append("Attacker invisible")
 	if target.conditions.has("Invisible"):result.disadvantage.append("Target invisible")
-	if target.get("dodging",false) and not COMBAT.incapacitated(target) and not target.conditions.has("Blinded") and not a.conditions.has("Invisible"):result.disadvantage.append("Target dodging")
+	if encounter.actions.dodging(target) and not target.conditions.has("Blinded") and not a.conditions.has("Invisible"):result.disadvantage.append("Target dodging")
+	if encounter.actions.help_attack(a,target):result.advantage.append("Help")
 	for condition in ["Blinded","Restrained","Stunned","Paralyzed","Petrified","Unconscious"]:
 		if target.conditions.has(condition):result.advantage.append("Target "+condition.to_lower())
 	if target.conditions.has("Prone"):
@@ -338,6 +343,7 @@ func mark_changed():
 	for a in data.actors:
 		magic.ensure(a)
 		if not a.concentration.is_empty() and COMBAT.incapacitated(a):magic.end_concentration(a)
+	encounter.actions.reconcile()
 	dirty = true
 	BUILD.invalidate()
 	refresh_rooms()
@@ -362,6 +368,11 @@ func request_command(kind: String, payload: Dictionary):
 
 func apply_command(kind: String,p: Dictionary,peer: int):
 	if peer!=1 and JSON.stringify(p).length()>1500000:reject_command(peer,"This command is too large.");return
+	if kind=="customize_mini":
+		var unit=actor(str(p.get("id","")));var appearance=p.get("appearance",{});var color=p.get("color","")
+		if not can_control(unit,peer) or not unit.get("hero",false):reject_command(peer,"Customize only your own hero.");return
+		if not APPEARANCE.valid(appearance) or not color is String or color.length()!=7 or not Color.html_is_valid(color):reject_command(peer,"Invalid miniature appearance.");return
+		history.append(data.duplicate(true));unit.appearance=appearance.duplicate(true);unit.color=color;unit.miniature="Adventurer";mark_changed();return
 	if kind=="lighting":
 		if peer!=1:return
 		history.append(data.duplicate(true));var time_name=str(p.get("time","Day"));scene().lighting={"time":time_name if time_name in ["Day","Dusk","Night"] else "Day","brightness":clampf(float(p.get("brightness",1)),.35,1.5),"sun_angle":clampf(float(p.get("sun_angle",-25)),-180,180),"local_lights":bool(p.get("local_lights",true))};mark_changed();return
@@ -404,7 +415,9 @@ func apply_command(kind: String,p: Dictionary,peer: int):
 			if route.has("trigger") and not route.path.is_empty():x=int(route.path[-1].x);y=int(route.path[-1].y)
 			var dist=float(route.cost) if route.ok else movement_feet(Vector2i(a.x,a.y),Vector2i(x,y))
 			a.last_path=[] if peer==1 and p.get("dm_override",false) else route.get("path",[])
+			var old_cell=Vector2i(a.x,a.y)
 			a.x=x;a.y=y;a.elevation_ft=encounter.elevation(Vector2i(x,y))
+			if not (peer==1 and p.get("dm_override",false)):encounter.actions.drag(a,old_cell,route)
 			if data.combat.active and not (peer==1 and p.get("dm_override",false)):a.moved=float(a.get("moved",0))+dist;a.movement_diagonals=int(route.get("diagonals",a.get("movement_diagonals",0)))
 			if route.has("trigger"):director.entered(a,route.trigger)
 		"roll":
@@ -431,13 +444,16 @@ func apply_command(kind: String,p: Dictionary,peer: int):
 				bonus = RULES.modifier(int(a.abilities[RULES.SKILLS[skill]]))+int(a.skills.get(skill,0))*RULES.proficiency(a.level)
 			if p.get("save",false):bonus=int(a.get("save_bonuses",{}).get(RULES.ABILITIES[index],bonus))
 			if p.has("skill"):bonus=int(a.get("skill_bonuses",{}).get(str(p.skill),bonus))
-			var r = RULES.d20(bonus,clampi(int(p.get("mode",0)),0,2))
-			var effect_die=encounter.bonus_die(a,"save" if p.get("save",false) else "check",true);r.total+=int(effect_die.amount)
-			r.bonus=bonus+int(effect_die.amount);director.record(a,name_check,r)
+			var mode=clampi(int(p.get("mode",0)),0,2)
+			if p.has("skill") and not p.get("save",false):mode=encounter.actions.check_mode(a,str(p.skill),mode);encounter.actions.help_check(a,str(p.skill),true)
+			var r = magic.save_roll(a,index,mode) if p.get("save",false) else RULES.d20(bonus,mode)
+			var effect_die={"amount":0} if p.get("save",false) else encounter.bonus_die(a,"check",true);r.total+=int(effect_die.amount)
+			if not p.get("save",false):r.bonus=bonus+int(effect_die.amount);director.record(a,name_check,r)
 			log_line("◆ "+a.name+" · "+name_check+" → "+str(r.total)+"  d20 "+str(r.dice)+" "+RULES.signed_n(bonus),[a.id])
 		"attack":
 			var target = actor(str(p.get("target","")))
 			var profile=assessment.profile
+			encounter.actions.help_attack(a,target,true)
 			var r = RULES.d20(int(profile.bonus),int(assessment.mode))
 			var bonus_die=encounter.bonus_die(a,"attack");r.total+=int(bonus_die.amount)
 			var armor=encounter.effective_ac(target)+encounter.cover_bonus(target)
@@ -574,7 +590,7 @@ func apply_command(kind: String,p: Dictionary,peer: int):
 			var updated=p.get("actor",{})
 			if updated is Dictionary:
 				for key in updated:
-					if key!="id" and key!="hero" and (a.has(key) or key in ["miniature","elevation_ft","attack_type","reach_ft","range_normal_ft","range_long_ft","ignore_close_range","ignore_long_range","side"]):a[key]=updated[key]
+					if key!="id" and key!="hero" and (a.has(key) or key in ["miniature","appearance","grapple_hands","size_category","elevation_ft","attack_type","reach_ft","range_normal_ft","range_long_ft","ignore_close_range","ignore_long_range","side"]):a[key]=updated[key]
 		"add_actor":
 			var unit=p.get("actor",{}).duplicate(true)
 			if unit.is_empty():return
@@ -738,7 +754,7 @@ func _peer_disconnected(id: int):
 		network_label="Hosting · "+str(peers.size())+" players";connection_status.emit(network_label);mark_changed()
 
 @rpc("any_peer","call_remote","reliable")
-func authenticate(password: String,player_name: String="Player",protocol: int=9):
+func authenticate(password: String,player_name: String="Player",protocol: int=10):
 	if not multiplayer.is_server():return
 	var id=multiplayer.get_remote_sender_id()
 	if password!=passphrase or protocol!=PROTOCOL:
@@ -772,9 +788,13 @@ func player_snapshot(peer: int=-1) -> Dictionary:
 		if a.hero or (a.scene==data.scene and visible(a)):
 			if peer!=-1 and int(a.owner)!=peer:
 				a.notes="";a.inventory="";a.inventory_items=[];a.coins={"cp":0,"sp":0,"ep":0,"gp":0,"pp":0};a.spellbook=[];a.known_spells=[];a.custom_spells=[];a.features=[]
+				for field in ["background","alignment","age","height_text","weight_text","languages"]:a.erase(field)
 			units.append(a)
 	copy.actors=units
 	var visible_ids=units.map(func(a):return a.id)
+	for unit in units:
+		for effect in unit.get("effects",[]):
+			if effect.kind in ["grapple","help_attack","help_check"] and not visible_ids.has(str(effect.get("source",""))):effect.source="";effect.erase("help_until")
 	copy.resolutions=copy.get("resolutions",[]).filter(func(e):return e.get("scene","")==data.scene and (e.get("actor","")=="" or visible_ids.has(e.actor)) and (e.get("target","")=="" or visible_ids.has(e.target)))
 	copy.dice_rolls=copy.get("dice_rolls",[]).filter(func(e):return e.get("scene","")==data.scene and (e.get("actor","")=="" or visible_ids.has(e.actor)) and (e.get("target","")=="" or visible_ids.has(e.target)))
 	if copy.combat.has("intro") and not visible_ids.has(copy.combat.intro.get("focus","")):copy.combat.intro.focus=""

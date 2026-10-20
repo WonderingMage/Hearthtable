@@ -51,6 +51,7 @@ var overlay: Control
 var bold: Font=preload("res://assets/Inter.ttf")
 var regular: Font=preload("res://assets/Inter.ttf")
 const BLUE=Color("91bcff")
+const APPEARANCE=preload("res://scripts/mini_appearance.gd")
 var camera_mode="Isometric"
 var build_controller
 const BUILD=preload("res://scripts/build_system.gd")
@@ -411,7 +412,7 @@ func sync_state():
 	for a in World.data.actors:
 		if a.scene!=s.id or ((World.client or World.preview or immersive()) and not World.visible(a)):continue
 		alive[a.id]=true
-		var signature=str([a.get("miniature","Auto"),a.class,a.race,a.color,a.get("token_size",1),a.hp<=0])
+		var signature=str([a.get("miniature","Auto"),a.get("appearance",{}),a.class,a.race,a.color,a.get("token_size",1),a.hp<=0])
 		if actors.has(a.id) and actors[a.id].get_meta("signature","")!=signature:
 			minis.remove_child(actors[a.id]);actors[a.id].queue_free();actors.erase(a.id)
 		if not actors.has(a.id):
@@ -716,9 +717,10 @@ func draw_area(area: Dictionary):
 		overlay.draw_colored_polygon(points,Color(0.46,0.65,1,0.13));overlay.draw_polyline(points,Color(0.6,0.77,1,0.75),1.5,true)
 
 func build_adventurer(parent: Node3D,a: Dictionary,factor: float):
-	var archetype="Mage" if a.class in ["Wizard","Sorcerer","Warlock","Druid","Bard"] else "Rogue_Hooded" if a.class in ["Rogue","Ranger","Monk"] else "Barbarian" if a.class=="Barbarian" else "Knight"
-	var body=model(parent,"kk-"+archetype,Vector3.ZERO,Vector3.ONE*0.54*factor,-0.25)
-	configure_adventurer(body,archetype,a.class)
+	var archetype=APPEARANCE.archetype(a);var appearance=a.get("appearance",{})
+	var proportions=Vector3(float(appearance.get("build",1)),float(appearance.get("height",1)),float(appearance.get("build",1)))
+	var body=model(parent,"kk-"+archetype,Vector3.ZERO,proportions*0.54*factor,-0.25)
+	APPEARANCE.configure(body,a,archetype)
 	var anim=find_anim(body)
 	var animation="2H_Melee_Idle" if archetype in ["Mage","Barbarian"] else "Idle"
 	if anim and anim.has_animation(animation):anim.get_animation(animation).loop_mode=Animation.LOOP_LINEAR;anim.play(animation)

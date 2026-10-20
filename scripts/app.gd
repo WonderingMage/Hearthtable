@@ -49,6 +49,7 @@ var settings=ConfigFile.new()
 var chosen_attacks={}
 var chosen_targets={}
 var character_ui
+var creator
 var modal_tag=""
 var session_signature=""
 var seen_lobby=false
@@ -100,6 +101,7 @@ func _ready():
 	get_tree().root.content_scale_factor=ui_scale
 	character_ui=preload("res://scripts/character_ui.gd").new(self,World)
 	make_theme();loadouts=World.read_json("res://assets/loadouts.json",{})
+	creator=preload("res://scripts/character_creator.gd").new(self,World)
 	build_ui();battle_ui=preload("res://scripts/battle_ui.gd").new(self,World);battle_ui.create(board.get_parent().get_parent().get_parent().get_parent());build_editor=preload("res://scripts/build_ui.gd").new(self,World);build_editor.create(board.get_parent().get_parent().get_parent().get_parent());zones_ui=preload("res://scripts/battle_zones_ui.gd").new(self,World);board.zones_controller=zones_ui;dice_overlay=preload("res://scripts/combat_overlay.gd").new();dice_overlay.setup(self,World);board.add_child(dice_overlay);var downloads=preload("res://scripts/scene_download_ui.gd").new();downloads.setup(self,World);board.add_child(downloads);ui_built=true
 	board.viewport.msaa_3d=int(settings.get_value("display","msaa",2));board.render_scale=float(settings.get_value("display","render_scale",1.0))
 	board.labels=bool(settings.get_value("display","labels",true));board.coordinates=bool(settings.get_value("display","coordinates",true));board.cutaway=bool(settings.get_value("display","cutaway",true));board.resize_view()
@@ -394,6 +396,8 @@ func show_character():
 	var hp=row(side);var amount=number(hp,5,1,9999)
 	button(hp,"− Damage",func():World.command("hp",{"id":a.id,"amount":-int(amount.value)})).disabled=not control
 	button(hp,"+ Heal",func():World.command("hp",{"id":a.id,"amount":int(amount.value)})).disabled=not control
+	button(side,"Combat actions…",func():character_ui.combat_actions(a.id)).disabled=not World.can_control(a)
+	if a.hero:button(side,"Customize miniature…",func():creator.customize(a.id)).disabled=not World.can_control(a)
 	var edit=row(side);expand(button(edit,"Edit sheet",func():edit_actor(a),"Update stats, abilities, proficiency, equipment and notes"));edit.get_child(0).disabled=not World.is_dm()
 	if not a.hero:button(edit,"Reveal" if a.get("hidden",false) else "Hide",func():World.command("hidden",{"id":a.id})).disabled=World.client
 	character_ui.summary(side,a)
@@ -702,6 +706,11 @@ func edit_actor(a: Dictionary):
 	heading(body,"3D MINIATURE")
 	var mini_options=["Auto","Adventurer","Orc","Skeleton","Beast","Dragon"]
 	var miniature=options(body,mini_options,maxi(0,mini_options.find(a.get("miniature","Auto"))))
+	if a.hero:button(body,"Customize miniature…",func():creator.customize(a.id))
+	var creature_sizes=["Tiny","Small","Medium","Large","Huge","Gargantuan"]
+	var size_choice=options(body,creature_sizes,maxi(0,creature_sizes.find(str(a.get("size_category",creature_sizes[clampi(int(a.get("token_size",1))+1,2,5)])))))
+	paragraph(body,"Hands available for grappling: set after readying/stowing weapons and shields. Each held creature requires a hand. Creature size governs grapple/shove limits; token footprint controls occupied squares.",MUTED,12)
+	var hands=number(body,int(a.get("grapple_hands",1)),0,2)
 	button(body,"Import profile portrait…",func():file_picker("portrait:"+a.id),"Use your own image as the character’s profile portrait")
 	paragraph(body,"Final values are editable. Level changes recalculate proficiency only; update HP, slots and class features with your DM. Changing ability scores does not automatically change AC or the basic attack.",GOLD,13)
 	var imported_bonuses=CheckBox.new();imported_bonuses.text="Keep imported final skill/save bonuses";imported_bonuses.button_pressed=a.get("imported_sheet",false) and (not a.get("skill_bonuses",{}).is_empty() or not a.get("save_bonuses",{}).is_empty());imported_bonuses.visible=a.get("imported_sheet",false);body.add_child(imported_bonuses)
@@ -754,6 +763,7 @@ func edit_actor(a: Dictionary):
 	var colors=row(body);colors.add_child(label("Token color"));var color=ColorPickerButton.new();color.color=Color(a.color);color.custom_minimum_size=Vector2(120,36);colors.add_child(color)
 	button(body,"Save sheet",func():
 		var values={}
+		values.grapple_hands=int(hands.value);values.size_category=creature_sizes[size_choice.selected]
 		for key in fields:values[key]=fields[key].text if fields[key] is LineEdit else int(fields[key].value)
 		if values.name.strip_edges().is_empty():toast("Give the character a name.");return
 		if not R.roll(values.damage).ok:toast("Damage must be a dice expression (1d8+3) or fixed amount (1).");return
@@ -787,27 +797,7 @@ func confirm_rest(a: Dictionary):
 	button(body,"Complete long rest",func():World.command("long_rest",{"id":a.id});close_modal(),"Apply standard long-rest recovery",true)
 
 func show_creator():
-	if World.client:toast("Ask the DM to create and assign a hero to you.");return
-	var body=modal("Meet your next hero",780,720)
-	button(body,"Import a D&D Beyond character PDF…",func():file_picker("character"),"Read a filled PDF exported from Beyond")
-	paragraph(body,"Start with a level-1 class loadout, then use Edit sheet to finish your hero with the DM. Scores are final human defaults. Choose race traits, background, equipment and spell selections together.",INK,15)
-	heading(body,"YOUR HERO’S NAME")
-	var name_field=line(body,"Rowan Ashford")
-	heading(body,"CHOOSE A CLASS")
-	var class_field=options(body,loadouts.keys(),4)
-	var race_field=line(body,"Race (traits and ability changes are manual)","Human")
-	var info=VBoxContainer.new();body.add_child(info)
-	var update_preview=func():
-		clear(info)
-		var a=loadouts[class_field.get_item_text(class_field.selected)]
-		var h=row(info);stat(h,"HIT POINTS",str(a.hp),MOSS);stat(h,"ARMOR CLASS",str(a.ac));stat(h,"HIT DIE","d"+str(a.hit_die))
-		paragraph(info,a.notes,INK,14)
-	update_preview.call();class_field.item_selected.connect(func(_i):update_preview.call())
-	button(body,"Create hero & place token",func():
-		var a=loadouts[class_field.get_item_text(class_field.selected)].duplicate(true)
-		a.name=name_field.text.strip_edges() if not name_field.text.strip_edges().is_empty() else "New "+a.class
-		a.race=race_field.text.strip_edges();a.hero=true;a.color=["#caaa76","#87baa5","#8fa7d1","#bd9acb","#c89081"].pick_random()
-		World.command("add_actor",{"actor":a});close_modal();side_tab="Character";refresh_side();toast("Hero created. Edit the sheet to finish proficiencies, equipment and racial traits."),"Create an editable starting sheet",true)
+	creator.open()
 
 func import_character_pdf(path: String):
 	var result=preload("res://scripts/beyond_import.gd").read(path,loadouts)
@@ -815,63 +805,7 @@ func import_character_pdf(path: String):
 	show_character_import(result)
 
 func show_character_import(result: Dictionary):
-	var a=result.actor.duplicate(true)
-	var body=modal("Review imported character",900,870)
-	paragraph(body,result.filename+" · "+str(result.fields)+" filled fields · "+str(a.spellbook.size())+" spell entries",GOLD,13)
-	paragraph(body,"Review the values, then add a new hero and miniature. Original 2014 5e rules apply. Imported features stay in your notes. Spell names connect to the 2014 spellbook; unknown spells need DM configuration before use. This does not convert revised rules or automate every class feature.",INK,14)
-	for issue in result.issues:paragraph(body,"• "+issue,GOLD,13)
-	if World.data.actors.any(func(unit):return unit.hero and unit.name.to_lower()==a.name.to_lower()):paragraph(body,"A hero with this name already exists. This import adds a separate character.",GOLD,13)
-	var form=GridContainer.new();form.columns=2;form.add_theme_constant_override("h_separation",15);body.add_child(form);var fields={}
-	for key in ["name","class","race"]:form.add_child(label(key.capitalize()));fields[key]=line(form,"",str(a[key]))
-	for entry in [["level",1,20],["ac",1,40],["hp",0,9999],["max_hp",1,9999],["temp",0,9999],["speed",0,300],["initiative_bonus",-20,40],["hit_die",4,20],["hit_dice",0,20]]:
-		form.add_child(label(str(entry[0]).replace("_"," ").capitalize()));fields[entry[0]]=number(form,int(a[entry[0]]),entry[1],entry[2])
-	heading(body,"FINAL ABILITY SCORES")
-	var scores=row(body);var score_fields=[]
-	for i in 6:
-		var c=col(scores);expand(c);c.add_child(label(R.ABILITIES[i],11,GOLD));var n=number(c,a.abilities[i],1,30);n.custom_minimum_size.x=100;score_fields.append(n)
-	heading(body,"BASIC ATTACK")
-	paragraph(body,"Choose a sheet attack or edit its values. Reach/range comes from 2014 weapons and printed notes; unknown attacks need range configuration in Edit sheet. Extra damage dice, damage types, weapon properties and spell effects remain DM rulings.",MUTED,12)
-	var attack_form=GridContainer.new();attack_form.columns=2;body.add_child(attack_form)
-	for key in ["weapon","damage"]:attack_form.add_child(label(key.capitalize()));fields[key]=line(attack_form,"",str(a[key]))
-	attack_form.add_child(label("Attack bonus"));fields.attack=number(attack_form,a.attack,-20,40)
-	if not result.attacks.is_empty():
-		var choice=options(body,result.attacks.map(func(item):return item.name+" · "+R.signed_n(item.bonus)+" · "+item.source))
-		choice.item_selected.connect(func(index):var chosen=result.attacks[index];fields.weapon.text=chosen.name;fields.damage.text=chosen.damage;fields.attack.value=chosen.bonus)
-	var bonuses_button=CheckButton.new();bonuses_button.text="Review skills and saving throws";body.add_child(bonuses_button)
-	var bonuses=VBoxContainer.new();bonuses.visible=false;body.add_child(bonuses);bonuses_button.toggled.connect(func(value):bonuses.visible=value)
-	paragraph(bonuses,"Final PDF bonuses are preserved, including bonuses that proficiency alone cannot reproduce. Reimport after leveling, or disable imported bonuses later in Edit sheet.",MUTED,12)
-	var bonus_grid=GridContainer.new();bonus_grid.columns=3;bonuses.add_child(bonus_grid);var save_fields={};var skill_fields={};var skill_tiers={}
-	for title in ["Save / skill","Proficiency","Final bonus"]:bonus_grid.add_child(label(title,12,GOLD))
-	for i in 6:
-		var ability=R.ABILITIES[i];bonus_grid.add_child(label(ability+" save"));var prof=CheckBox.new();prof.button_pressed=a.save_profs.has(i);bonus_grid.add_child(prof)
-		save_fields[ability]={"proficient":prof,"bonus":number(bonus_grid,int(a.save_bonuses.get(ability,R.modifier(a.abilities[i])+(a.prof_bonus if a.save_profs.has(i) else 0))),-20,50)}
-	for skill in R.SKILLS:
-		bonus_grid.add_child(label(skill));skill_tiers[skill]=options(bonus_grid,["None","Proficient","Expertise"],int(a.skills.get(skill,0)));skill_fields[skill]=number(bonus_grid,int(a.skill_bonuses.get(skill,R.modifier(a.abilities[R.SKILLS[skill]])+int(a.skills.get(skill,0))*a.prof_bonus)),-20,50)
-	var slots_button=CheckButton.new();slots_button.text="Review spell slots";body.add_child(slots_button)
-	var slots=GridContainer.new();slots.columns=3;slots.visible=false;body.add_child(slots);slots_button.toggled.connect(func(value):slots.visible=value)
-	for title in ["Spell level","Remaining","Maximum"]:slots.add_child(label(title,12,GOLD))
-	var remaining=[];var maximum=[]
-	for i in 9:slots.add_child(label(str(i+1)));remaining.append(number(slots,a.slots[i],0,9));maximum.append(number(slots,a.slots_max[i],0,9))
-	heading(body,"FEATURES, SPELLS & SOURCE NOTES")
-	var notes=TextEdit.new();notes.text=a.notes;notes.wrap_mode=TextEdit.LINE_WRAPPING_BOUNDARY;notes.custom_minimum_size.y=220;body.add_child(notes)
-	heading(body,"EQUIPMENT & COINS")
-	var inventory=TextEdit.new();inventory.text=a.inventory;inventory.wrap_mode=TextEdit.LINE_WRAPPING_BOUNDARY;inventory.custom_minimum_size.y=140;body.add_child(inventory)
-	button(body,"Add imported hero & miniature",func():
-		for key in fields:a[key]=fields[key].text.strip_edges() if fields[key] is LineEdit else int(fields[key].value)
-		if a.name.is_empty():toast("Give the character a name.");return
-		if not R.roll(a.damage).ok:toast("Use a damage expression such as 1d6+2 or a fixed amount.");return
-		if a.hit_die not in [4,6,8,10,12,20]:toast("Hit Die must be d4, d6, d8, d10, d12 or d20.");return
-		a.hp=mini(a.hp,a.max_hp);a.hit_dice=mini(a.hit_dice,a.level);a.abilities=score_fields.map(func(n):return int(n.value));a.save_profs=[];a.save_bonuses={};a.skills={};a.skill_bonuses={}
-		for i in 6:
-			var ability=R.ABILITIES[i]
-			if save_fields[ability].proficient.button_pressed:a.save_profs.append(i)
-			a.save_bonuses[ability]=int(save_fields[ability].bonus.value)
-		for skill in skill_fields:a.skill_bonuses[skill]=int(skill_fields[skill].value);a.skills[skill]=skill_tiers[skill].selected
-		a.slots_max=maximum.map(func(n):return int(n.value));a.slots=[]
-		for i in 9:a.slots.append(mini(int(remaining[i].value),int(a.slots_max[i])))
-		a.conditions=["Unconscious"] if a.hp==0 else [];a.notes=notes.text.left(100000);a.inventory=inventory.text.left(50000)
-		World.command("submit_hero" if World.client else "add_actor",{"actor":a});close_modal();side_tab="Character";refresh_side();toast("Submitted to the DM for review." if World.client else "Imported "+a.name+". Open its spellbook to review spellcasting."),"Create a new editable hero from these reviewed values",true)
-	button(body,"Cancel import",close_modal)
+	creator.open(result)
 
 func show_session():
 	var body=modal("Session · "+("Player lobby" if World.client else "Dungeon Master"),920,840)
@@ -890,6 +824,7 @@ func show_session():
 		if World.client:
 			var self_id=multiplayer.get_unique_id();var myself=World.session.players.get(self_id,{})
 			button(body,"Not ready" if myself.get("ready",false) else "I’m ready",func():World.command("lobby_ready",{"ready":not myself.get("ready",false)}),"Tell the DM you are ready",true)
+			button(body,"Create my character…",show_creator,"Build a hero and submit the reviewed sheet to the DM")
 			button(body,"Import my Beyond character PDF…",func():file_picker("character"),"Review your sheet, then send it to the DM for acceptance")
 			paragraph(body,"Once the DM starts the table, select your hero and open Spellbook to cast. Your actions and sheet resources are resolved by the host.")
 			if World.session.phase=="table":button(body,"Return to my character",close_modal,"",true)

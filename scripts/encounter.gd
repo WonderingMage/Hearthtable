@@ -4,7 +4,8 @@ const C=preload("res://scripts/combat_rules.gd")
 const G=preload("res://scripts/room_geometry.gd")
 const TYPES=["acid","bludgeoning","cold","fire","force","lightning","necrotic","piercing","poison","psychic","radiant","slashing","thunder"]
 var w: Node
-func _init(world: Node):w=world
+var actions
+func _init(world: Node):w=world;actions=preload("res://scripts/combat_actions.gd").new(world)
 func ensure(a: Dictionary):
 	if not a.has("effects"):a.effects=[]
 	if not a.has("effect_conditions"):a.effect_conditions=[]
@@ -62,6 +63,7 @@ func consume_attack(a: Dictionary,profile: Dictionary):
 	if a.get("attack_limits_left",{}).has(k):a.attack_limits_left[k]=maxi(0,int(a.attack_limits_left[k])-1)
 func reset_turn(a: Dictionary):
 	if a.is_empty():return
+	actions.expire_turn(a.id)
 	a.attacks_left=0;a.attack_limits_left={};a.extra_actions=0;a.dash_ft=0;a.dodging=false;a.disengaged=false
 	a.effects=a.get("effects",[]).filter(func(e):return e.get("until_start","")!=a.id)
 	reconcile_conditions(a)
@@ -126,13 +128,15 @@ func feet_per_cell() -> float:
 func elevation(cell: Vector2i) -> float:return float(w.scene().get("elevations",{}).get(G.key(cell),0))
 func speed(a: Dictionary) -> float:
 	if C.incapacitated(a) or a.conditions.any(func(c):return c in ["Grappled","Restrained","Petrified","Stunned","Paralyzed"]):return 0
-	return float(a.speed)
+	return float(a.speed)*actions.dragging_speed(a)
 func movement(a: Dictionary,destination: Vector2i,require_visible: bool=true) -> Dictionary:
 	var result={"ok":false,"reason":"No walkable path.","cost":0.0,"path":[]}
 	if a.is_empty() or a.scene!=w.data.scene:return result
 	if C.incapacitated(a):result.reason="An incapacitated creature cannot move.";return result
+	if speed(a)<=0 and destination!=Vector2i(a.x,a.y):result.reason="Your speed is 0. Escape or release the condition before moving.";return result
 	if strict() and not is_turn(a):result.reason="Wait for your turn to move.";return result
 	var footprint=int(a.get("token_size",1));var from=Vector2i(a.x,a.y)
+	var dragged=actions.held(a).map(func(t):return t.id)
 	if not G.clear_footprint(w.scene(),destination,footprint):result.reason="A wall, closed door or solid obstacle blocks that square.";return result
 	var frontier=[from];var costs={G.key(from):0.0};var paths={G.key(from):[]};var diagonals={G.key(from):int(a.get("movement_diagonals",0)) if w.data.combat.active else 0};var limit=int(w.scene().width)*int(w.scene().height);var iterations=0
 	while not frontier.is_empty() and iterations<limit:
@@ -148,7 +152,7 @@ func movement(a: Dictionary,destination: Vector2i,require_visible: bool=true) ->
 				if require_visible and not w.cell_visible(next):continue
 				var occupied=false
 				for other in w.data.actors:
-					if other.id==a.id or other.scene!=a.scene or other.hp<=0:continue
+					if other.id==a.id or dragged.has(other.id) or other.scene!=a.scene or other.hp<=0:continue
 					var occupied_cells=C.cells(other)
 					var next_cells=C.cells({"x":next.x,"y":next.y,"token_size":footprint})
 					if next_cells.any(func(c):return occupied_cells.has(c)) and (C.hostile(a,other) or next==destination):occupied=true;break
@@ -165,6 +169,7 @@ func movement(a: Dictionary,destination: Vector2i,require_visible: bool=true) ->
 				costs[k]=value;paths[k]=paths[current_key].duplicate();paths[k].append({"x":next.x,"y":next.y,"cost":value})
 				if not frontier.has(next):frontier.append(next)
 	if not result.ok:return result
+	if not actions.drag_route(a,result):result.ok=false;result.reason="The grappled creature cannot follow this route. Release the hold or choose a clear, level route.";return result
 	if strict() and float(a.get("moved",0))+result.cost>speed(a)+float(a.get("dash_ft",0))+0.001:result.ok=false;result.reason="Not enough movement remains. Dash or choose a nearer square."
 	return result
 func adjust_damage(a: Dictionary,amount: int,damage_type: String) -> int:
@@ -220,12 +225,13 @@ func command(kind: String,p: Dictionary,peer: int) -> bool:
 		if not w.data.combat.active or not is_turn(a):w.reject_command(peer,"Only the current creature can end its turn.");return true
 		w.apply_command("next_turn",{},1);return true
 	var action=str(p.get("action",""))
+	if action in actions.TARGETED:actions.command(p,peer);return true
 	if C.incapacitated(a) or not is_turn(a):w.reject_command(peer,"This action requires your active turn and an able character.");return true
 	if action not in ["Dash","Dodge","Disengage","Stand"]:return true
 	if action=="Stand":
 		if not a.conditions.has("Prone"):return true
-		var cost=float(a.speed)/2
-		if strict() and float(a.get("moved",0))+cost>float(a.speed)+float(a.get("dash_ft",0)):w.reject_command(peer,"Standing costs half your speed; not enough movement remains.");return true
+		var cost=speed(a)/2
+		if cost<=0 or (strict() and float(a.get("moved",0))+cost>speed(a)+float(a.get("dash_ft",0))):w.reject_command(peer,"Standing requires a nonzero speed and half your speed in remaining movement.");return true
 		a.conditions.erase("Prone");a.moved=float(a.get("moved",0))+cost
 	else:
 		if strict() and not has_action(a):w.reject_command(peer,"This creature has already used its action.");return true

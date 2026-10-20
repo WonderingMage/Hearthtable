@@ -1,6 +1,6 @@
 # Hearthtable development handoff
 
-Hearthtable is a native Godot **4.5.1** tabletop for **original 2014 D&D 5e**, currently **0.11.1**, campaign schema **1**, network protocol **9**. Open the folder containing `project.godot` in Codex and Godot. In the source companion this is `Hearthtable/Source`.
+Hearthtable is a native Godot **4.5.1** tabletop for **original 2014 D&D 5e**, development **0.12.0-dev**, campaign schema **1**, network protocol **10** (last published: 0.11.1/protocol 9). Open the folder containing `project.godot` in Codex and Godot. In the source companion this is `Hearthtable/Source`.
 
 ## Product requirements
 
@@ -61,9 +61,13 @@ XDG_DATA_HOME=/tmp/hearthtable-test-combat godot --headless --path . --script re
 
 Read `tests/README.md` for graphical and two-process UDP suites. Headless tests intentionally reset their campaign, so never point them at real player data. Graphical tests require an OpenGL display. Use distinct user-data directories for the host and player. Tests for removed camera modes are archived and are not current requirements.
 
+## Character/action development
+
+Read `docs/character-actions.md`. `combat_actions.gd` handles host-resolved contests, source-linked holds, Help and Dodge eligibility. `character_creator.gd` owns an isolated draft for new/imported heroes and cosmetic editing; `mini_appearance.gd` validates cosmetic data and configures the same meshes in preview/board. Player-created/imported sheets require existing DM submission approval. Cosmetic updates have a dedicated owner-checked command; clients cannot change stats through it. Protocol 10 prevents mixing these commands with older releases; save schema stays 1. Do not publish this branch without a release request.
+
 ## Current validation and limits
 
-The release companion includes 654 passing assertions across exported-pack rules/data, native OpenGL UI, actual local host/player UDP, custom-scene cold/warm downloads, doors and portable snapshot restoration. Windows resources were exercised using matching Linux Godot; **native Windows launch has not been tested**. A real Windows machine, GPU and external port-forwarded connection remain validation work.
+The historical 0.11 release companion included 654 passing assertions across exported-pack rules/data, native OpenGL UI, actual local host/player UDP, custom-scene cold/warm downloads, doors and portable snapshot restoration. Windows resources were exercised using matching Linux Godot; **native Windows launch has not been tested**. A real Windows machine, GPU and external port-forwarded connection remain validation work.
 
 The automation coverage file is authoritative about partial rules. Reactions/opportunity attacks, all subclass features, unusual damage riders, environmental damage, lighting/darkvision rules and some spell effects still require DM adjudication. This is not full D&D Beyond or BG3 parity.
 

@@ -352,7 +352,8 @@ func spell_attack(a: Dictionary,target: Dictionary,s: Dictionary,expression: Str
 		if a.conditions.has(condition):dis.append(condition)
 	if a.conditions.has("Invisible"):adv.append("invisible")
 	if target.conditions.has("Invisible"):dis.append("invisible")
-	if target.get("dodging",false) and not C.incapacitated(target) and not target.conditions.has("Blinded") and not a.conditions.has("Invisible"):dis.append("dodge")
+	if w.encounter.actions.dodging(target) and not target.conditions.has("Blinded") and not a.conditions.has("Invisible"):dis.append("dodge")
+	if w.encounter.actions.help_attack(a,target,true):adv.append("Help")
 	for condition in ["Blinded","Restrained","Stunned","Paralyzed","Petrified","Unconscious"]:
 		if target.conditions.has(condition):adv.append(condition)
 	var distance=C.distance(a,target,w.scene())
@@ -379,7 +380,7 @@ func save_roll(a: Dictionary,index: int,chosen_mode: int) -> Dictionary:
 	var dis=["chosen"] if chosen_mode==2 else []
 	if index==1 and a.conditions.has("Restrained"):dis.append("restrained")
 	var adv=["chosen"] if chosen_mode==1 else []
-	if index==1 and a.get("dodging",false) and not C.incapacitated(a):adv.append("dodge")
+	if index==1 and w.encounter.actions.dodging(a):adv.append("dodge")
 	var roll=R.d20(bonus,C.roll_mode(adv,dis));var extra=w.encounter.bonus_die(a,"save",true);roll.total+=int(extra.amount)
 	roll.bonus=bonus+int(extra.amount);w.director.record(a,R.ABILITIES[index]+" saving throw",roll)
 	return roll

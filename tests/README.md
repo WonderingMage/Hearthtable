@@ -54,3 +54,11 @@ godot --headless --main-pack /absolute/path/campaign.exe --script /absolute/path
 ```
 
 Godot consumes `--main-pack` before exposing engine arguments to application scripts. `--portable-source` supplies the appended snapshot to the editor explicitly. Exported programs ignore that override and always inspect their own executable. Testing Windows resources and embedded snapshots with Linux does not establish native Windows launch, GPU or firewall behavior.
+
+## Character/action development (protocol 10)
+
+`actions.gd` covers original-2014 grapple/shove contests and ties, Extra Attack budgets, size/reach/free hands, failed attempts, escape/release, dragging, opening initiative, Help consumption/expiry, spell Help, Dodge speed-zero expiry, and hostile/malformed cosmetic commands. `creator_ui.gd` exercises the actual shared creator, imported sheet review, draft cancellation, actual 3D props, palette updates, persistent cosmetics, save/load, minimum-window footer and action targeting. `pdf_import_ui.gd` verifies imported bonus retention and undo through the shared review flow.
+
+`actions_network.gd` uses UDP 24727: host with `-- --host`, client without it (or `-- --ui --qa` for the actual player creator and tactical targeting). It checks pending character submissions, DM acceptance, owner-only cosmetics, unchanged stats, invalid model rejection, hidden/private data filtering, grapple resources, free off-turn release, Help and replicated miniatures. Run fixed-port suites serially. `portable.gd` additionally verifies created identity and appearance after restoring an embedded campaign.
+
+Cloud helpers support `python3 /workspace/hearthtable-toolchain/check.py headless --suite actions`, `ui --suite creator_ui`, `network --suite actions_network`, and `network-ui --suite actions_network`. They retain the existing proven disposable user-data isolation. These are Linux/matching-pack checks, not native Windows validation.
