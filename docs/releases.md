@@ -1,6 +1,10 @@
 # Releases
 
-Publish to `WonderingMage/Hearthtable` only when the user requests a release. A coding request by itself does not trigger publication. The next requested release includes the intended fixes since the previous release, receives a new version/tag, and leaves older releases available. Never overwrite a published tag or asset. Preserve the repository's visibility; establish private visibility before first publication unless the user explicitly authorizes public distribution.
+Publish to `WonderingMage/Hearthtable` only when the user requests a release. A coding request by itself does not trigger publication. The next requested release includes the intended fixes since the previous release, receives a new version/tag, and leaves older releases available. Never overwrite a published tag or asset. The owner explicitly authorized public distribution in this existing public repository; preserve that choice without repeating the visibility question.
+
+The `Portable release` GitHub Actions workflow runs only on a pushed version tag or an explicit manual dispatch with an existing tag. Do not create/push a version tag until the user requests a release. The workflow uses GitHub's built-in token with only `contents: write` to upload assets; no personal token is required. This also avoids cloud-proxy credentials that may work for the API but fail on the separate upload hostname. It calls `tools/release.py` to verify official Godot checksums, build from the clean tag, run nine exported headless suites and both portable restoration routes, upload only the plain `.exe` plus checksum/manifest, verify a downloaded copy, and publish as a prerelease. An ordinary branch push does not trigger release publication.
+
+For a local Linux verification without uploading, run `python3 tools/release.py --tag vVERSION --output /new/output/folder --toolchain /optional/existing/toolchain`. The tool refuses to run native Windows tests using Linux XDG isolation.
 
 ## Prepare
 

@@ -10,3 +10,4 @@ Read `CODEX_HANDOFF.md`, `tests/README.md` and the in-app help before changing b
 - Distinguish Linux validation of the exported Windows pack from a native Windows launch. Do not claim full rules coverage or performance results that have not been measured.
 - Keep machine paths, `.godot/`, temporary test data, campaign saves and private PDFs out of source deliverables. Use official export templates when rebuilding.
 - Publish a new release only when the user requests one; ordinary coding requests do not automatically publish. Follow `docs/releases.md` and attach the single portable `.exe` as a release asset.
+- The owner has authorized public releases in the existing `WonderingMage/Hearthtable` repository. Preserve its public visibility; do not repeat that approval for subsequent requested releases.

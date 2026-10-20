@@ -1,0 +1,41 @@
+name: Portable release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag to release
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: portable-release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - name: Check out the exact requested tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          git -c credential.helper='!gh auth git-credential' clone --no-checkout "https://github.com/${GITHUB_REPOSITORY}.git" source
+          git -C source checkout --detach "refs/tags/$RELEASE_TAG"
+          test -z "$(git -C source status --porcelain)"
+      - name: Build, test, and publish the portable prerelease
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source
+          python3 tools/release.py --tag "$RELEASE_TAG" --output "$RUNNER_TEMP/portable-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" --publish --repo "$GITHUB_REPOSITORY"
