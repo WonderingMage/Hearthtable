@@ -6,6 +6,8 @@ Build locally from the exact clean tag before pushing the release tag. The tag w
 
 Record separate rendered UI/network evidence in release notes, preserve source/old campaigns, verify fresh public downloads and updater provenance after publication, and retain the native Windows/GPU/audio/external internet limitations. Lite updates are fixed to the `lite-vVERSION` provenance and product name; classic packages are refused.
 
+GitHub can allow the Actions token to create a draft and upload assets while rejecting the final release edit with `Resource not accessible by integration`. This happened for `lite-v1.0.0`; the build and all 212 assertions had passed. Inspect the draft, download all four assets, and verify their GitHub digests, SHA256SUMS and clean-tag build manifest before finishing publication with the existing authenticated repository connection (`gh release edit lite-vVERSION --draft=false --prerelease --notes-file /path/to/verified-notes.md --repo WonderingMage/Hearthtable`). This remains subject to the owner requesting that release. Do not rewrite the tag, replace a published asset or claim the failed Actions run published it. After publication, download the assets again and check the real updater's `inspect`/`official` result against the published release JSON. No extra token or permission change was needed to finish the initial Lite publication this way.
+
 ## Classic release procedure retained
 
 The following older procedure applies to classic source on `main`, not the Lite builder/product identity above.

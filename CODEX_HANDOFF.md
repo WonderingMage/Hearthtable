@@ -8,6 +8,8 @@ There is no automatic attack/save/damage or encounter director in Lite. Movement
 
 Lite uses the **Hearthtable Lite** user-data directory and accepts only matching Lite update provenance. `tools/release_lite.py` builds a clean `lite-vVERSION` tag, exported Windows resources, real three-process networking, Windows/Linux portable copies and compiled-update/rollback validation. Native Windows/GPU/audio/external internet remain untested. Each future coding task prepares the update and change list; release publication still requires a request.
 
+The initial public prerelease is https://github.com/WonderingMage/Hearthtable/releases/tag/lite-v1.0.0, built from immutable tagged source `ae2846ddc17f8630439def92ebaf3a13b94dc15f`. CI passed 212 assertions and uploaded all four assets, but its token could not finish publishing; the existing repository connection published the verified draft. See `docs/releases.md` for that fallback. Separate validation passed 57 rendered UI assertions against exported Windows resources and 39 graphical DM/two-player network assertions. Published downloads and the real updater provenance were verified. Native Windows/GPU/audio/external residential internet checks remain outstanding.
+
 The previous handoff is retained below for shared architecture and classic behavior. Its player tactical view, automated rules and classic asset/tag names do not describe this Lite edition.
 
 ---
