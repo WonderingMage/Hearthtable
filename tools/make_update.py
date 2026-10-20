@@ -17,7 +17,7 @@ def build(pack: Path,output: Path,version: str,commit: str,protocol: int,changes
         raise ValueError('Expected a Godot 4.5.1 resource pack with relative file offsets')
     if changes is None:changes=json.loads((Path(__file__).resolve().parents[1]/'docs/release-highlights.json').read_text())
     if not isinstance(changes,list) or not 1<=len(changes)<=80 or any(not isinstance(c,str) or len(c)>1000 for c in changes):raise ValueError('Expected bounded change descriptions')
-    manifest={'format':1,'application':'Hearthtable','version':version,'engine':'4.5.1','boot_api':1,'minimum_base':'0.12.0','protocol':protocol,'schema':1,'commit':commit,'pack_size':len(data),'sha256':hashlib.sha256(data).hexdigest(),'changes':changes}
+    manifest={'format':1,'application':'Hearthtable Lite','version':version,'engine':'4.5.1','boot_api':1,'minimum_base':'1.0.0','protocol':protocol,'schema':1,'commit':commit,'pack_size':len(data),'sha256':hashlib.sha256(data).hexdigest(),'changes':changes}
     encoded=json.dumps(manifest,ensure_ascii=False,separators=(',',':')).encode()
     if len(encoded)>65536:raise ValueError('Manifest too large')
     with output.open('xb') as handle:handle.write(MAGIC+struct.pack('<I',len(encoded))+encoded+data)

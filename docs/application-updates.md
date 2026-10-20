@@ -1,3 +1,7 @@
+# Lite update identity
+
+On `edition/lite`, the current product is **Hearthtable Lite 1.0.0**. Use `tools/release_lite.py`, `lite-vVERSION`, `Hearthtable_Lite_Portable.exe`, `Hearthtable-Lite-VERSION.hearthupdate`, and manifest application `Hearthtable Lite`, with minimum foundation 1.0.0. Lite has its own user-data/update directory and refuses classic packages. See `docs/lite.md`. The verified full-PCK boot/backup/rollback/portable design below is shared; its 0.12.0 names describe the retained classic edition.
+
 # Importable application updates
 
 The owner requested code changes as files importable through Settings. From 0.12.0, each release provides the full single-file `Hearthtable_Portable.exe` and a matching `Hearthtable-VERSION.hearthupdate`. The EXE includes the engine and current application; the update contains the complete application resources for the compatible installed engine. A coding task prepares the package and updates `docs/release-highlights.json`; publication still happens only on an explicit release request.

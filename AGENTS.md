@@ -1,3 +1,19 @@
+# Working on Hearthtable Lite
+
+This is the separate `edition/lite` line: **Hearthtable Lite 1.0.0**, Godot **4.5.1**, protocol **11**, campaign schema **1**. Read `docs/lite.md`, `assets/help/lite.txt`, `CODEX_HANDOFF.md` and `tests/README.md`. Classic Hearthtable stays on `main` and existing `v*` releases; do not merge Lite's product configuration into classic without a new user instruction.
+
+- The user explicitly replaced automated RPG combat with a DM-led VTT. Both roles use rotatable isometric views. DM placement is free, with measured distance. Players move only assigned heroes: no distance cap outside combat, cumulative allowance on their own turn after the DM starts combat. Only the DM opens/closes doors.
+- Players roll and submit intentions from their own expanded sheets. The DM controls outcomes, initiative order, HP, conditions, resources and board visibility. Preserve the host gateway; do not restore auto attacks, spell saves/damage or encounter triggers. Player movement budgets are explicitly required in DM-started combat; DM placement remains free.
+- Player privacy applies to packets and asset downloads. Use Lite's allowlist snapshot, neutral public tokens, private roll/inbox filtering, pre-transfer fog redaction and blackout placeholder. New enemies/props start concealed. Never transmit real enemy health/AC/initiative or hidden models/objects to players.
+- Creature/map/character imports stay data-only. Custom geometry is bounded by `lite_creature.gd`; no imported code or arbitrary resource paths. Keep models/maps self-contained in campaigns, scenes and portable copies.
+- Lite has separate saves and update provenance. Build with `tools/release_lite.py`; tags are `lite-vVERSION`, player EXE is `Hearthtable_Lite_Portable.exe`, updates are `Hearthtable-Lite-VERSION.hearthupdate`. Classic and Lite updates are not interchangeable.
+- For coding tasks, prepare the compatible update and update `docs/release-highlights.json`. Publish only when requested; this Lite release is explicitly requested and public releases in this repository remain authorized.
+- Validate changes using disposable **Hearthtable Lite** user data. Use real DM/two-player processes for authority/privacy and rendered UI for sheet/board controls. Preserve the native-Windows/prerelease limitation until actually tested. No private campaigns, PDFs, QA logs, builds or `.godot/` in Git/player release assets.
+
+## Shared/classic guidance retained for reference
+
+The earlier guidance below describes classic 0.12.0. Its tactical camera and automatic combat requirements apply to classic only; Lite's explicit contract above supersedes them on this branch.
+
 # Working on Hearthtable
 
 Read `CODEX_HANDOFF.md`, `tests/README.md` and the in-app help before changing behavior. This is Godot 4.5.1, original 2014 fifth edition, version 0.12.0/protocol 10 (older 0.11.1 uses protocol 9).

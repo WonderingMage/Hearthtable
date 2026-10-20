@@ -50,7 +50,10 @@ var client_images={}
 var scene_loading=false
 var scene_sync
 const SCENE_SYNC=preload("res://scripts/scene_sync.gd")
-const PROTOCOL=10
+const PROTOCOL=11
+var lite_enabled=ProjectSettings.get_setting("application/config/edition","")=="lite"
+var lite
+const LITE=preload("res://scripts/lite_rules.gd")
 const SCENE_FILES=preload("res://scripts/scene_files.gd")
 
 func _ready():
@@ -75,6 +78,8 @@ func _ready():
 	BUILD.mount(data.scenes)
 	for a in data.actors:a.owner=1;magic.ensure(a)
 	encounter.ensure_data()
+	lite=LITE.new(self)
+	if lite_enabled:lite.ensure()
 	refresh_rooms()
 
 func _process(delta):
@@ -100,6 +105,7 @@ func normalize_numbers(value):
 
 func valid_campaign(d) -> bool:
 	if not d is Dictionary or d.get("schema",0) != 1: return false
+	if d.has("lite") and not LITE.valid_state(d.lite):return false
 	if not d.get("actors") is Array or not d.get("scenes") is Array or d["scenes"].is_empty(): return false
 	if not d.get("combat") is Dictionary or not d.get("log") is Array: return false
 	if not d.get("scene") is String or not d.get("journal_dm") is String: return false
@@ -113,13 +119,35 @@ func valid_campaign(d) -> bool:
 		ids[a["id"]] = true
 		for key in ["hp","max_hp","ac","speed","level","x","y","attack","hit_die","hit_dice","owner","temp","death_success","death_failure"]:
 			if not (a.get(key) is int or a.get(key) is float): return false
+			if not is_finite(float(a[key])) or absf(float(a[key]))>2147483647:return false
 		if not a.get("abilities") is Array or a["abilities"].size()!=6: return false
 		for value in a["abilities"]:
 			if not (value is float or value is int): return false
+			if not is_finite(float(value)) or value<1 or value>100:return false
+		if a.has("token_size") and (not (a.token_size is int or a.token_size is float) or not is_finite(float(a.token_size)) or a.token_size!=floor(a.token_size) or a.token_size<1 or a.token_size>4):return false
+		if a.max_hp<1 or a.hp<0 or a.hp>a.max_hp or a.level<1 or a.level>20 or a.speed<0 or a.speed>10000:return false
 		if not a.get("conditions") is Array or not a.get("skills") is Dictionary or not a.get("save_profs") is Array: return false
+		for condition in a.conditions:
+			if not condition is String or condition.length()>100:return false
+		for skill in a.skills:
+			if not skill is String or not (a.skills[skill] is int or a.skills[skill] is float) or not is_finite(float(a.skills[skill])) or a.skills[skill]!=floor(a.skills[skill]) or a.skills[skill]<0 or a.skills[skill]>2:return false
+		for value in a.save_profs:
+			if not (value is int or value is float) or not is_finite(float(value)) or value!=floor(value) or value<0 or value>5:return false
+		for field in ["skill_bonuses","save_bonuses"]:
+			if not a.get(field,{}) is Dictionary or a.get(field,{}).size()>100:return false
+			for key in a.get(field,{}):
+				var value=a[field][key]
+				if not key is String or not (value is int or value is float) or not is_finite(float(value)) or absf(float(value))>10000:return false
 		if not a.get("slots") is Array or not a.get("slots_max") is Array or a["slots"].size()!=9 or a["slots_max"].size()!=9: return false
+		for field in ["slots","slots_max"]:
+			for value in a[field]:
+				if not (value is int or value is float) or not is_finite(float(value)) or value<0 or value>999:return false
 		if not a.get("hero") is bool: return false
 		if a.has("appearance") and not APPEARANCE.valid(a.appearance):return false
+		if a.has("lite_model") and not preload("res://scripts/lite_creature.gd").valid(a.lite_model):return false
+		if a.has("lite_allowance") and (not (a.lite_allowance is int or a.lite_allowance is float) or not is_finite(float(a.lite_allowance)) or a.lite_allowance<0 or a.lite_allowance>10000):return false
+		for field in LITE.SHEET_TEXT+["public_name"]:
+			if a.has(field) and (not a[field] is String or a[field].length()>30000):return false
 		if a.has("size_category") and a.size_category not in ["Tiny","Small","Medium","Large","Huge","Gargantuan"]:return false
 		if a.has("grapple_hands") and (not (a.grapple_hands is int or a.grapple_hands is float) or int(a.grapple_hands)<0 or int(a.grapple_hands)>2):return false
 		if a.has("attack_type") and a.attack_type not in ["melee","ranged"]:return false
@@ -235,6 +263,7 @@ func refresh_rooms():
 	room_signature=signature;room_info=ROOMS.analyze(s,heroes)
 
 func cell_visible(cell: Vector2i) -> bool:
+	if lite_enabled and lite!=null and lite.blackout():return false
 	var k=cell_key(cell.x,cell.y)
 	if scene().fog.has(k):return false
 	if client:return not scene().get("room_mask",{}).has(k)
@@ -337,13 +366,14 @@ func log_line(line: String,subjects: Array=[]):
 	while data.log.size() > 150: data.log.pop_front()
 
 func mark_changed():
+	if lite_enabled and lite!=null:lite.ensure()
 	BUILD.mount(data.scenes)
 	while history.size()>20:history.pop_front()
 	encounter.ensure_data()
 	for a in data.actors:
 		magic.ensure(a)
-		if not a.concentration.is_empty() and COMBAT.incapacitated(a):magic.end_concentration(a)
-	encounter.actions.reconcile()
+		if not lite_enabled and not a.concentration.is_empty() and COMBAT.incapacitated(a):magic.end_concentration(a)
+	if not lite_enabled:encounter.actions.reconcile()
 	dirty = true
 	BUILD.invalidate()
 	refresh_rooms()
@@ -367,6 +397,7 @@ func request_command(kind: String, payload: Dictionary):
 	apply_command(kind,payload,sender)
 
 func apply_command(kind: String,p: Dictionary,peer: int):
+	if lite_enabled and lite!=null and lite.command(kind,p,peer):return
 	if peer!=1 and JSON.stringify(p).length()>1500000:reject_command(peer,"This command is too large.");return
 	if kind=="customize_mini":
 		var unit=actor(str(p.get("id","")));var appearance=p.get("appearance",{});var color=p.get("color","")
@@ -706,6 +737,7 @@ func save_campaign(path: String="") -> Error:
 func load_campaign(path: String) -> bool:
 	if client:return false
 	var d=read_json(path,{})
+	if d is Dictionary and d.get("lite") is Dictionary and d.lite.get("public",false):message.emit("A player snapshot is not a complete DM campaign backup.");return false
 	if not valid_campaign(d):message.emit("That file is not a valid Hearthtable campaign (schema 1).");return false
 	history.append(data.duplicate(true));data=d
 	for a in data.actors:a.owner=1
@@ -721,7 +753,8 @@ func host_session(password: String,port: int=24680,lobby: bool=false) -> Error:
 	var error=peer.create_server(clampi(port,1024,65535),8)
 	if error!=OK:return error
 	multiplayer.multiplayer_peer=peer;passphrase=password;client=false;session_port=clampi(port,1024,65535)
-	session={"phase":"lobby" if lobby else "table","port":session_port,"players":{},"requests":{}}
+	session={"phase":"lobby" if lobby else "table","port":session_port,"players":{},"requests":{},"lite_id":str(Time.get_ticks_usec())+"_"+str(randi())}
+	if lite_enabled:lite.rates.clear()
 	network_label="Hosting · "+str(peers.size())+" players";connection_status.emit(network_label)
 	return OK
 
@@ -754,7 +787,7 @@ func _peer_disconnected(id: int):
 		network_label="Hosting · "+str(peers.size())+" players";connection_status.emit(network_label);mark_changed()
 
 @rpc("any_peer","call_remote","reliable")
-func authenticate(password: String,player_name: String="Player",protocol: int=10):
+func authenticate(password: String,player_name: String="Player",protocol: int=11):
 	if not multiplayer.is_server():return
 	var id=multiplayer.get_remote_sender_id()
 	if password!=passphrase or protocol!=PROTOCOL:
@@ -774,6 +807,7 @@ func sync_all():
 		receive_snapshot.rpc_id(id,snapshot)
 
 func player_snapshot(peer: int=-1) -> Dictionary:
+	if lite_enabled:return lite.snapshot(peer)
 	refresh_rooms()
 	var copy=data.duplicate(true)
 	copy.journal_dm=""

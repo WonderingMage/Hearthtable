@@ -1,3 +1,19 @@
+# Lite verification
+
+The active edition on this branch is Hearthtable Lite; use Godot 4.5.1 and disposable **Hearthtable Lite** user data. Full/classic automated-combat suites below describe the other edition and are not Lite acceptance criteria.
+
+- `lite.gd`: DM free placement, own-pawn exploration/combat movement, blocked ownership/door/legacy command routes, manual Fireball/initiative, private packets/rolls/requests, fogged image/geometry redaction, individual prop concealment/defaults, custom model validation, malformed records and save/load.
+- `updates.gd`: bounded/tamper-resistant Lite packages, fixed-release provenance, classic-package rejection, install/confirm/rollback and campaign preservation.
+- `pdf_import.gd`: real PDF parsing/fields, narrative sections, structured equipment, imported bonuses through Lite's actual private dice and serialization.
+- `lite_ui.gd`: rendered DM/player desktops, direct drag with distance, minimum windows, sheet pages, custom model import/export, player blackout, and Settings verification/install/offline gate/backup.
+- `pdf_import_ui.gd`: reviewed creator, actual import/edit/undo/cancel and persistent imported bonuses.
+- `tools/test_lite_network.py --engine /path/Godot --output /new/qa [--pack /path/export.exe] [--ui]`: actual DM and two distinct players on UDP 24731, with a rendered primary player when requested. Checks private data, independent owned sheets, roll prompts, blocked bypass attempts and explicit DM Fireball decisions. Do not run fixed-port suites concurrently.
+- `lite_portable.gd` and `tools/test_updates.py`: self-contained private Lite campaigns and actual compiled World replacement/restart/portable transfer/rollback. Release builder runs exported resources and both portable routes.
+
+Run the listed Godot test scripts with proven disposable Lite user data and an OpenGL display for graphical suites. The release builder and tracked network runner perform their own isolation probes. Cloud helper locations are environment-specific. Linux exported Windows resource tests are not native Windows tests.
+
+## Historical classic suites
+
 # Verification
 
 Use Godot 4.5.1. Run tests against isolated user data, so they cannot replace a real campaign.

@@ -17,7 +17,7 @@ func run():
 		check(not w.get_script().get_script_constant_map().has("UPDATE_INTEGRATION_MARKER"),"Base exported World runs before installing a code update")
 		var inspected=U.inspect(argument("--package"));check(inspected.ok,"Exported application inspects the generated release-format package")
 		if not inspected.ok:quit(1);return
-		var release={"draft":false,"tag_name":"v"+inspected.manifest.version,"assets":[{"name":U.asset_name(inspected.manifest.version),"state":"uploaded","digest":"sha256:"+inspected.digest}]}
+		var release={"draft":false,"tag_name":"lite-v"+inspected.manifest.version,"assets":[{"name":U.asset_name(inspected.manifest.version),"state":"uploaded","digest":"sha256:"+inspected.digest}]}
 		check(U.install(inspected,release,argument("--base"),argument("--base")).ok,"Generated package stages through the same verified install path")
 	elif phase=="updated":
 		check(w.get_script().get_script_constant_map().get("UPDATE_INTEGRATION_MARKER","")=="COMPILED_WORLD_UPDATED","Restart replaces the actual compiled World autoload with updated code")

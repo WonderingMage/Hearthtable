@@ -1,31 +1,22 @@
-# Hearthtable
+# Hearthtable Lite
 
-An editable Godot **4.5.1** virtual tabletop for original **2014 D&D 5e**. The current version is **0.12.0**, campaign schema **1**, multiplayer protocol **10**. Hosts and guests need the same version; older 0.11.1 uses protocol 9.
+A DM-led virtual tabletop for original **2014 D&D 5e**, built with **Godot 4.5.1**. This separate edition is **1.0.0**, protocol **11**, campaign schema **1**. Classic Hearthtable remains on `main` and its existing releases; Lite lives on `edition/lite` with `lite-v*` releases and its own saves.
 
-The repository root is the Godot project directory: open `project.godot` here. The complete source is in `scripts/`, `assets/`, `tests/`, `art/` and `tools/`; there is no additional `Source` wrapper in this checkout.
+- A rotatable isometric tabletop for both roles. The DM freely moves pieces with live distance measurement, builds/imports scenes, edits enemy sheets and imports bespoke data-only creature miniatures. Players move assigned pawns without a distance cap outside combat; DM-started combat enforces turn and cumulative allowance. Only the DM controls doors.
+- An expandable player sheet over the board: abilities/saves/skills, actions, full included spell references, equipment, features, description, notes and extras, plus reviewed PDF import and miniature customization.
+- A DM screen with blackout, fog, concealed objects/creatures, private rolls and private manually arranged initiative. Player intentions include the relevant rules and dice; the DM decides targets, effects and resource spending.
 
-## Start development
+Download **Hearthtable_Lite_Portable.exe** from the [Lite release](https://github.com/WonderingMage/Hearthtable/releases/tag/lite-v1.0.0) and run it directly. No installer, ZIP or Godot installation is required. Later compatible Lite updates import through Settings using the matching `.hearthupdate`. Classic and Lite update files are not interchangeable. Native Windows launch is still unverified, so this is a prerelease.
 
-1. Read `AGENTS.md`, `CODEX_HANDOFF.md` and `Hearthtable_Codex_Workflow.md`.
-2. Install Godot 4.5.1 standard and matching export templates when building a release.
-3. Import/open this directory in Godot, or run `godot --editor --path .` with the correct editor on PATH.
-4. Use `tests/README.md` for the test suites and `assets/help/automation.txt` for the actual rules coverage and limitations.
+Read the in-app Guide or [Lite documentation](docs/lite.md) for play, sheet coverage, privacy and custom creatures. This independent sheet includes 2014 SRD references and editable homebrew; it has no D&D Beyond account/paid-book integration or complete character progression database.
 
-Tests intentionally reset their campaign. Use isolated user data; never use real campaign saves as fixtures. On Linux, set `XDG_DATA_HOME` to a fresh disposable directory for each test process. Native Windows needs a verified Windows isolation method, as described in the workflow guide.
+## Development and validation
 
-The Windows export preset embeds the engine/game pack in a single executable. Generated programs, caches, personal characters and campaign snapshots do not belong in source commits. Native Windows launch and external port-forwarded play remain separate validation tasks.
+The repository root contains `project.godot`; open it with Godot 4.5.1. Read `AGENTS.md`, `CODEX_HANDOFF.md`, `docs/lite.md` and `tests/README.md`. Tests reset campaigns: use proven disposable Lite user data, separate for every network peer. Generated programs, caches, real PDFs and DM campaign copies stay outside source commits.
 
-Releases attach `Hearthtable_Portable.exe` directly for a one-file player download, plus a matching `.hearthupdate` application update. Download 0.12.0’s portable EXE once to obtain the updater; later code/assets packages import through Settings with a review, public-release verification, campaign backup, restart and rollback. Portable campaign copies also embed the active updated code. See `docs/application-updates.md`. New releases are published only on request; see `docs/releases.md`.
+Use `tools/release_lite.py --tag lite-vVERSION --output /new/output --toolchain /optional/toolchain` for a local clean-tag build. It checks exported Windows resources, a real DM/two-player session, Windows/Linux portable copies and actual compiled updates/restarts/rollback. Graphical sheet/board checks run separately. Publish only on an explicit release request; the tag workflow uses GitHub's built-in token.
 
-## Interface
-
-Original painted party portraits, sculpted bronze frames, wine-red controls, codex tabs, illustrated combat cards and visible ability/weapon summaries replace the flat interface. The rich fantasy style preserves the DM isometric and player tactical views, original 2014 rules and minimum-window controls. `art/build_chronicle_ui.py` reproduces the vector materials and action illustrations; user portrait imports take precedence over the bundled archetypes.
-
-## Characters and actions
-
-New hero opens a draft-based character creator with identity, attributes, skills, equipment/features, spells, a rotatable 3D miniature and a review step. PDF import uses the same menu, preserving printed bonuses and spell selections. Players create or import through Session and submit the reviewed character for DM acceptance. Full character sheet → Customize miniature allows owners to change cosmetic body styles, colors, props and proportions without changing combat stats.
-
-Combat actions adds 2014 grapple, shove prone/push, attack/skill Help, escape and free release alongside Dodge, Dash, Disengage and Stand. The host validates turn, ownership, size, reach, hands and resources. See in-app help and `docs/character-actions.md` for behavior and limits.
+Portable DM campaign copies include private notes, hidden scenes, custom creatures and installed updates. Keep those copies private. Ordinary campaigns live in the application's separate user-data folder. Existing classic campaign JSON can be imported into Lite after keeping an original backup.
 
 ## Source and notices
 

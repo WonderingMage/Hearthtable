@@ -284,6 +284,7 @@ func handle(kind: String,p: Dictionary,peer: int) -> bool:
 		"feature_set":
 			var i=int(p.get("index",-1));var maximum=clampi(int(p.get("max",1)),0,1000)
 			var f={"name":str(p.get("name","Custom feature")).left(100),"max":maximum,"remaining":clampi(int(p.get("remaining",maximum)),0,maximum),"recharge":str(p.get("recharge","long")) if p.get("recharge","long") in ["short","long","none"] else "long"}
+			if w.lite_enabled:f.description=str(p.get("description","")).left(20000)
 			if i>=0 and i<a.features.size():
 				if p.get("delete",false):a.features.remove_at(i)
 				else:a.features[i]=f

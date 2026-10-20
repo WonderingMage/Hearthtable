@@ -1,3 +1,15 @@
+# Lite releases
+
+On `edition/lite`, follow `docs/lite.md` and use `tools/release_lite.py`, unique annotated `lite-vVERSION` tags, `Hearthtable_Lite_Portable.exe` and `Hearthtable-Lite-VERSION.hearthupdate`. Do not replace classic `v*` tags/assets or merge Lite's product configuration into `main`. Both editions remain public in the existing repository under the owner's authorization. This initial Lite release is explicitly requested.
+
+Build locally from the exact clean tag before pushing the release tag. The tag workflow selects the Lite builder, uses official Godot 4.5.1/checksum-verified templates, runs the exported-resource suites, real DM/two-player UDP, both portable restoration routes and compiled updates. It uploads a draft, verifies downloaded hashes and GitHub asset digests, then publishes as a prerelease. Only the plain EXE, matching update, SHA256SUMS and build manifest are player release assets.
+
+Record separate rendered UI/network evidence in release notes, preserve source/old campaigns, verify fresh public downloads and updater provenance after publication, and retain the native Windows/GPU/audio/external internet limitations. Lite updates are fixed to the `lite-vVERSION` provenance and product name; classic packages are refused.
+
+## Classic release procedure retained
+
+The following older procedure applies to classic source on `main`, not the Lite builder/product identity above.
+
 # Releases
 
 Publish to `WonderingMage/Hearthtable` only when the user requests a release. A coding request by itself does not trigger publication. The next requested release includes the intended fixes since the previous release, receives a new version/tag, and leaves older releases available. Never overwrite a published tag or asset. The owner explicitly authorized public distribution in this existing public repository; preserve that choice without repeating the visibility question.

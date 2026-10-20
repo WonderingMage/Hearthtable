@@ -4,7 +4,7 @@ const R=preload("res://scripts/rules.gd")
 const C=preload("res://scripts/combat_rules.gd")
 var w
 func _init(world):w=world
-func enabled() -> bool:return bool(w.data.get("automation",{}).get("auto_initiative",true))
+func enabled() -> bool:return not w.lite_enabled and bool(w.data.get("automation",{}).get("auto_initiative",true))
 func record(a: Dictionary,label: String,result: Dictionary,sides: int=20,target: Dictionary={},detail: String=""):
 	if not result.get("ok",true):return
 	if not w.data.has("dice_rolls"):w.data.dice_rolls=[]

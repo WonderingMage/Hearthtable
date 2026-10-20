@@ -1,3 +1,7 @@
+# Lite action behavior
+
+On `edition/lite`, these 2014 actions are reference text and player intentions. Dice do not resolve contests, hits, saves, effects or resources automatically; the DM approves outcomes in the inbox. Player movement is the board exception: unlimited distance during exploration, cumulative own-turn allowance in DM-started combat, with doors controlled only by the DM. See `docs/lite.md`. The implementation notes below describe classic 0.12.0 and are retained for its shared reference modules, not as Lite's active combat contract.
+
 # Character and action development
 
 Included in version `0.12.0`, protocol 10, save schema 1. The earlier v0.11.1 release uses protocol 9. Publish subsequent releases only when the owner requests one.

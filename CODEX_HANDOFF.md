@@ -1,3 +1,17 @@
+# Hearthtable Lite development handoff
+
+This branch is **Hearthtable Lite 1.0.0** (`edition/lite`, release `lite-v1.0.0`), Godot 4.5.1, protocol 11, schema 1. Read `docs/lite.md` and `assets/help/lite.txt` for the active product contract. The user explicitly requested this separate DM-led edition; classic Hearthtable remains on `main` with its existing releases.
+
+`main.tscn` now loads `lite_app.gd`. `lite_board.gd` retains the rotatable isometric view for both roles and lets players drag their assigned pawns, with no distance cap during exploration and a cumulative own-turn allowance in DM-started combat. Players cannot control doors. `lite_sheet.gd` provides the expandable complete sheet. `lite_rules.gd` is the first host command boundary and creates private rolls, DM prompts, intentions, manual decisions, private initiative and allowlist player snapshots. `lite_creature.gd` validates/constructs data-only custom geometry. Shared map, save, lobby, PDF, miniature, asset-sync and update modules remain available.
+
+There is no automatic attack/save/damage or encounter director in Lite. Movement limits apply only to players in DM-started combat; DM placement remains unrestricted. The DM explicitly chooses effects and resource spending. Do not route a new sheet button around `lite_rules` into classic automation. Enemy health/AC/initiative, hidden actors/objects, DM rolls/notes and decisions are excluded before networking; fog masks art and geometry before transfer. New props/creatures start concealed; blackout sends an empty scene while preserving assigned sheets.
+
+Lite uses the **Hearthtable Lite** user-data directory and accepts only matching Lite update provenance. `tools/release_lite.py` builds a clean `lite-vVERSION` tag, exported Windows resources, real three-process networking, Windows/Linux portable copies and compiled-update/rollback validation. Native Windows/GPU/audio/external internet remain untested. Each future coding task prepares the update and change list; release publication still requires a request.
+
+The previous handoff is retained below for shared architecture and classic behavior. Its player tactical view, automated rules and classic asset/tag names do not describe this Lite edition.
+
+---
+
 # Hearthtable development handoff
 
 Hearthtable is a native Godot **4.5.1** tabletop for **original 2014 D&D 5e**, version **0.12.0**, campaign schema **1**, network protocol **10** (older 0.11.1 uses protocol 9). Open the folder containing `project.godot` in Codex and Godot. In the source companion this is `Hearthtable/Source`.

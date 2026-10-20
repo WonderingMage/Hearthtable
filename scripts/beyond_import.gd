@@ -70,6 +70,13 @@ static func from_fields(raw: Dictionary,loadouts: Dictionary,filename: String="c
 	var current=first(fields,["CurrentHP","HPCurrent"])
 	a.hp=clampi(integer(current,a.max_hp),0,a.max_hp);a.temp=clampi(integer(first(fields,["TempHP","HPTemp"])),0,9999)
 	a.xp=maxi(0,integer(first(fields,["EXPERIENCE POINTS","XP"])))
+	# Lite exposes the printed narrative and reference fields in their own sections.
+	for pair in [["personality_traits","PersonalityTraits"],["ideals","Ideals"],["bonds","Bonds"],["flaws","Flaws"],["backstory","Backstory"],["eyes","EYES"],["skin","SKIN"],["hair","HAIR"],["senses","AdditionalSenses"],["proficiencies","ProficienciesLang"]]:a[pair[0]]=first(fields,[pair[1]]).left(30000)
+	a.personal_notes=(first(fields,["AdditionalNotes1"])+"\n"+first(fields,["AdditionalNotes2"])).strip_edges().left(30000)
+	a.custom_actions=(first(fields,["Actions1"])+"\n"+first(fields,["Actions2"])).strip_edges().left(30000)
+	a.multiclass=class_text if classes.size()>1 else ""
+	a.inventory_items=[]
+
 	a.token_size=int({"large":2,"huge":3,"gargantuan":4}.get(first(fields,["SIZE"]).to_lower(),1))
 	a.size_category=first(fields,["SIZE"],"Medium").capitalize()
 	if a.size_category not in ["Tiny","Small","Medium","Large","Huge","Gargantuan"]:a.size_category="Medium"
@@ -96,11 +103,14 @@ static func from_fields(raw: Dictionary,loadouts: Dictionary,filename: String="c
 	if not attacks.is_empty():a.weapon=attacks[0].name;a.attack=attacks[0].bonus;a.damage=attacks[0].damage
 	else:issues.append("No basic weapon attack found. You can add one now or in Edit sheet.")
 	var inventory=[]
+	var weight_regex=RegEx.new();weight_regex.compile("^[0-9]+(?:\\.[0-9]+)?")
 	for i in range(0,200):
 		var item=first(fields,["Eq Name"+str(i)])
 		if item.is_empty():continue
 		var quantity=first(fields,["Eq Qty"+str(i)],"1");var weight=first(fields,["Eq Weight"+str(i)])
 		inventory.append(item+" × "+quantity+(" ("+weight+")" if not weight.is_empty() else ""))
+		var weight_match=weight_regex.search(weight.strip_edges())
+		a.inventory_items.append({"name":item.left(100),"quantity":clampi(integer(quantity,1),0,9999),"weight":clampf(float(weight_match.get_string()),0,10000) if weight_match else 0.0,"equipped":false,"attuned":false,"notes":"Imported equipment; confirm equipped/attuned state and weight with the DM."})
 	a.coins={}
 	var money=[]
 	for coin in ["CP","SP","EP","GP","PP"]:

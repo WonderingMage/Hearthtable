@@ -718,6 +718,7 @@ func edit_actor(a: Dictionary):
 	var body=modal("Edit "+a.name,820,850)
 	heading(body,"3D MINIATURE")
 	var mini_options=["Auto","Adventurer","Orc","Skeleton","Beast","Dragon"]
+	if a.has("lite_model"):mini_options.append("Custom")
 	var miniature=options(body,mini_options,maxi(0,mini_options.find(a.get("miniature","Auto"))))
 	if a.hero:button(body,"Customize miniature…",func():creator.customize(a.id))
 	var creature_sizes=["Tiny","Small","Medium","Large","Huge","Gargantuan"]

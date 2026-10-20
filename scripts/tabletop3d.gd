@@ -480,6 +480,7 @@ func build_terrain():
 					else:model(terrain,"chest",cell_pos,Vector3.ONE*1.2,0.12)
 			if not World.cell_visible(Vector2i(x,y)):box(terrain,cell_pos+Vector3.UP*0.018,Vector3(1,0.025,1),Color(0.1,0.16,0.24,0.48))
 	for prop in s.get("props",[]):
+		if World.lite_enabled and (World.client or World.preview) and prop.get("concealed",false):continue
 		var dims=BUILD.rect(prop);var visible=false
 		for x in range(dims.position.x,dims.end.x):
 			for y in range(dims.position.y,dims.end.y):
@@ -589,7 +590,8 @@ func create_mini(a: Dictionary) -> Node3D:
 	var kind=str(a.get("miniature","Auto"))
 	if kind=="Auto":kind="Adventurer" if a.hero else "Skeleton" if a.race.to_lower().contains("undead") else "Dragon" if a.race.to_lower().contains("dragon") else "Beast" if a.race.to_lower().contains("beast") else "Orc"
 	var scale_figure=minf(size_mini,2.4)
-	if kind=="Adventurer":build_adventurer(figure,a,scale_figure)
+	if kind=="Custom" and preload("res://scripts/lite_creature.gd").valid(a.get("lite_model")):preload("res://scripts/lite_creature.gd").make(figure,a.lite_model)
+	elif kind=="Adventurer":build_adventurer(figure,a,scale_figure)
 	elif kind=="Orc":
 		var body=model(figure,"character-orc",Vector3.ZERO,Vector3.ONE*1.28*scale_figure,-0.3)
 		var anim=find_anim(body)
@@ -660,6 +662,7 @@ func draw_overlay():
 		if labels or a.id==World.selected:
 			var title=str(a.name).split(" ")[0];var c=Color(a.color).lightened(0.18)
 			draw_text(point,title,13,c,true)
+			if World.lite_enabled and (World.client or World.preview):continue
 			var rect=Rect2(point+Vector2(-23,7),Vector2(46,4));overlay.draw_style_box(flat(Color("111827")),rect);overlay.draw_rect(Rect2(rect.position,Vector2(46*clampf(float(a.hp)/maxf(a.max_hp,1),0,1),4)),Color("84d3b5") if a.hp>0 else Color("d2828e"))
 		if not a.conditions.is_empty():draw_text(point+Vector2(0,-20),"● "+str(a.conditions[0]),11,Color("edc581"),true)
 	if World.ping_time>0:

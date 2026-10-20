@@ -12,7 +12,7 @@ func fixture(content: PackedByteArray,name: String="pdf_fixture.pdf") -> String:
 func run():
 	await process_frame
 	var w=root.get_node("World");var loadouts=w.read_json("res://assets/loadouts.json",{})
-	var fields={"CharacterName":"Test Hero","CLASS  LEVEL":"Rogue 3","RACE":"Elf","BACKGROUND":"Scout","STR":"10","DEX":"16","CON":"14","INT":"12","WIS":"13","CHA":"8","AC":"15","MaxHP":"24","CurrentHP":"0","Speed":"35 ft. (Walking)","Total":"3d8","Init":"+7","Acrobatics":"+5","AcrobaticsProf":"P","Stealth":"+7","StealthProf":"E","ST Dexterity":"+5","DexProf":"•","Wpn Name":"Shortbow","Wpn1 AtkBonus":"+5","Wpn1 Damage":"1d6+3 Piercing","Eq Name0":"Rope (hempen)","Eq Qty0":"2","Eq Weight0":"10 lb.","GP":"42","FeaturesTraits1":"Test feature reference.","spellHeader0":"=== 2nd LEVEL ===","spellSlotHeader0":"2 Slots OO","spellName0":"Misty Step","spellPrepared0":"P"}
+	var fields={"CharacterName":"Test Hero","CLASS  LEVEL":"Rogue 3","RACE":"Elf","BACKGROUND":"Scout","STR":"10","DEX":"16","CON":"14","INT":"12","WIS":"13","CHA":"8","AC":"15","MaxHP":"24","CurrentHP":"0","Speed":"35 ft. (Walking)","Total":"3d8","Init":"+7","Acrobatics":"+5","AcrobaticsProf":"P","Stealth":"+7","StealthProf":"E","ST Dexterity":"+5","DexProf":"•","Wpn Name":"Shortbow","Wpn1 AtkBonus":"+5","Wpn1 Damage":"1d6+3 Piercing","Eq Name0":"Rope (hempen)","Eq Qty0":"2","Eq Weight0":"10 lb.","GP":"42","FeaturesTraits1":"Test feature reference.","PersonalityTraits":"Watchful","Ideals":"Freedom","Bonds":"My sister","Flaws":"Distrust","Backstory":"From the coast","AdditionalSenses":"Darkvision 60 ft.","spellHeader0":"=== 2nd LEVEL ===","spellSlotHeader0":"2 Slots OO","spellName0":"Misty Step","spellPrepared0":"P"}
 	var r=IMPORT.from_fields(fields,loadouts)
 	check(r.ok,"Standard Beyond field names recognized")
 	var a=r.actor
@@ -27,13 +27,15 @@ func run():
 	check(a.notes.contains("Test feature reference.") and a.notes.contains("Background: Scout"),"Background and feature notes retained")
 	check(a.slots_max[1]==2 and a.slots_max[0]==0,"Spell level is read from header rather than header index")
 	check(a.coins.gp==42,"Coin purse imports from character sheet")
+	check(a.personality_traits=="Watchful" and a.ideals=="Freedom" and a.bonds=="My sister" and a.flaws=="Distrust" and a.backstory=="From the coast" and a.senses=="Darkvision 60 ft.","Printed narrative and senses populate the expanded Lite sheet sections")
+	check(a.inventory_items.size()==1 and a.inventory_items[0].quantity==2 and a.inventory_items[0].weight==10,"Printed equipment populates structured quantity and weight fields")
 	check(a.spellbook.size()==1 and a.spellbook[0].name=="Misty Step" and a.spellbook[0].prepared=="P","Known spell and printed prepared mark retained")
 	w.command("new_campaign",{"heroes":false});w.command("add_actor",{"actor":a})
 	check(w.valid_campaign(w.data),"Imported actor creates a valid campaign")
-	var imported=w.actor(w.selected);w.command("check",{"id":imported.id,"skill":"Stealth","label":"Import check"})
-	check(w.data.log[-1].text.ends_with("+7"),"Actual skill roll uses imported final bonus")
-	w.command("check",{"id":imported.id,"ability":1,"save":true,"label":"Imported save"})
-	check(w.data.log[-1].text.ends_with("+5"),"Actual saving throw uses imported final bonus")
+	var imported=w.actor(w.selected);w.command("lite_roll",{"id":imported.id,"type":"skill","skill":"Stealth","mode":0})
+	check(int(w.data.lite.rolls[-1].result.bonus)==7,"Actual skill roll uses imported final bonus")
+	w.command("lite_roll",{"id":imported.id,"type":"save","ability":1,"mode":0})
+	check(int(w.data.lite.rolls[-1].result.bonus)==5,"Actual saving throw uses imported final bonus")
 	w.save_campaign("user://import_roundtrip.json");w.load_campaign("user://import_roundtrip.json")
 	check(w.data.actors[0].spellbook[0].name=="Misty Step" and w.data.actors[0].initiative_bonus==7,"Imported extras persist through campaign save/load")
 	var sparse=IMPORT.from_fields({"CharacterName":"Sparse Hero"},loadouts)

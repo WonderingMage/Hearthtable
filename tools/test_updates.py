@@ -19,9 +19,9 @@ def main():
         base=output/name
         for folder in ['data','config','cache']:(base/folder).mkdir(parents=True,exist_ok=True)
         env=dict(os.environ,XDG_DATA_HOME=str(base/'data'),XDG_CONFIG_HOME=str(base/'config'),XDG_CACHE_HOME=str(base/'cache'))
-        probe=base/'probe';probe.mkdir(exist_ok=True);(probe/'project.godot').write_text('[application]\nconfig/name="Hearthtable"\n');(probe/'probe.gd').write_text('extends SceneTree\nfunc _initialize():\n\tprint("USER_PATH="+OS.get_user_data_dir())\n\tquit()\n')
+        probe=base/'probe';probe.mkdir(exist_ok=True);(probe/'project.godot').write_text('[application]\nconfig/name="Hearthtable Lite"\n');(probe/'probe.gd').write_text('extends SceneTree\nfunc _initialize():\n\tprint("USER_PATH="+OS.get_user_data_dir())\n\tquit()\n')
         p=subprocess.run([str(engine),'--headless','--path',str(probe),'--script','res://probe.gd'],env=env,capture_output=True,text=True,timeout=20,check=True)
-        expected=(base/'data/godot/app_userdata/Hearthtable').resolve();match=re.search(r'USER_PATH=(.+)',p.stdout)
+        expected=(base/'data/godot/app_userdata/Hearthtable Lite').resolve();match=re.search(r'USER_PATH=(.+)',p.stdout)
         if not match or Path(match[1].strip()).resolve()!=expected or BAD.search(p.stdout+p.stderr):raise RuntimeError('Disposable user-data isolation failed')
         (base/'isolation.txt').write_text(str(expected));template_link=base/'data/godot/export_templates';template_link.parent.mkdir(parents=True,exist_ok=True)
         if not template_link.exists():template_link.symlink_to(args.templates.resolve())

@@ -87,6 +87,7 @@ static func valid_scene(s: Dictionary) -> bool:
 	var ids={}
 	for p in s.get("props",[]):
 		if not p is Dictionary or not p.get("uid") is String or ids.has(p.uid):return false
+		if p.has("concealed") and not p.concealed is bool:return false
 		var d=scene_definition(s,str(p.get("asset","")))
 		if d.get("kind","")!="prop":return false
 		for field in ["x","y","rotation","swatch"]:
@@ -147,6 +148,7 @@ func command(kind: String,p: Dictionary,peer: int) -> bool:
 				if definition(str(next.surfaces.get(key,""))).get("kind","")=="wall":next.surfaces.erase(key)
 			else:
 				var prop={"uid":uid if op=="move" else "prop_"+str(Time.get_ticks_usec())+"_"+str(randi()%99999),"asset":asset,"x":cell.x,"y":cell.y,"rotation":rotation,"swatch":clampi(int(p.get("swatch",0)),0,3)}
+				if w.lite_enabled:prop.concealed=bool(next.props[index].get("concealed",false)) if index>=0 and op=="move" else true
 				if index>=0 and op=="move":next.props[index]=prop
 				else:next.props.append(prop)
 		"delete":

@@ -2,7 +2,7 @@ name: Portable release
 
 on:
   push:
-    tags: ['v*']
+    tags: ['v*', 'lite-v*']
   workflow_dispatch:
     inputs:
       tag:
@@ -29,7 +29,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$RELEASE_TAG" =~ ^(lite-)?v[0-9]+\.[0-9]+\.[0-9]+$ ]]
           git -c credential.helper='!gh auth git-credential' clone --no-checkout "https://github.com/${GITHUB_REPOSITORY}.git" source
           git -C source checkout --detach "refs/tags/$RELEASE_TAG"
           test -z "$(git -C source status --porcelain)"
@@ -38,4 +38,9 @@ jobs:
         run: |
           set -euo pipefail
           cd source
-          python3 tools/release.py --tag "$RELEASE_TAG" --output "$RUNNER_TEMP/portable-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" --publish --repo "$GITHUB_REPOSITORY"
+          if [[ "$RELEASE_TAG" == lite-v* ]]; then
+            RELEASE_BUILDER=tools/release_lite.py
+          else
+            RELEASE_BUILDER=tools/release.py
+          fi
+          python3 "$RELEASE_BUILDER" --tag "$RELEASE_TAG" --output "$RUNNER_TEMP/portable-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" --publish --repo "$GITHUB_REPOSITORY"

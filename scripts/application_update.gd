@@ -3,7 +3,7 @@ extends RefCounted
 const MAGIC="HEARTHUPDATE01\n"
 const DIRECTORY="user://updates"
 const STATE=DIRECTORY+"/state.json"
-const API="https://api.github.com/repos/WonderingMage/Hearthtable/releases/tags/v"
+const API="https://api.github.com/repos/WonderingMage/Hearthtable/releases/tags/lite-v"
 const ENGINE="4.5.1"
 const BOOT_API=1
 const MAX_PACK=200000000
@@ -41,7 +41,7 @@ static func hex_valid(value,length: int=64) -> bool:
 		if not "0123456789abcdef".contains(ch):return false
 	return true
 static func manifest_valid(m) -> bool:
-	if not m is Dictionary or m.get("format",0)!=1 or m.get("application","")!="Hearthtable":return false
+	if not m is Dictionary or m.get("format",0)!=1 or m.get("application","")!="Hearthtable Lite":return false
 	if not version_valid(m.get("version")) or m.get("engine","")!=ENGINE or m.get("boot_api",0)!=BOOT_API:return false
 	if not version_valid(m.get("minimum_base")) or not hex_valid(m.get("sha256")) or not hex_valid(m.get("commit"),40):return false
 	if not (m.get("pack_size") is int or m.get("pack_size") is float) or m.pack_size<112 or m.pack_size>MAX_PACK:return false
@@ -67,11 +67,11 @@ static func inspect(path: String) -> Dictionary:
 	while file.get_position()<file.get_length():hash.update(file.get_buffer(mini(1048576,file.get_length()-file.get_position())))
 	if hash.finish().hex_encode()!=manifest.sha256:out.error="The update's code/assets failed their checksum. Download the file again.";return out
 	return {"ok":true,"manifest":manifest,"offset":offset,"digest":FileAccess.get_sha256(path),"path":path}
-static func asset_name(version: String) -> String:return "Hearthtable-"+version+".hearthupdate"
+static func asset_name(version: String) -> String:return "Hearthtable-Lite-"+version+".hearthupdate"
 static func official(inspected: Dictionary,release) -> bool:
 	if not inspected.get("ok",false) or not release is Dictionary:return false
 	var m=inspected.manifest
-	if release.get("draft",true) or release.get("tag_name","")!="v"+m.version:return false
+	if release.get("draft",true) or release.get("tag_name","")!="lite-v"+m.version:return false
 	var expected=asset_name(m.version)
 	for asset in release.get("assets",[]):
 		if asset is Dictionary and asset.get("name","")==expected and asset.get("state","")=="uploaded" and asset.get("digest","")=="sha256:"+inspected.digest:return true
@@ -122,7 +122,7 @@ static func active_pack() -> String:
 	var state=read_state();var active=state.get("active",{})
 	return pack_path(active) if record_valid(active) and not state.get("pending",false) else ""
 static func boot() -> Dictionary:
-	var base=str(ProjectSettings.get_setting("application/config/version","0.12.0"));var state=read_state()
+	var base=str(ProjectSettings.get_setting("application/config/version","1.0.0"));var state=read_state()
 	var active=state.get("active",{});var notice=""
 	if active.is_empty():return {"base":base,"notice":""}
 	if state.get("pending",false) and state.get("attempted",false):
