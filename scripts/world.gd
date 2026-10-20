@@ -802,6 +802,13 @@ func authenticate(password: String,player_name: String="Player",protocol: int=11
 
 func sync_all():
 	for id in peers:
+		# Two disconnects may arrive in the same poll. The authenticated roster can
+		# still contain the second guest after its ENet channels have closed.
+		if id not in multiplayer.get_peers():continue
+		var transport=multiplayer.multiplayer_peer
+		if transport is ENetMultiplayerPeer:
+			var remote=transport.get_peer(id)
+			if remote==null or remote.get_state()!=ENetPacketPeer.STATE_CONNECTED:continue
 		var snapshot=player_snapshot(id)
 		scene_sync.prepare(snapshot,id)
 		receive_snapshot.rpc_id(id,snapshot)

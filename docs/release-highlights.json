@@ -4,5 +4,6 @@
   "Guided seven-step hero creation with persistent Back/Next controls, contextual instructions, validation and final review; imported sheets follow the same flow.",
   "Dropdown choices for ancestry/subrace, class/subclass, background, alignment, weapons, armor, equipment and the class/level-filtered spell library; imported and DM-approved custom choices are preserved.",
   "Standard-array swapping, validated 27-point buy, displayed ancestry bonuses, optional basic starting HP/AC/attack totals, structured gear and live miniature customization.",
-  "Imported final scores, skill/save overrides, equipment and custom spell selections stay intact unless explicitly edited; changing imported identity labels never replaces the mechanical sheet."
+  "Imported final scores, skill/save overrides, equipment and custom spell selections stay intact unless explicitly edited; changing imported identity labels never replaces the mechanical sheet.",
+  "Avoid snapshot sends to closed ENet channels when multiple guests disconnect together; session cleanup returns their heroes to the DM."
 ]

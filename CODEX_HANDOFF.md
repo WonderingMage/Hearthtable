@@ -12,6 +12,8 @@ The initial public prerelease is https://github.com/WonderingMage/Hearthtable/re
 
 The 1.0.1 follow-up fixes DM spell-area deletion (board eraser, individual list removal, clear-all and undo) and the local throne-map import size cap while preserving remote command limits and scene validation. `character_creator.gd` now guides seven steps using `creation_catalog.gd` for structured 2014 choices, standard array / 27-point buy, optional basic starting totals, catalog gear/spells and import-preserving review. Imports keep unknown choices, final bonuses and custom spells; class changes on imports never replace the mechanical sheet. This is not a full progression engine. `tests/lite_creation_ui.gd` covers the complete rendered flow and both reported UI regressions. Prepare the 1.0.1 update but publish only on a new release request.
 
+Release validation also caught simultaneous guest departures leaving a stale authenticated peer during ENet polling. `World.sync_all` now checks current transport membership and connected ENet state before sending snapshots. The actual three-process suite waits for both guests to disconnect while the host remains active and verifies ownership returns to the DM.
+
 The previous handoff is retained below for shared architecture and classic behavior. Its player tactical view, automated rules and classic asset/tag names do not describe this Lite edition.
 
 ---

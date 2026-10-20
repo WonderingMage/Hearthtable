@@ -70,6 +70,9 @@ func host():
 	w.command("lite_blackout",{"enabled":true});chat("FINAL_BLACKOUT")
 	if not await wait_for(func():return marker("P_FINAL_OK") and marker("O_FINAL_OK"),"both guests confirm final blackout"):return
 	check(w.valid_campaign(w.data),"Three-process session remains valid saved campaign data")
+	chat("CLOSE_SESSION")
+	if not await wait_for(func():return w.peers.is_empty(),"both guests disconnect while the host stays active"):return
+	check(w.data.actors.all(func(a):return int(a.owner)==1),"Concurrent guest departures return ownership to the DM without sending to closed ENet channels")
 func player(observer: bool):
 	var name="Bea" if observer else "Ada";var id="bea_hero" if observer else "ada_hero";var prefix="O" if observer else "P"
 	check(w.join_session("127.0.0.1","lite-network",24731,name)==OK,"Guest connects with the Lite protocol")
@@ -132,3 +135,5 @@ func player(observer: bool):
 	check(w.actor(id).hero and w.actor("visible_foe").is_empty() and w.data.scenes[0].props.is_empty() if w.data.scenes[0].has("props") else w.actor(id).hero and w.actor("visible_foe").is_empty(),"DM can obscure the board again while preserving the owned sheet")
 	if app!=null:await create_timer(.15).timeout;check(app.board.obscured() and not app.board.view_container.visible,"Actual network blackout removes the displayed board");root.get_texture().get_image().save_png("user://lite_network_blackout.png")
 	chat(prefix+"_FINAL_OK")
+	if not await wait_for(func():return marker("CLOSE_SESSION"),"DM finishes the session checks"):return
+	w.disconnect_session()
