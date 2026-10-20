@@ -77,13 +77,18 @@ EXE SHA-256: `{digest(windows)}`.
     releases=json.loads(subprocess.check_output(['gh','api',f'repos/{a.repo}/releases?per_page=100'],text=True));existing=next((r for r in releases if r['tag_name']==a.tag),None);allowed={windows.name,update.name,'SHA256SUMS.txt','build-manifest.json'}
     if existing and not existing['draft']:raise RuntimeError('Never overwrite a published release')
     if existing and any(asset['name'] not in allowed for asset in existing['assets']):raise RuntimeError('Unexpected draft assets; inspect before continuing')
-    if existing:gh('release','edit',a.tag,'--target',commit,'--prerelease','--notes-file',str(output/'RELEASE_NOTES.md'))
+    if existing:gh('release','edit',a.tag,'--prerelease','--notes-file',str(output/'RELEASE_NOTES.md'))
     else:gh('release','create',a.tag,'--verify-tag','--draft','--prerelease','--title',f'Hearthtable Lite {version} — DM-led VTT prerelease','--notes-file',str(output/'RELEASE_NOTES.md'))
     gh('release','upload',a.tag,*[str(output/name) for name in sorted(allowed)],'--clobber')
     download=output/'download-check';download.mkdir();gh('release','download',a.tag,'--dir',str(download))
     for name in allowed:
         if digest(download/name)!=digest(output/name):raise RuntimeError('Downloaded release asset checksum mismatch; leave draft unpublished')
-    remote=json.loads(subprocess.check_output(['gh','api',f'repos/{a.repo}/releases/tags/{a.tag}'],text=True))
+    # The tag lookup can return 404 for an unpublished draft. Listing releases
+    # with this authenticated connection includes the draft and its asset digests.
+    drafts=json.loads(subprocess.check_output(['gh','api',f'repos/{a.repo}/releases?per_page=100'],text=True))
+    matches=[release for release in drafts if release['tag_name']==a.tag]
+    if len(matches)!=1 or not matches[0]['draft']:raise RuntimeError('Expected exactly one unpublished draft; leave assets unpublished')
+    remote=matches[0]
     for asset in remote['assets']:
         if asset['name'] in allowed and asset.get('digest')!='sha256:'+digest(output/asset['name']):raise RuntimeError('GitHub digest unavailable or incorrect; leave draft unpublished')
     gh('release','edit',a.tag,'--draft=false','--prerelease');gh('release','view',a.tag,'--json','url,isDraft,isPrerelease')

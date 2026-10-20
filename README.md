@@ -1,12 +1,12 @@
 # Hearthtable Lite
 
-A DM-led virtual tabletop for original **2014 D&D 5e**, built with **Godot 4.5.1**. The working source prepares **1.0.1** (latest published: 1.0.0), protocol **11**, campaign schema **1**. Classic Hearthtable remains on `main` and its existing releases; Lite lives on `edition/lite` with `lite-v*` releases and its own saves.
+A DM-led virtual tabletop for original **2014 D&D 5e**, built with **Godot 4.5.1**. This separate edition is **1.0.1**, protocol **11**, campaign schema **1**. Classic Hearthtable remains on `main` and its existing releases; Lite lives on `edition/lite` with `lite-v*` releases and its own saves.
 
 - A rotatable isometric tabletop for both roles. The DM freely moves pieces with live distance measurement, builds/imports scenes, edits enemy sheets and imports bespoke data-only creature miniatures. Players move assigned pawns without a distance cap outside combat; DM-started combat enforces turn and cumulative allowance. Only the DM controls doors.
 - An expandable player sheet over the board: abilities/saves/skills, actions, full included spell references, equipment, features, description, notes and extras, plus reviewed PDF import and miniature customization.
 - A DM screen with blackout, fog, concealed objects/creatures, private rolls and private manually arranged initiative. Player intentions include the relevant rules and dice; the DM decides targets, effects and resource spending.
 
-Download **Hearthtable_Lite_Portable.exe** from the [Lite release](https://github.com/WonderingMage/Hearthtable/releases/tag/lite-v1.0.0) and run it directly. No installer, ZIP or Godot installation is required. Later compatible Lite updates import through Settings using the matching `.hearthupdate`. Classic and Lite update files are not interchangeable. Native Windows launch is still unverified, so this is a prerelease.
+Download **Hearthtable_Lite_Portable.exe** from the [Lite release](https://github.com/WonderingMage/Hearthtable/releases/tag/lite-v1.0.1) and run it directly. No installer, ZIP or Godot installation is required. Later compatible Lite updates import through Settings using the matching `.hearthupdate`. Classic and Lite update files are not interchangeable. Native Windows launch is still unverified, so this is a prerelease.
 
 Read the in-app Guide or [Lite documentation](docs/lite.md) for play, sheet coverage, privacy and custom creatures. This independent sheet includes 2014 SRD references and editable homebrew; it has no D&D Beyond account/paid-book integration or complete character progression database.
 
