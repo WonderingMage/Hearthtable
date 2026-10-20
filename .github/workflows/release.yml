@@ -43,4 +43,15 @@ jobs:
           else
             RELEASE_BUILDER=tools/release.py
           fi
-          python3 "$RELEASE_BUILDER" --tag "$RELEASE_TAG" --output "$RUNNER_TEMP/portable-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" --publish --repo "$GITHUB_REPOSITORY"
+          RELEASE_LOG="$RUNNER_TEMP/portable-release.log"
+          if python3 "$RELEASE_BUILDER" --tag "$RELEASE_TAG" --output "$RUNNER_TEMP/portable-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" --publish --repo "$GITHUB_REPOSITORY" 2>&1 | tee "$RELEASE_LOG"; then
+            exit 0
+          fi
+          python3 - "$RELEASE_LOG" <<'PYLOG'
+          from pathlib import Path
+          import sys
+          text=Path(sys.argv[1]).read_text()[-12000:]
+          text=text.replace('%','%25').replace('\r','%0D').replace('\n','%0A')
+          print('::error title=Portable release diagnostic::'+text)
+          PYLOG
+          exit 1
