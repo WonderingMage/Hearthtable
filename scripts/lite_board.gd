@@ -40,10 +40,31 @@ func _gui_input(event):
 					if World.client and not drag_id.is_empty() and valid_cell(drag_cell):World.command("move",{"id":drag_id,"x":drag_cell.x,"y":drag_cell.y})
 					drag_id="";ruler_start=Vector2i(-1,-1)
 		return
+	if tool=="Erase area":
+		if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and not event.shift_pressed:
+			if event.pressed:
+				var index=template_at(event.position)
+				if index>=0:World.command("lite_remove_template",{"index":index,"area":World.scene().areas[index].duplicate(true)})
+			return
+		if event is InputEventMouseMotion:map_hint.emit("Click a spell area to remove it · Newest overlapping area first · Ctrl+Z restores it")
 	super._gui_input(event)
 	if not drag_id.is_empty():
 		var unit=World.actor(drag_id)
 		if not unit.is_empty():map_hint.emit(unit.name+" · "+World.format_distance(World.measure_cells(Vector2i(unit.x,unit.y),drag_cell))+" · free DM placement")
+func template_at(pos: Vector2) -> int:
+	var areas=World.scene().get("areas",[])
+	for i in range(areas.size()-1,-1,-1):
+		var a=areas[i];var start=Vector3(a.x+.5,.06,a.y+.5);var end=Vector3(a.ex+.5,.06,a.ey+.5)
+		var radius=maxf(.5,start.distance_to(end));var points=PackedVector2Array()
+		if a.shape=="Circle":
+			for j in 64:points.append(project(start+Vector3(cos(j*TAU/64),0,sin(j*TAU/64))*radius))
+		elif a.shape=="Cone":
+			var direction=(end-start).normalized();var across=Vector3(-direction.z,0,direction.x)*radius/2
+			for p in [start,end+across,end-across]:points.append(project(p))
+		else:
+			for p in [start,Vector3(end.x,.06,start.z),end,Vector3(start.x,.06,end.z)]:points.append(project(p))
+		if Geometry2D.is_point_in_polygon(pos,points):return i
+	return -1
 func draw_overlay():
 	if obscured():
 		overlay.draw_rect(Rect2(Vector2.ZERO,size),Color.BLACK)

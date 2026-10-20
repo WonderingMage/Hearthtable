@@ -1,6 +1,6 @@
 # Hearthtable Lite
 
-A DM-led virtual tabletop for original **2014 D&D 5e**, built with **Godot 4.5.1**. This separate edition is **1.0.0**, protocol **11**, campaign schema **1**. Classic Hearthtable remains on `main` and its existing releases; Lite lives on `edition/lite` with `lite-v*` releases and its own saves.
+A DM-led virtual tabletop for original **2014 D&D 5e**, built with **Godot 4.5.1**. The working source prepares **1.0.1** (latest published: 1.0.0), protocol **11**, campaign schema **1**. Classic Hearthtable remains on `main` and its existing releases; Lite lives on `edition/lite` with `lite-v*` releases and its own saves.
 
 - A rotatable isometric tabletop for both roles. The DM freely moves pieces with live distance measurement, builds/imports scenes, edits enemy sheets and imports bespoke data-only creature miniatures. Players move assigned pawns without a distance cap outside combat; DM-started combat enforces turn and cumulative allowance. Only the DM controls doors.
 - An expandable player sheet over the board: abilities/saves/skills, actions, full included spell references, equipment, features, description, notes and extras, plus reviewed PDF import and miniature customization.

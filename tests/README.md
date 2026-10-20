@@ -6,6 +6,7 @@ The active edition on this branch is Hearthtable Lite; use Godot 4.5.1 and dispo
 - `updates.gd`: bounded/tamper-resistant Lite packages, fixed-release provenance, classic-package rejection, install/confirm/rollback and campaign preservation.
 - `pdf_import.gd`: real PDF parsing/fields, narrative sections, structured equipment, imported bonuses through Lite's actual private dice and serialization.
 - `lite_ui.gd`: rendered DM/player desktops, direct drag with distance, minimum windows, sheet pages, custom model import/export, player blackout, and Settings verification/install/offline gate/backup.
+- `lite_creation_ui.gd`: complete guided creation, standard-array/point-buy validation, catalog gear/spells, imported custom choices/final totals, cancellation, minimum-window layout, actual area eraser/undo/clear-all and the real throne-map import button.
 - `pdf_import_ui.gd`: reviewed creator, actual import/edit/undo/cancel and persistent imported bonuses.
 - `tools/test_lite_network.py --engine /path/Godot --output /new/qa [--pack /path/export.exe] [--ui]`: actual DM and two distinct players on UDP 24731, with a rendered primary player when requested. Checks private data, independent owned sheets, roll prompts, blocked bypass attempts and explicit DM Fireball decisions. Do not run fixed-port suites concurrently.
 - `lite_portable.gd` and `tools/test_updates.py`: self-contained private Lite campaigns and actual compiled World replacement/restart/portable transfer/rollback. Release builder runs exported resources and both portable routes.

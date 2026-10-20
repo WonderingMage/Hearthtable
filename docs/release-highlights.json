@@ -1,8 +1,8 @@
 [
-  "A separate DM-led VTT edition: rotatable isometric board for both roles and free DM piece placement with measured distance. Players move assigned pawns freely during exploration, and within a cumulative own-turn allowance in DM-started combat; doors remain DM-only.",
-  "Expandable player sheet with abilities, saves, all skills, actions, complete included spell references, equipment, features, description, notes and extras.",
-  "Players send private rolls and intentions; the DM explicitly decides targets, effects, damage/healing, conditions and resource spending.",
-  "Private DM dice and initiative, whole-board blackout, fogged-art/geometry redaction, individually concealed objects, and visual-only enemy tokens without real HP/AC.",
-  "Data-only custom creature stat blocks and procedural miniatures, plus reviewed PDF character import and persistent cosmetic customization.",
-  "Separate Lite saves, protocol and verified Lite update packages, with backups, rollback and self-contained portable DM campaigns."
+  "Remove individual circle/cone/square spell areas with the board eraser or Areas manager; clear all areas and restore deletions with undo. Players cannot remove DM templates.",
+  "Fix the throne-map import: local DM scene imports accept embedded images larger than the remote-command cap while keeping scene/asset validation and player command limits.",
+  "Guided seven-step hero creation with persistent Back/Next controls, contextual instructions, validation and final review; imported sheets follow the same flow.",
+  "Dropdown choices for ancestry/subrace, class/subclass, background, alignment, weapons, armor, equipment and the class/level-filtered spell library; imported and DM-approved custom choices are preserved.",
+  "Standard-array swapping, validated 27-point buy, displayed ancestry bonuses, optional basic starting HP/AC/attack totals, structured gear and live miniature customization.",
+  "Imported final scores, skill/save overrides, equipment and custom spell selections stay intact unless explicitly edited; changing imported identity labels never replaces the mechanical sheet."
 ]

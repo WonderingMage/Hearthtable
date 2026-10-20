@@ -58,8 +58,9 @@ func build_ui():
 	var top=row(center_column);scene_title=label("",18,GOLD,true);expand(scene_title);top.add_child(scene_title)
 	preview_button=button(top,"Preview player view",toggle_preview)
 	var tools=row(center_column);var tool_scroll=ScrollContainer.new();tool_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO;tool_scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;expand(tool_scroll);tools.add_child(tool_scroll);var rail=row(tool_scroll)
-	for name_tool in ["Select","Measure","Reveal","Conceal","Circle","Cone","Square"]:
+	for name_tool in ["Select","Measure","Reveal","Conceal","Circle","Cone","Square","Erase area"]:
 		var item=button(rail,name_tool,func():set_tool(name_tool));tool_buttons[name_tool]=item
+	dm_controls.append(button(rail,"Areas…",show_area_templates,"Remove one spell area or clear every area on this scene"))
 	button(rail,"Fit",func():board.fit_map());dm_controls.append(button(rail,"Build · F2",func():build_editor.toggle()));dm_controls.append(button(rail,"Grid…",show_map_settings))
 	board=LITE_MAP.new();board.custom_minimum_size=Vector2(360,300);board.size_flags_vertical=Control.SIZE_EXPAND_FILL;expand(board);center_column.add_child(board)
 	board.token_selected.connect(func(id):select_actor(id));board.map_hint.connect(func(value):hint.text=value);board.scene_synchronized.connect(refresh)
@@ -76,10 +77,22 @@ func build_ui():
 	roll_select=options(dice,["Normal","Advantage","Disadvantage"]);roll_select.item_selected.connect(func(i):World.roll_mode=i)
 	button(dice,"Roll history",roll_history);button(dice,"Chat",chat_dialog)
 	latest_result=label("",12,MOSS);latest_result.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;footer.add_child(latest_result)
-	status_label=label(World.network_label+" · Lite 1.0.0 · 2014 fifth edition",11,MUTED);footer.add_child(status_label)
+	status_label=label(World.network_label+" · Lite "+str(ProjectSettings.get_setting("application/config/version"))+" · 2014 fifth edition",11,MUTED);footer.add_child(status_label)
 	side_tab="Inbox";set_tool("Select")
 func apply_view_layout():
 	if is_instance_valid(party_panel):party_panel.visible=not World.client
+func show_area_templates():
+	if World.client:return
+	var body=modal("Spell areas & measurements",650,650)
+	paragraph(body,"Use Erase area on the board to click away a circle, cone or square. Overlapping areas are erased newest first. Undo restores a removed area.")
+	var areas=World.scene().get("areas",[])
+	if areas.is_empty():paragraph(body,"There are no spell areas on this scene.",MUTED)
+	for i in areas.size():
+		var area=areas[i].duplicate(true);var h=row(body)
+		expand(paragraph(h,str(area.shape)+" · "+World.RULES.column_name(int(area.x))+str(int(area.y)+1)+" → "+World.RULES.column_name(int(area.ex))+str(int(area.ey)+1)))
+		button(h,"Remove",func():World.command("lite_remove_template",{"index":i,"area":area});show_area_templates())
+	button(body,"Clear all spell areas",func():World.command("clear_templates");show_area_templates()).disabled=areas.is_empty()
+	button(body,"Back to table",close_modal)
 func refresh_now():
 	if not ui_built or updating:return
 	updating=true;campaign_label.text=World.data.title;scene_title.text=World.scene().name

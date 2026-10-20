@@ -201,7 +201,9 @@ func public_event(message: String):
 	while state().events.size()>150:state().events.pop_front()
 func command(kind: String,p: Dictionary,peer: int) -> bool:
 	ensure()
-	if JSON.stringify(p).length()>1500000:reject(peer,"This command is too large.");return true
+	# Local DM imports contain embedded PNGs. Remote commands keep their strict cap;
+	# the normal scene/image validators still validate the DM's imported content.
+	if peer!=1 and JSON.stringify(p).length()>1500000:reject(peer,"This command is too large.");return true
 	if peer!=1 and not w.peers.has(peer):return true
 	if not permit_rate(peer):reject(peer,"Please slow down before submitting another action.");return true
 	var a=w.actor(str(p.get("id","")))
@@ -222,6 +224,12 @@ func command(kind: String,p: Dictionary,peer: int) -> bool:
 		return false
 	if peer!=1:reject(peer,"The DM controls movement, initiative, resources and outcomes. Submit an intention from your sheet.");return true
 	match kind:
+		"lite_remove_template":
+			var areas=w.scene().get("areas",[])
+			if not integer(p,"index",0,areas.size()-1) or not p.get("area") is Dictionary:return true
+			# An old list/hover must not delete a different area after another edit.
+			if areas[int(p.index)]!=p.area:return true
+			w.history.append(w.data.duplicate(true));areas.remove_at(int(p.index));changed()
 		"lite_blackout":
 			if not p.get("enabled") is bool:return true
 			state().blackout=p.enabled;changed()

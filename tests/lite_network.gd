@@ -37,6 +37,7 @@ func host():
 	var enemy=hero.duplicate(true);enemy.id="visible_foe";enemy.hero=false;enemy.owner=1;enemy.name="Revealed warden";enemy.hp=511;enemy.max_hp=733;enemy.ac=29;enemy.initiative=28;enemy.notes="ENEMY_SECRET_SHEET";enemy.x=8;enemy.y=4
 	var hidden=enemy.duplicate(true);hidden.id="SECRET_HIDDEN_CREATURE";hidden.name="SECRET_HIDDEN_NAME";hidden.hidden=true;w.data.actors.append(enemy);w.data.actors.append(hidden)
 	w.scene().props=[{"uid":"SECRET_PORTAL","asset":"throne","x":2,"y":2,"rotation":0,"swatch":0,"concealed":true}];w.scene().tiles["18,8"]=6;w.scene().doors_open={"18,8":false};w.scene().dm_notes="SECRET_SCENE_NOTES";w.data.journal_dm="SECRET_JOURNAL"
+	w.command("template",{"shape":"Circle","x":4,"y":4,"ex":8,"ey":4})
 	w.mark_changed();check(w.host_session("lite-network",24731)==OK,"DM opens the real Lite UDP session")
 	if not await wait_for(func():return w.peers.size()==2,"both guests authenticate"):return
 	var ada=0;var bea=0
@@ -52,6 +53,7 @@ func host():
 	w.command("lite_combat",{"active":true});chat("COMBAT_WAIT")
 	if not await wait_for(func():return marker("P_SUBMITTED") and marker("O_REVEAL_OK"),"rolls and intention arrive"):return
 	check(hero.x==4 and hero.y==4 and hero.slots[2]==2 and enemy.hp==511 and not w.scene().doors_open["18,8"],"Remote forged movement, casting and HP commands cannot change the table")
+	check(w.scene().areas.size()==1,"Actual remote clients cannot erase or clear the DM's spell areas")
 	check(w.lite.state().requests.size()==1 and w.lite.state().requests[0].label=="Fireball","Only the owned visible-target spell proposal enters the DM inbox")
 	check(w.lite.state().prompts[0].done and w.lite.state().order[0]==enemy.id,"Remote initiative satisfies the DM prompt without changing order")
 	check(w.lite.state().rolls.any(func(entry):return entry.peer==ada and entry.label=="Perception"),"Actual player check arrives privately at the DM")
@@ -99,6 +101,7 @@ func player(observer: bool):
 		else:
 			w.command("lite_roll",{"id":id,"type":"skill","skill":"Perception","mode":0});w.command("lite_roll",{"id":id,"type":"initiative","prompt":w.data.lite.prompts[0].id,"mode":0})
 		w.command("move",{"id":id,"x":15,"y":10,"dm_override":true});w.command("cast_spell",{"id":id,"spell":"fireball","slot":3});w.command("hp",{"id":"visible_foe","amount":-500});w.command("door",{"id":id,"x":18,"y":8,"open":true});w.command("lite_request",{"id":"bea_hero","kind":"manual","note":"forged","targets":[]});w.command("lite_request",{"id":id,"kind":"attack","index":0,"note":"forged hidden target","targets":["SECRET_HIDDEN_CREATURE"]})
+		w.command("lite_remove_template",{"index":0,"area":{"shape":"Circle","x":4,"y":4,"ex":8,"ey":4}});w.command("clear_templates")
 		if graphical:
 			app.character_ui.cast_dialog(id,"fireball");await process_frame;button(app.modal_overlay,"Revealed warden").button_pressed=true;button(app.modal_overlay,"Send intention to DM").pressed.emit()
 		else:w.command("lite_request",{"id":id,"kind":"spell","spell":"fireball","slot":3,"mode":"ordinary","targets":["visible_foe"],"note":"The doorway."})

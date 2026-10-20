@@ -1,4 +1,4 @@
-HEARTHTABLE LITE 1.0.0 · THE DM'S TABLE
+HEARTHTABLE LITE 1.0.1 · THE DM'S TABLE
 
 Lite is a separate, DM-led virtual tabletop for original 2014 fifth edition. The DM decides outcomes and homebrew exceptions. Players move their own pawns on the shared board and use their character sheet for rolls and intentions.
 
@@ -6,6 +6,18 @@ DM: PREPARE THE TABLE
 The board starts blacked out to players. You still see and edit the complete scene. Drag any miniature wherever you want, including through walls, occupied squares or beyond its speed. The ruler and live drag caption show distance using the scene's grid scale and diagonal setting. Shift-drag rotates, right-drag pans, and the wheel zooms. DM placement ignores paths and movement budgets. Player moves follow revealed walkable routes, with no distance cap outside combat. In Initiative, the DM begins/ends combat and advances the private order: players then move only on their turn, spending a cumulative speed allowance. The DM can set/reset that allowance for Dash, corrections or homebrew. Walls/closed doors and unrevealed squares block player routes. Only the DM opens/closes doors. There are no automatic encounters, attacks, saves or spell outcomes.
 
 Use Build / F2 to place objects, walls and terrain, or Scenes to import a map / self-contained .hearthscene. Grid configures scale, calibration, manual fog and optional room concealment. Visibility conceals/reveals individual objects. Select any creature to conceal/reveal it or edit its AC, abilities, HP, attacks and sheet. Newly added enemies are concealed until you reveal them.
+
+SPELL AREAS
+Drag Circle, Cone or Square to mark an area. Choose Erase area and click the area to remove it; where areas overlap, the newest one is removed first. Areas… lists every spell area with an individual Remove control and Clear all spell areas. Ctrl+Z restores a removed area. Players cannot erase the DM’s areas. These are visual guides; the DM still resolves effects.
+
+CREATE YOUR HERO
+Create hero opens seven guided steps: Identity, Attributes, Skills, Equipment, Magic, Miniature and Review. Back/Next buttons stay visible; the numbered step buttons let you revisit a section. Required identity choices and point-buy errors take you back to the relevant choice before submission.
+
+Choose class, ancestry/subrace, subclass (when available), background and alignment from lists. New class choices replace the draft’s starting sheet, so choose class before later customization. The included ancestry/subclass options follow the 2014 SRD; imported and DM-approved names remain available. Name, description and story are free text; missing choices can be added through Add a DM-approved choice.
+
+Standard array is recommended: choosing an assigned score swaps it with the other ability, so each is used once. Point buy gives 27 points with the 2014 costs. Ancestry bonuses are displayed separately. Manual / imported scores are final and never receive ancestry bonuses twice. New heroes can use calculated basic HP/AC/attack; imported heroes keep their printed totals unless you explicitly enable calculation. Review higher-level features, proficiency, armor restrictions, subclass benefits and exceptions with your DM.
+
+Select skill training, weapons, armor, equipment and spells from the lists. Suggested training combines class/background choices for review; choose replacements for overlaps with your DM. Spells default to your class and available spell levels; other-class or exceptional choices need DM approval. Gear has quantity/equipped/attuned records; a pack is recorded as one item until you review its contents/weight. Customize the live miniature, then review and confirm the complete sheet. Imports use this same flow without replacing their scores, bonuses, custom choices, equipment or spell selections. Cancel leaves the campaign untouched.
 
 BLACKOUT AND FOG
 BLACK OUT player board hides the whole tabletop while leaving each player's character sheet usable. Revealing the board preserves individual hidden creatures, concealed objects and fog. Reveal / Conceal paints a 3-by-3-square fog brush; Visibility can cover or clear the whole map. Player preview shows the obscured view without changing your own authoritative data.
