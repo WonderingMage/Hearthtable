@@ -1,4 +1,4 @@
-AUTOMATION IN HEARTHTABLE 0.12.0-dev
+AUTOMATION IN HEARTHTABLE 0.12.0
 
 Original 2014 fifth edition remains the rules baseline. The action dock takes inspiration from cinematic RPG hotbars; the program does not reproduce all of Baldur's Gate 3 or D&D Beyond.
 
@@ -48,7 +48,7 @@ Open door cells are walkable. Closed-door clicks can approach a reachable adjace
 
 Scene packages version 2 include validated procedural asset definitions, collision fields and preferred spawn points; version 1 remains supported. The two supplied references are in Scene library → Prepared maps. Their original PNGs are preserved and reusable native geometry is provided. Map features and grid-curved walls are authored approximations; hazard damage, unusual traversal and special senses remain DM adjudication.
 
-Joining and changing scenes automatically downloads the active PNG and custom design definitions. Transfers use bounded chunks, integrity checks, an on-disk content cache and a loading overlay. Players receive no future scene packages, DM notes or private battle zones. Custom content contains data only and never executes imported scripts. Host and guests must all run the same protocol-10 development build.
+Joining and changing scenes automatically downloads the active PNG and custom design definitions. Transfers use bounded chunks, integrity checks, an on-disk content cache and a loading overlay. Players receive no future scene packages, DM notes or private battle zones. Custom content contains data only and never executes imported scripts. Host and guests must all run the same protocol-10 release.
 
 
 CHARACTERS AND CONTESTED ACTIONS IN 0.12 DEVELOPMENT
@@ -57,3 +57,11 @@ Grapple and shove use host-rolled Athletics versus the defender's better Athleti
 Help attack grants the next eligible ally's weapon/spell attack advantage against the distracted enemy before the helper's next turn. Help check grants one specified skill check advantage, subject to manual task eligibility. First eligible rolls consume all matching assistance; previews do not. Dodge loses its benefits at speed zero or incapacitation. Source-specific frightened/sight/special-feature modifiers remain manual through roll mode or DM adjustment.
 
 The shared creator records final sheet values and preserves import provenance, bonuses, notes and spell choices. It is not an automatic class progression or point-buy/racial-trait engine. New/imported player characters require host acceptance. Owners can change bounded cosmetic miniature data, never gameplay stats, through the appearance command. Cosmetics persist in ordinary saves and portable copies; new identity details follow existing owner privacy filtering.
+
+
+APPLICATION UPDATE COVERAGE IN 0.12
+Settings accepts the release's .hearthupdate code/assets package, validates bounded format/engine/payload metadata and checks its complete SHA-256 against the asset digest from the fixed WonderingMage/Hearthtable GitHub release. Files from drafts, altered files and unsupported foundations are refused. Installation saves a campaign backup and stages a new startup pack, preserving the previous version for rollback. Applying code requires an offline session and restart. Failed startup rolls back on the following launch; current campaign files remain separate.
+
+The startup loader mounts application resources before the World autoload, so updates replace real compiled game code. Portable copies rebake the running update pack with their engine and campaign snapshot, preserving independent operation. This is separate from scene/character imports, which never execute imported scripts. Engine and updater-API changes may need a new full portable EXE.
+
+The ornate visual interface adds artwork and readable sheet/action framing; it does not add BG3 rules, change camera roles or claim BG3 rendering parity. Native Windows, real hardware/audio and external networking still require their own validation.

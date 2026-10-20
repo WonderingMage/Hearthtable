@@ -1,6 +1,6 @@
 # Character and action development
 
-This work is on `feat/character-actions-creator`, version `0.12.0-dev`, protocol 10, save schema 1. The published v0.11.1/protocol-9 executable remains unchanged. Publish only when the owner requests the next release.
+Included in version `0.12.0`, protocol 10, save schema 1. The earlier v0.11.1 release uses protocol 9. Publish subsequent releases only when the owner requests one.
 
 ## Using the character menu
 

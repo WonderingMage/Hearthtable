@@ -1,4 +1,4 @@
-Hearthtable 0.12.0-dev · Original 2014 fifth edition
+Hearthtable 0.12.0 · Original 2014 fifth edition
 
 A SINGLE-FILE PROGRAM
 Run Hearthtable_Portable.exe directly. No installer, ZIP extraction, Godot installation or external asset folder is required. The program embeds the engine, models, rules, reference data and this help.
@@ -87,7 +87,7 @@ Version-2 scene packages carry their reusable design recipes. Importing mounts t
 AUTOMATIC PLAYER SCENE DOWNLOADS
 Players join with the same updated program and need no manual map or asset installation. The host automatically sends the active scene's PNG artwork and custom asset definitions over the existing UDP connection. A Preparing your table overlay shows progress and blocks table input until the data validates. Scene changes run the same transfer. Returning to a scene or rejoining reuses the local verified cache; changed content receives a new download.
 
-Artwork and assets transfer in bounded chunks with SHA-256 checks, at a capped aggregate host rate. The cache lives under user data/scene_cache and can be deleted when disconnected to reclaim disk space; missing or damaged cache entries download again. Future scenes, DM notes and private battle-zone geometry are not included in player downloads. Portable campaign copies also embed custom design recipes and map art; keep campaign copies private and distribute the plain program to players. Use the same protocol-10 development build on the host and all guests.
+Artwork and assets transfer in bounded chunks with SHA-256 checks, at a capped aggregate host rate. The cache lives under user data/scene_cache and can be deleted when disconnected to reclaim disk space; missing or damaged cache entries download again. Future scenes, DM notes and private battle-zone geometry are not included in player downloads. Portable campaign copies also embed custom design recipes and map art; keep campaign copies private and distribute the plain program to players. Use the same protocol-10 release on the host and all guests.
 
 
 CHARACTER CREATION, IMPORT REVIEW & MINIATURES
@@ -111,3 +111,16 @@ Shove can knock prone or push 5 feet directly away into a clear level square. Un
 Help attack spends an action to distract an enemy within a clear 5 feet. The first eligible ally's weapon or spell attack against it gets advantage before the helper's next turn. Previewing does not consume Help; the first actual roll does, including a miss. Help check assists an ally's next chosen skill check before the helper's next turn; confirm task eligibility and positioning with the DM. Assistance does not stack.
 
 Dodge spends an action until your next turn: attacks from creatures you can see have disadvantage, and your DEX saves have advantage. Incapacitation or speed becoming 0 ends the benefits. Dash, Disengage and Stand remain available. Opportunity attacks, Ready triggers, Hide/Search adjudication and unusual class exceptions still need the DM.
+
+
+SETTINGS · APPLICATION UPDATES
+Download Hearthtable_Portable.exe once for version 0.12.0 to obtain the updater. The older 0.11.1 program cannot import application updates. Each requested release also provides Hearthtable-VERSION.hearthupdate, containing that version's code and assets.
+
+Open Settings → Import application update. Choose the official .hearthupdate release file, review its version and change list, and let Hearthtable verify it against the published release. An internet connection is required for this verification. Disconnect your multiplayer session, then Install update & restart. Hearthtable saves the current campaign and a separate backup before staging the code. Normal campaigns stay in the same user-data folder. Give the DM and all players the same compatible version.
+
+Settings → Roll back application update restores the retained previous code version (or the EXE's built-in version) after a restart. Campaign saves are kept. An update that fails to finish startup is rolled back on the next launch. Damaged packages are refused. If the updater foundation or engine changes, download the new portable EXE.
+
+Portable copy includes the currently running updated code and all campaign/maps/characters together; the copy can move to another machine without the original update folder. Campaign copies and pre-update backups contain DM information: keep them private. Scene, image, PDF and design imports remain separate data-only formats.
+
+THE ORNATE INTERFACE
+Painted class portraits, bronze flourishes, wine-red tabs, codex pages and dedicated action illustrations frame the table. The Character sidebar shows abilities, defenses and equipped attack details up front. Import your own portrait in Edit sheet to replace the archetype art. Combat keeps visible resources and action cards; smaller windows use a shorter party tray without hiding the action controls. The DM still uses Isometric and players use Tactical.

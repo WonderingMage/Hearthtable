@@ -20,18 +20,19 @@ func _ready():
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);mouse_filter=Control.MOUSE_FILTER_IGNORE
 	resized.connect(layout)
 func framed() -> PanelContainer:
-	var p=PanelContainer.new();p.add_theme_stylebox_override("panel",u.gilded("panel",12));add_child(p);return p
+	var p=PanelContainer.new();p.add_theme_stylebox_override("panel",u.gilded("chapter" if compact() else "panel",10 if compact() else 12));add_child(p);return p
 func text(parent: Node,value: String,size: int=12,color: Color=SOFT) -> Label:
 	var l=u.label(value,size,color);parent.add_child(l);return l
 func btn(parent: Node,title: String,action: Callable,tip: String="",active: bool=false) -> Button:
 	var node=u.button(parent,title,action,tip);node.add_theme_font_size_override("font_size",12)
 	node.add_theme_stylebox_override("normal",u.gilded("selected" if active else "button",7));node.add_theme_color_override("font_color",GOLD if active else Color("e6dfcf"));return node
+func compact() -> bool:return size.x<1400 or size.y<700
 func layout():
 	if not is_instance_valid(bottom):return
 	bottom.size.x=minf(1320,maxf(300,size.x-24));bottom.position=Vector2((size.x-bottom.size.x)/2,maxf(200,size.y-bottom.size.y-12))
-	party.position=Vector2(12,78);party.size.x=164
-	if is_instance_valid(party_scroll):party_scroll.custom_minimum_size.y=clampf(bottom.position.y-246,65,220)
-	top.position=Vector2(maxf(188,size.x*0.24),12);top.size.x=maxf(300,size.x*0.52)
+	party.position=Vector2(12,12 if compact() else 88);party.size.x=200
+	if is_instance_valid(party_scroll):party_scroll.custom_minimum_size.y=clampf(bottom.position.y-(140 if compact() else 300),56,220)
+	top.position=Vector2(maxf(224,size.x*0.24),12);top.size.x=maxf(300,size.x*0.52)
 	results.position=Vector2(maxf(188,size.x-300),maxf(100,bottom.position.y-results.size.y-12));results.size.x=288;results.visible=size.y>690
 func _process(_delta):
 	if not visible:return
@@ -63,14 +64,15 @@ func build_party(a: Dictionary):
 		var tile=btn(list,unit.name+"\n"+str(unit.hp)+" / "+str(unit.max_hp)+" HP",func():
 			if not w.can_control(unit):return
 			w.selected=unit.id;b.actor_id=unit.id;u.board.pov_actor_id=unit.id;u.board.tactical_tracking=true;b.cancel_selection();u.board.focus_selected(),"Select and center on "+unit.name,unit.id==a.id)
-		tile.alignment=HORIZONTAL_ALIGNMENT_LEFT;tile.custom_minimum_size=Vector2(140,58);tile.disabled=not w.can_control(unit)
+		tile.alignment=HORIZONTAL_ALIGNMENT_LEFT;tile.custom_minimum_size=Vector2(166,54 if compact() else 78);tile.disabled=not w.can_control(unit)
 		var portrait=u.profile_texture(unit)
 		if portrait==null:portrait=u.ICONS.texture("classes",str(unit.class))
-		if portrait:tile.icon=portrait;tile.expand_icon=true;tile.add_theme_constant_override("icon_max_width",38)
+		if portrait:tile.icon=portrait;tile.expand_icon=true;tile.add_theme_constant_override("icon_max_width",38 if compact() else 56)
 		var hp=ProgressBar.new();hp.max_value=maxi(1,int(unit.max_hp));hp.value=unit.hp;hp.show_percentage=false;hp.custom_minimum_size.y=5;hp.mouse_filter=Control.MOUSE_FILTER_IGNORE;list.add_child(hp)
 		hp.add_theme_stylebox_override("fill",u.REGALIA.bar("hp"));hp.add_theme_stylebox_override("background",u.style(Color("29272a"),Color.TRANSPARENT,2,0))
-	if b.enemy_mode:btn(column,"Close enemy HUD",b.toggle_enemy)
+	if b.enemy_mode and not compact():btn(column,"Close enemy HUD",b.toggle_enemy)
 	var tools=u.row(column);btn(tools,"Sheet · I",func():u.character_ui.full_sheet(a.id));btn(tools,"Spells · K",func():u.character_ui.show_book(a.id))
+	if compact():return
 	btn(column,"Door · E",b.interact_door,"Open or close the nearest adjacent doorway; open door squares are walkable")
 	var extra=u.row(column);btn(extra,"Journal",func():u.show_text("Shared journal",w.data.journal_public));btn(extra,"Center · C",func():u.board.focus_selected())
 func build_initiative(a: Dictionary):
@@ -93,14 +95,20 @@ func build_results():
 	if events.is_empty():text(column,"Rolls, saves and damage appear here.",11)
 	btn(column,"Full results",func():u.show_text("Combat results","\n\n".join(events.map(func(e):return str(e.title)+" · "+str(e.text)))))
 func build_bottom(a: Dictionary):
-	var column=u.col(bottom);column.add_theme_constant_override("separation",7)
+	var column=u.col(bottom);column.add_theme_constant_override("separation",4 if compact() else 7)
+	u.CHRONICLE.divider(column)
 	var status=u.row(column);status.add_theme_constant_override("separation",18)
+	u.CHRONICLE.portrait_frame(u,status,a,54)
 	text(status,a.name,18,GOLD);text(status,"♥ "+str(a.hp)+" / "+str(a.max_hp),16,RED);text(status,"AC "+str(w.encounter.effective_ac(a)),13)
-	for item in [["Action",not a.get("action",false) or int(a.get("extra_actions",0))>0,GREEN],["Bonus",not a.get("bonus",false),Color("e6b878")],["Reaction",not a.get("reaction",false),Color("93c4db")]]:text(status,("● " if item[1] else "○ ")+item[0],12,item[2] if item[1] else SOFT)
-	move_label=text(status,"",13,GREEN)
-	if int(a.get("attacks_left",0))>0:text(status,str(a.attacks_left)+" attacks left",12,GOLD)
 	var fill=Control.new();u.expand(fill);status.add_child(fill)
+	if compact():
+		btn(status,"Door · E",b.interact_door)
+		if b.enemy_mode:btn(status,"Close enemy HUD",b.toggle_enemy)
 	var end=btn(status,"End turn  ›",func():w.command("end_turn",{"id":a.id}),"Space · End this character’s turn",true);end.custom_minimum_size=Vector2(126,36);end.disabled=not w.data.combat.active or not w.encounter.is_turn(a)
+	var resources=u.row(column)
+	for item in [["Action",not a.get("action",false) or int(a.get("extra_actions",0))>0,GREEN],["Bonus",not a.get("bonus",false),Color("e6b878")],["Reaction",not a.get("reaction",false),Color("93c4db")]]:text(resources,("● " if item[1] else "○ ")+item[0],12,item[2] if item[1] else SOFT)
+	move_label=text(resources,"",13,GREEN)
+	if int(a.get("attacks_left",0))>0:text(resources,str(a.attacks_left)+" attacks left",12,GOLD)
 	if not a.conditions.is_empty():text(column,", ".join(a.conditions),11,RED)
 	var tabs=u.row(column)
 	for tab in ["Actions","Cantrips","Spells","Features"]:btn(tabs,tab,func():b.category=tab;b.refresh(),"Show "+tab,tab==b.category)
@@ -108,7 +116,7 @@ func build_bottom(a: Dictionary):
 	if b.category=="Spells":
 		for i in 9:
 			if int(a.slots_max[i])>0:text(tabs,"L"+str(i+1)+" "+str(a.slots[i])+"/"+str(a.slots_max[i]),11,Color("91bcd4"))
-	var scroll=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO;scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.custom_minimum_size.y=118;column.add_child(scroll);var cards=u.row(scroll);cards.add_theme_constant_override("separation",5)
+	var scroll=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO;scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.custom_minimum_size.y=128 if compact() else 144;column.add_child(scroll);var cards=u.row(scroll);cards.add_theme_constant_override("separation",5)
 	match b.category:
 		"Actions":
 			var profiles=w.attack_profiles(a)

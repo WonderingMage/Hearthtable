@@ -45,6 +45,7 @@ func _process(delta):
 	age+=delta;intro_age+=delta
 	if not queue.is_empty() and (active.is_empty() or age>1.1):active=queue.pop_front();age=0
 	var board=u.board;tray.size.x=230;tray.position=Vector2(maxf(8,size.x-242),88)
+	if u.battle_ui!=null and (board.immersive() or u.battle_ui.enemy_mode):tray.position.y=12
 	tray.visible=size.x>650;banner.size.x=minf(620,size.x-32);banner.position=Vector2((size.x-banner.size.x)/2,110);banner.visible=intro_age<3.6 and w.data.combat.active
 	banner.modulate.a=clampf((3.6-intro_age)*2,0,1)
 	if active.is_empty():return

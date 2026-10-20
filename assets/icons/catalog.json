@@ -2454,6 +2454,38 @@
     },
     "sneakattack": {
       "path": "res://assets/icons/actions/sneakattack.svg"
+    },
+    "grapple": {
+      "path": "res://assets/icons/actions/grapple.svg",
+      "motif": "grapple"
+    },
+    "shoveprone": {
+      "path": "res://assets/icons/actions/shoveprone.svg",
+      "motif": "shoveprone"
+    },
+    "shovepush": {
+      "path": "res://assets/icons/actions/shovepush.svg",
+      "motif": "shovepush"
+    },
+    "helpattack": {
+      "path": "res://assets/icons/actions/helpattack.svg",
+      "motif": "helpattack"
+    },
+    "helpcheck": {
+      "path": "res://assets/icons/actions/helpcheck.svg",
+      "motif": "helpcheck"
+    },
+    "escapegrapple": {
+      "path": "res://assets/icons/actions/escapegrapple.svg",
+      "motif": "escapegrapple"
+    },
+    "releasegrapple": {
+      "path": "res://assets/icons/actions/releasegrapple.svg",
+      "motif": "releasegrapple"
+    },
+    "moreactions": {
+      "path": "res://assets/icons/actions/moreactions.svg",
+      "motif": "moreactions"
     }
   },
   "classes": {

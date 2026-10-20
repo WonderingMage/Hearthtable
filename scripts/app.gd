@@ -5,6 +5,7 @@ const R = preload("res://scripts/rules.gd")
 const C = preload("res://scripts/combat_rules.gd")
 const ICONS = preload("res://scripts/icon_library.gd")
 const REGALIA = preload("res://scripts/regalia.gd")
+const CHRONICLE=preload("res://scripts/chronicle_ui.gd")
 const INK = Color("eee5cf")
 const MUTED = Color("b4aa93")
 const GOLD = Color("e1c184")
@@ -50,6 +51,7 @@ var chosen_attacks={}
 var chosen_targets={}
 var character_ui
 var creator
+var update_ui
 var modal_tag=""
 var session_signature=""
 var seen_lobby=false
@@ -78,6 +80,8 @@ func picture(parent: Node,texture: Texture2D,extent: int=40) -> TextureRect:
 func make_theme():
 	var t=Theme.new();t.default_font=preload("res://assets/Inter.ttf");t.default_font_size=15
 	t.set_color("font_color","Label",INK)
+	for kind in ["tab_selected","tab_unselected","tab_hovered","tab_disabled"]:t.set_stylebox(kind,"TabContainer",gilded("primary" if kind=="tab_selected" else "ribbon",10))
+	t.set_stylebox("panel","TabContainer",gilded("codex",14));t.set_color("font_selected_color","TabContainer",Color("ffe4a9"));t.set_color("font_unselected_color","TabContainer",Color("c0ab87"))
 	for type in ["Button","OptionButton","MenuButton"]:
 		for data in [["normal","button"],["hover","hover"],["pressed","pressed"],["disabled","disabled"]]:t.set_stylebox(data[0],type,gilded(data[1],9))
 		t.set_stylebox("focus",type,style(Color.TRANSPARENT,GOLD,5,0))
@@ -102,6 +106,7 @@ func _ready():
 	character_ui=preload("res://scripts/character_ui.gd").new(self,World)
 	make_theme();loadouts=World.read_json("res://assets/loadouts.json",{})
 	creator=preload("res://scripts/character_creator.gd").new(self,World)
+	update_ui=preload("res://scripts/update_ui.gd").new(self)
 	build_ui();battle_ui=preload("res://scripts/battle_ui.gd").new(self,World);battle_ui.create(board.get_parent().get_parent().get_parent().get_parent());build_editor=preload("res://scripts/build_ui.gd").new(self,World);build_editor.create(board.get_parent().get_parent().get_parent().get_parent());zones_ui=preload("res://scripts/battle_zones_ui.gd").new(self,World);board.zones_controller=zones_ui;dice_overlay=preload("res://scripts/combat_overlay.gd").new();dice_overlay.setup(self,World);board.add_child(dice_overlay);var downloads=preload("res://scripts/scene_download_ui.gd").new();downloads.setup(self,World);board.add_child(downloads);ui_built=true
 	board.viewport.msaa_3d=int(settings.get_value("display","msaa",2));board.render_scale=float(settings.get_value("display","render_scale",1.0))
 	board.labels=bool(settings.get_value("display","labels",true));board.coordinates=bool(settings.get_value("display","coordinates",true));board.cutaway=bool(settings.get_value("display","cutaway",true));board.resize_view()
@@ -110,6 +115,9 @@ func _ready():
 	World.connection_status.connect(func(text):status_label.text=text;refresh())
 	refresh()
 	if World.startup_notice!="":toast(World.startup_notice)
+	var update_notice=str(get_node("/root/UpdateBoot").status.get("notice",""))
+	if not update_notice.is_empty():toast(update_notice)
+	get_tree().process_frame.connect(func():preload("res://scripts/application_update.gd").confirm_boot(),CONNECT_ONE_SHOT)
 	get_tree().auto_accept_quit=false
 	if OS.get_cmdline_user_args().has("--qa"):
 		get_tree().create_timer(3).timeout.connect(func():get_viewport().get_texture().get_image().save_png("user://qa.png");print("QA_SCREENSHOT "+ProjectSettings.globalize_path("user://qa.png")))
@@ -161,7 +169,9 @@ func label(text: String,size: int=14,color: Color=INK,serif: bool=false) -> Labe
 func paragraph(parent: Node,text: String,color: Color=MUTED,size: int=13) -> Label:
 	var l=label(text,size,color);l.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;l.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(l);return l
 
-func heading(parent: Node,text: String):parent.add_child(label(text,11,GOLD))
+func heading(parent: Node,text: String):
+	if parent is VBoxContainer:CHRONICLE.divider(parent)
+	parent.add_child(label(text,12,GOLD,true))
 func spacer(parent: Node,height: int=6):
 	var s=Control.new();s.custom_minimum_size.y=height;parent.add_child(s)
 func row(parent: Node) -> HBoxContainer:
@@ -186,18 +196,19 @@ func panel(parent: Node) -> VBoxContainer:
 	var p=PanelContainer.new();parent.add_child(p);var v=VBoxContainer.new();p.add_child(v);return v
 
 func build_ui():
-	var bg=ColorRect.new();bg.color=Color("101515");bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);bg.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(bg)
+	var bg=TextureRect.new();bg.texture=preload("res://assets/ui/screen.svg");bg.texture_repeat=CanvasItem.TEXTURE_REPEAT_ENABLED;bg.stretch_mode=TextureRect.STRETCH_TILE;bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);bg.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(bg)
 	var margin=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for edge in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,12)
 	add_child(margin)
 	var all=col(margin);all.add_theme_constant_override("separation",10)
-	var header=row(all);header.custom_minimum_size.y=50
+	var banner=PanelContainer.new();banner.add_theme_stylebox_override("panel",gilded("chapter",8));all.add_child(banner)
+	var header=row(banner);header.custom_minimum_size.y=42
 	var icon=TextureRect.new();icon.texture=preload("res://assets/icon.svg");icon.custom_minimum_size=Vector2(36,36);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;header.add_child(icon)
-	header.add_child(label("Hearthtable",21,INK,true));header.add_child(label(" / ",21,MUTED))
+	header.add_child(label("HEARTHTABLE",24,GOLD,true));header.add_child(label("◆",15,GOLD))
 	campaign_label=label("The Lantern Below",17,INK,true);campaign_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;expand(campaign_label);header.add_child(campaign_label)
 	header.add_child(label("2014 5E",11,MUTED))
 	button(header,"Learn",show_learn,"Learn the table controls and original 5e rules")
-	button(header,"Display",show_display_settings,"Native rendering, antialiasing and interface scale")
+	button(header,"Settings",func():update_ui.settings(),"Import application updates, roll back, and configure display")
 	button(header,"Session",show_session,"Host or join the campaign")
 	dm_controls.append(button(header,"Portable copy…",func():file_picker("portable"),"Embed the campaign and maps in a new single-file program"))
 	dm_controls.append(button(header,"Save",func():if World.save_campaign()==OK:toast("Campaign saved."),"Ctrl+S · Autosave every 20 seconds",true))
@@ -210,7 +221,7 @@ func build_ui():
 	button(strip,"Scene library…",show_scene_library,"Import, activate and package reusable scenes")
 	dm_controls.append(button(strip,"+ Scene",new_scene,"Create a blank scene"))
 	var main=row(all);main.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_theme_constant_override("separation",10)
-	var left_panel=PanelContainer.new();left_panel.custom_minimum_size.x=206;left_panel.add_theme_stylebox_override("panel",gilded("panel",12));main.add_child(left_panel)
+	var left_panel=PanelContainer.new();left_panel.custom_minimum_size.x=238;left_panel.add_theme_stylebox_override("panel",gilded("panel",12));main.add_child(left_panel)
 	var left=col(left_panel);heading(left,"ACTORS & MINIATURES")
 	var roster_scroll=ScrollContainer.new();roster_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;roster_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;left.add_child(roster_scroll);roster=col(roster_scroll);expand(roster)
 	dm_controls.append(button(left,"+ New hero",show_creator,"Create a sheet and miniature",true))
@@ -244,10 +255,10 @@ func build_ui():
 	board.map_hint.connect(func(text):hint.text=text)
 	hint=label("Drag miniature · Shift+drag rotate · Right-drag pan · Wheel zoom",11,MUTED);map_col.add_child(hint)
 	guide_label=label("",10,MUTED);guide_label.visible=false;map_col.add_child(guide_label)
-	var right_panel=PanelContainer.new();right_panel.custom_minimum_size.x=344;right_panel.add_theme_stylebox_override("panel",gilded("panel",12));upper.add_child(right_panel)
+	var right_panel=PanelContainer.new();right_panel.custom_minimum_size.x=366;right_panel.add_theme_stylebox_override("panel",gilded("codex",12));upper.add_child(right_panel)
 	var right=col(right_panel);var tabs=row(right);tabs.add_theme_constant_override("separation",3)
 	for tab in ["Character","Combat","Journal","Library"]:
-		var b=button(tabs,tab,func():side_tab=tab;refresh_side());b.add_theme_font_size_override("font_size",12);expand(b);tab_buttons[tab]=b
+		var b=button(tabs,tab,func():side_tab=tab;refresh_side());b.add_theme_font_size_override("font_size",12);b.add_theme_stylebox_override("normal",gilded("ribbon",5));expand(b);tab_buttons[tab]=b
 	sidebar_scroll=ScrollContainer.new();sidebar_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;sidebar_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;right.add_child(sidebar_scroll);side=col(sidebar_scroll);expand(side)
 	var bottom=PanelContainer.new();bottom.add_theme_stylebox_override("panel",gilded("panel",10));workspace.add_child(bottom);var tray=col(bottom);var dice_row=row(tray)
 	heading(dice_row,"ROLL")
@@ -343,11 +354,12 @@ func refresh_roster():
 			if (World.preview or World.client) and not World.visible(a):continue
 			var p=PanelContainer.new();p.add_theme_stylebox_override("panel",gilded("selected" if a.id==World.selected else "panel",8));roster.add_child(p)
 			var h=row(p)
-			var initial=label(str(a.name).substr(0,1),22,Color(a.color),true);initial.custom_minimum_size.x=22;h.add_child(initial)
+			if a.hero:CHRONICLE.portrait_frame(self,h,a,62)
+			else:picture(h,ICONS.texture("creatures","claw"),40)
 			var info=col(h);expand(info);info.add_theme_constant_override("separation",1)
-			var b=Button.new();b.text=a.name+("  ◌" if a.get("hidden",false) else "");b.flat=true;b.alignment=HORIZONTAL_ALIGNMENT_LEFT;b.add_theme_font_size_override("font_size",12);b.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;b.custom_minimum_size.x=137;info.add_child(b);b.pressed.connect(func():World.selected=a.id;refresh_roster();side_tab="Character";refresh_side();board.queue_redraw())
+			var b=Button.new();b.text=a.name+("  ◌" if a.get("hidden",false) else "");b.flat=true;b.alignment=HORIZONTAL_ALIGNMENT_LEFT;b.add_theme_font_size_override("font_size",13);b.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;b.custom_minimum_size.x=112;info.add_child(b);b.pressed.connect(func():World.selected=a.id;refresh_roster();side_tab="Character";refresh_side();board.queue_redraw())
 			info.add_child(label((a.class+" · " if a.hero else "")+str(a.hp)+"/"+str(a.max_hp)+" HP"+(" · Yours" if World.client and World.can_control(a) else ""),10,MUTED))
-			var bar=ProgressBar.new();bar.show_percentage=false;bar.max_value=maxi(1,int(a.max_hp));bar.value=a.hp;bar.custom_minimum_size.y=3;info.add_child(bar)
+			var bar=ProgressBar.new();bar.show_percentage=false;bar.max_value=maxi(1,int(a.max_hp));bar.value=a.hp;bar.custom_minimum_size.y=7;bar.add_theme_stylebox_override("fill",REGALIA.bar("hp"));info.add_child(bar)
 
 func refresh_log():
 	var text=""
@@ -363,7 +375,7 @@ func refresh_side():
 	saved_scroll=int(sidebar_scroll.scroll_vertical) if side_tab==previous_side_tab else 0
 	previous_side_tab=side_tab
 	clear(side);live_journal_dm=null;live_journal_public=null
-	for key in tab_buttons:tab_buttons[key].modulate=GOLD if key==side_tab else Color.WHITE
+	for key in tab_buttons:tab_buttons[key].add_theme_stylebox_override("normal",gilded("primary" if key==side_tab else "ribbon",5))
 	match side_tab:
 		"Character":show_character()
 		"Combat":show_combat()
@@ -374,22 +386,26 @@ func refresh_side():
 func select_actor(id: String):World.selected=id;side_tab="Character";refresh_roster();refresh_side();board.queue_redraw()
 
 func stat(parent: Node,title: String,value: String,color: Color=INK):
-	var box=col(parent);expand(box);box.add_theme_constant_override("separation",2);box.add_child(label(value,23,color,true));box.add_child(label(title,10,MUTED))
+	var badge=PanelContainer.new();badge.add_theme_stylebox_override("panel",gilded("input",7));expand(badge);parent.add_child(badge)
+	var box=col(badge);expand(box);box.add_theme_constant_override("separation",2);box.add_child(label(value,21,color,true));box.add_child(label(title,10,GOLD))
 
 func show_character():
 	var a=World.actor(World.selected)
 	if a.is_empty():paragraph(side,"Select a token or a party member to open their sheet.");return
 	spacer(side,3);heading(side,"CHARACTER SHEET" if a.hero else "CREATURE SHEET")
 	var title_row=row(side)
-	var avatar=profile_texture(a)
-	if avatar:
-		var picture=TextureRect.new();picture.texture=avatar;picture.custom_minimum_size=Vector2(48,48);picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;title_row.add_child(picture)
+	CHRONICLE.portrait_frame(self,title_row,a,92 if a.hero else 62)
 	var character_name=label(a.name,22,Color(a.color),true);character_name.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;expand(character_name);title_row.add_child(character_name)
 	paragraph(side,a.race+" · "+a.class+" · Level "+str(a.level) if a.hero else a.race.capitalize()+" creature · "+str(a.get("xp",0))+" XP",MUTED,12)
 	var footprint=int(a.get("token_size",1))
 	paragraph(side,"Base: "+str(footprint)+" × "+str(footprint)+" squares · "+World.format_distance(footprint*World.grid_settings().distance)+" per side",MUTED,11)
 	var control=World.can_control(a)
 	var stats=row(side);stat(stats,"HIT POINTS",str(a.hp)+" / "+str(a.max_hp),MOSS);stat(stats,"ARMOR CLASS",str(World.encounter.effective_ac(a)));stat(stats,"SPEED",str(a.speed)+" ft")
+	var ability_cards=GridContainer.new();ability_cards.columns=3;ability_cards.add_theme_constant_override("h_separation",5);ability_cards.add_theme_constant_override("v_separation",5);side.add_child(ability_cards)
+	for i in 6:
+		var rune=button(ability_cards,R.ABILITIES[i]+"  "+R.signed_n(R.modifier(int(a.abilities[i])))+"\n"+str(a.abilities[i]),func():World.command("check",{"id":a.id,"ability":i,"mode":World.roll_mode}),"Roll an ability check")
+		rune.add_theme_stylebox_override("normal",gilded("button",7));rune.add_theme_font_size_override("font_size",14);expand(rune);rune.disabled=not control
+	var equipped=panel(side);var weapon_row=row(equipped);picture(weapon_row,ICONS.weapon(str(a.weapon)),48);var weapon_info=col(weapon_row);expand(weapon_info);paragraph(weapon_info,str(a.weapon),GOLD,15);paragraph(weapon_info,R.signed_n(int(a.attack))+" to hit  ·  "+str(a.damage)+" damage",INK,12)
 	if a.temp>0:paragraph(side,str(a.temp)+" temporary HP",GOLD)
 	if a.get("dead",false):paragraph(side,"DEAD · DM can override in Edit sheet.",Color("e29680"))
 	elif a.get("stable",false):paragraph(side,"STABLE · At 0 HP. No death saves until destabilized.",GOLD)
@@ -401,10 +417,7 @@ func show_character():
 	var edit=row(side);expand(button(edit,"Edit sheet",func():edit_actor(a),"Update stats, abilities, proficiency, equipment and notes"));edit.get_child(0).disabled=not World.is_dm()
 	if not a.hero:button(edit,"Reveal" if a.get("hidden",false) else "Hide",func():World.command("hidden",{"id":a.id})).disabled=World.client
 	character_ui.summary(side,a)
-	spacer(side,3);heading(side,"ABILITIES · CLICK TO ROLL A CHECK")
-	var abilities=GridContainer.new();abilities.columns=3;abilities.add_theme_constant_override("h_separation",5);abilities.add_theme_constant_override("v_separation",5);side.add_child(abilities)
-	for i in 6:
-		var b=button(abilities,R.ABILITIES[i]+"  "+R.signed_n(R.modifier(a.abilities[i]))+"\n"+str(a.abilities[i]),func():World.command("check",{"id":a.id,"ability":i,"mode":World.roll_mode}),"Ability check: d20 + modifier");expand(b);b.disabled=not control;b.add_theme_font_size_override("font_size",12)
+	spacer(side,3);heading(side,"SAVES & SKILLS")
 	var saving=row(side);var saves=options(saving,R.ABILITIES)
 	button(saving,"Save",func():World.command("check",{"id":a.id,"ability":saves.selected,"save":true,"label":R.ABILITIES[saves.selected]+" save","mode":World.roll_mode})).disabled=not control
 	var skill_row=row(side);var skills=options(skill_row,R.SKILLS.keys())
@@ -1041,7 +1054,7 @@ func show_display_settings():
 
 func profile_texture(a: Dictionary) -> Texture2D:
 	var encoded=str(a.get("portrait",""))
-	if encoded.is_empty():return null
+	if encoded.is_empty():return CHRONICLE.portrait(a) if a.get("hero",false) else null
 	var key=encoded.hash()
 	if profile_textures.has(key):return profile_textures[key]
 	var image=Image.new()

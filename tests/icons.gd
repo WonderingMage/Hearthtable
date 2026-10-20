@@ -8,6 +8,8 @@ func check(ok: bool,note: String):
 	else:failed+=1;push_error("FAIL "+note)
 func run():
 	await process_frame;var w=root.get_node("World");I.ensure()
+	var new_actions=["grapple","shoveprone","shovepush","helpattack","helpcheck","escapegrapple","releasegrapple","moreactions"]
+	check(new_actions.all(func(key):return I.catalog.actions.has(key) and I.action(key).get_image().get_width()==256),"New combat actions have dedicated illustrated icons instead of generic sigils")
 	var missing=[];var invalid=[];var hashes={};var sizes=[]
 	for s in w.spells:
 		var entry=I.catalog.spells.get(I.key(s.name),{})

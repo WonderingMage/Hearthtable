@@ -32,11 +32,24 @@ static func export_copy(source: String,destination: String,data: Dictionary) -> 
 	var length=f.get_length();f.seek(length-12);var pack_length=f.get_64()
 	if f.get_buffer(4).get_string_from_ascii()!="GDPC":return ERR_FILE_UNRECOGNIZED
 	var prior=inspect(source);var end=int(prior.get("start",length-12));pack_length=int(prior.get("pack_length",pack_length))
+	var update_pack=preload("res://scripts/application_update.gd").active_pack()
+	var updated=FileAccess.open(update_pack,FileAccess.READ) if not update_pack.is_empty() else null
+	var engine_end=end-pack_length
+	if updated!=null:
+		if updated.get_buffer(4).get_string_from_ascii()!="GDPC":return ERR_FILE_CORRUPT
+		updated.seek(20)
+		if not (updated.get_32() & 2):return ERR_FILE_UNRECOGNIZED
 	var buffer=JSON.stringify(data).to_utf8_buffer()
 	if buffer.size()>LIMIT:return ERR_OUT_OF_MEMORY
 	var out=FileAccess.open(destination+".writing",FileAccess.WRITE)
 	if out==null:return FileAccess.get_open_error()
 	f.seek(0)
-	while f.get_position()<end:out.store_buffer(f.get_buffer(mini(1048576,end-f.get_position())))
-	out.store_buffer(buffer);out.store_buffer(MAGIC.to_ascii_buffer());out.store_64(buffer.size());out.store_64(pack_length+buffer.size()+24);out.store_buffer("GDPC".to_ascii_buffer());out.close();f.close()
+	var source_end=engine_end if updated!=null else end
+	while f.get_position()<source_end:out.store_buffer(f.get_buffer(mini(1048576,source_end-f.get_position())))
+	if updated!=null:
+		pack_length=updated.get_length();updated.seek(0)
+		while updated.get_position()<pack_length:out.store_buffer(updated.get_buffer(mini(1048576,pack_length-updated.get_position())))
+		updated.close()
+	out.store_buffer(buffer);out.store_buffer(MAGIC.to_ascii_buffer());out.store_64(buffer.size());out.store_64(pack_length+buffer.size()+24);out.store_buffer("GDPC".to_ascii_buffer());out.flush();var write_error=out.get_error();out.close();f.close()
+	if write_error!=OK:return write_error
 	return DirAccess.rename_absolute(destination+".writing",destination)

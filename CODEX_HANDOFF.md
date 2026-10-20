@@ -1,6 +1,6 @@
 # Hearthtable development handoff
 
-Hearthtable is a native Godot **4.5.1** tabletop for **original 2014 D&D 5e**, development **0.12.0-dev**, campaign schema **1**, network protocol **10** (last published: 0.11.1/protocol 9). Open the folder containing `project.godot` in Codex and Godot. In the source companion this is `Hearthtable/Source`.
+Hearthtable is a native Godot **4.5.1** tabletop for **original 2014 D&D 5e**, version **0.12.0**, campaign schema **1**, network protocol **10** (older 0.11.1 uses protocol 9). Open the folder containing `project.godot` in Codex and Godot. In the source companion this is `Hearthtable/Source`.
 
 ## Product requirements
 
@@ -63,7 +63,15 @@ Read `tests/README.md` for graphical and two-process UDP suites. Headless tests 
 
 ## Character/action development
 
-Read `docs/character-actions.md`. `combat_actions.gd` handles host-resolved contests, source-linked holds, Help and Dodge eligibility. `character_creator.gd` owns an isolated draft for new/imported heroes and cosmetic editing; `mini_appearance.gd` validates cosmetic data and configures the same meshes in preview/board. Player-created/imported sheets require existing DM submission approval. Cosmetic updates have a dedicated owner-checked command; clients cannot change stats through it. Protocol 10 prevents mixing these commands with older releases; save schema stays 1. Do not publish this branch without a release request.
+Read `docs/character-actions.md`. `combat_actions.gd` handles host-resolved contests, source-linked holds, Help and Dodge eligibility. `character_creator.gd` owns an isolated draft for new/imported heroes and cosmetic editing; `mini_appearance.gd` validates cosmetic data and configures the same meshes in preview/board. Player-created/imported sheets require existing DM submission approval. Cosmetic updates have a dedicated owner-checked command; clients cannot change stats through it. Protocol 10 prevents mixing these commands with older releases; save schema stays 1. Publish future versions only on a release request.
+
+## Application updates and interface
+
+Read `docs/application-updates.md`. `UpdateBoot` is the stable first autoload and mounts a verified application pack before `World`. `application_update.gd` handles bounded manifests, fixed-origin release provenance, staged files, startup confirmation and rollback. `update_ui.gd` exposes the Settings flow; it refuses installation during multiplayer. Scene/design imports remain data-only. Keep update state and campaign backups in user data, never the checkout. `portable.gd` embeds the currently mounted application pack when copying an updated campaign.
+
+The release builder exports a complete resource pack, packages it as `Hearthtable-VERSION.hearthupdate`, tests real compiled World replacement/restart/portable transfer/rollback, and uploads it alongside the standalone EXE. Each coding task should prepare the corresponding package and update `docs/release-highlights.json`; publication still needs a release request. Engine/updater-API changes require a compatible new portable foundation.
+
+`chronicle_ui.gd` supplies original painted archetype portraits, dividers and frames; user portraits take precedence. `art/build_chronicle_ui.py` generates the rich fantasy SVG materials and action icons. Rendered UI tests cover native and minimum windows; preserve readable controls and camera roles.
 
 ## Current validation and limits
 

@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 VERSION = '4.5.1'
 ENGINE_NAME = f'Godot_v{VERSION}-stable_linux.x86_64'
 BASE_URL = f'https://github.com/godotengine/godot/releases/download/{VERSION}-stable'
-SUITES = ['actions', 'smoke', 'combat_range', 'encounter', 'magic', 'rooms', 'build', 'director', 'prepared', 'pdf_import']
+SUITES = ['updates', 'actions', 'smoke', 'combat_range', 'encounter', 'magic', 'rooms', 'build', 'director', 'prepared', 'pdf_import']
 ERROR = re.compile(r'(?m)^(?:SCRIPT ERROR:|ERROR:|.*Parse Error:|.*FAIL )')
 SUMMARY = re.compile(r'\w+ (\d+) passed, (\d+) failed')
 
@@ -125,6 +125,12 @@ def main():
     linux = output / 'Hearthtable_Linux.x86_64'
     invoke('export-windows', command(args=['--export-release', 'Windows Desktop', str(portable)]))
     invoke('export-linux', command(args=['--export-release', 'Linux Desktop', str(linux)]))
+    update_pack=output/'Application.pck'
+    invoke('export-update',command(args=['--export-pack','Windows Desktop',str(update_pack)]))
+    protocol = int(re.search(r'const PROTOCOL\s*=\s*(\d+)', (ROOT / 'scripts/world.gd').read_text()).group(1))
+    from make_update import build as build_update
+    update_file=output/f'Hearthtable-{product}.hearthupdate'
+    update_manifest=build_update(update_pack,update_file,product,commit,protocol)
     for suite in SUITES:
         invoke(suite, command(suite, portable), True)
     for label, program in [('windows', portable), ('linux', linux)]:
@@ -136,19 +142,22 @@ def main():
             copy.chmod(0o700)
             verify = [str(copy), '--headless', '--script', str(ROOT / 'tests/portable.gd'), '--', '--verify', '--portable-source=/not/a/campaign.exe']
         invoke(label + '-portable-restore', verify, True)
+    invoke('update-cycle',[sys.executable,str(ROOT/'tools/test_updates.py'),'--engine',str(engine),'--program',str(linux),'--templates',str(tools/'data/godot/export_templates'),'--output',str(output/'qa/compiled-update-cycle')],True)
     if subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT, text=True).strip():
         raise RuntimeError('Build modified source files')
     protocol = int(re.search(r'const PROTOCOL\s*=\s*(\d+)', (ROOT / 'scripts/world.gd').read_text()).group(1))
-    manifest = {'commit': commit, 'dirty': False, 'engine': VERSION, 'product': product, 'protocol': protocol, 'filename': portable.name, 'sha256': digest(portable), 'assertions': results}
+    manifest = {'commit': commit, 'dirty': False, 'engine': VERSION, 'product': product, 'protocol': protocol, 'filename': portable.name, 'sha256': digest(portable), 'update':{'filename':update_file.name,'sha256':digest(update_file),'pack_sha256':update_manifest['sha256']},'assertions': results}
     (output / 'build-manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
-    (output / 'SHA256SUMS.txt').write_text(manifest['sha256'] + '  ' + portable.name + '\n')
+    (output / 'SHA256SUMS.txt').write_text(manifest['sha256'] + '  ' + portable.name + '\n'+digest(update_file)+'  '+update_file.name+'\n')
     notes = f'''# Hearthtable {product} — portable Windows prerelease
 
 Download **Hearthtable_Portable.exe** and run it directly. The engine, game resources, prepared maps and notices are embedded. No ZIP, installer or Godot installation is required. The checksum and manifest are optional verification files.
 
-This build includes original-2014 grapple, shove, Help and Dodge support, a shared character creator/import review menu, and persistent cosmetic miniatures. Campaign schema remains 1. Multiplayer protocol is {protocol}; hosts and guests must use a matching build. See the included help for supported rules and DM adjudication.
+This release adds an ornate fantasy interface with original painted portraits, bronze frames and expanded character information; original-2014 grapple, shove, Help and Dodge support; a shared character creator/PDF review menu; and persistent cosmetic miniatures. Campaign schema remains 1. Multiplayer protocol is {protocol}; hosts and guests must use a matching build. See the included help for supported rules and DM adjudication.
 
-Built from clean commit `{commit}` with official Godot {VERSION} and checksum-verified export templates. This automated run passed **{sum(results.values())} assertions** across {len(SUITES)} exported headless suites and Windows/Linux portable creation and restoration. This automated run does not validate graphical UI or actual UDP sessions; their separate results belong in the release checklist.
+Also attached: **{update_file.name}**. Download this portable EXE once to obtain the new updater, then use **Settings → Import application update** for this and subsequent code/assets updates. The importer verifies the file against its published GitHub release, saves a campaign backup and retains rollback before restarting. A portable campaign copy embeds the active updated code and campaign together. Version 0.11.1 has no update importer and needs the new EXE first. Engine/updater-foundation changes may still require a new EXE.
+
+Built from clean commit `{commit}` with official Godot {VERSION} and checksum-verified export templates. This automated run passed **{sum(results.values())} assertions** across {len(SUITES)} exported headless suites, Windows/Linux portable creation/restoration, and a real compiled-code install/restart/portable/rollback cycle. This automated run does not validate graphical UI or actual UDP sessions; their separate results belong in the release checklist.
 
 Native Windows launch, GPU/audio and external internet play remain untested, so this is a prerelease. This is the plain player program; synthetic or private campaign copies are not release assets.
 
@@ -168,16 +177,18 @@ SHA-256: `{manifest['sha256']}`.
     if not existing:
         run(['gh', 'release', 'create', options.tag, *repo_args, '--verify-tag', '--draft', '--prerelease', '--title', f'Hearthtable {product} — portable Windows prerelease', '--notes-file', str(output / 'RELEASE_NOTES.md')])
     else:
-        allowed = {portable.name, 'SHA256SUMS.txt', 'build-manifest.json'}
+        allowed = {portable.name,update_file.name, 'SHA256SUMS.txt', 'build-manifest.json'}
         if any(asset['name'] not in allowed for asset in existing['assets']):
             raise RuntimeError('Draft contains unexpected assets; inspect before publication')
         run(['gh', 'release', 'edit', options.tag, *repo_args, '--target', commit, '--prerelease', '--notes-file', str(output / 'RELEASE_NOTES.md')])
-    run(['gh', 'release', 'upload', options.tag, str(portable), str(output / 'SHA256SUMS.txt'), str(output / 'build-manifest.json'), *repo_args, '--clobber'])
+    run(['gh', 'release', 'upload', options.tag, str(portable),str(update_file), str(output / 'SHA256SUMS.txt'), str(output / 'build-manifest.json'), *repo_args, '--clobber'])
     download = output / 'download-check'
     download.mkdir()
     run(['gh', 'release', 'download', options.tag, *repo_args, '--pattern', portable.name, '--dir', str(download)])
     if digest(download / portable.name) != manifest['sha256']:
         raise RuntimeError('Uploaded download failed checksum verification; leave release unpublished')
+    run(['gh','release','download',options.tag,*repo_args,'--pattern',update_file.name,'--dir',str(download)])
+    if digest(download/update_file.name)!=digest(update_file):raise RuntimeError('Uploaded update failed checksum verification; leave release unpublished')
     run(['gh', 'release', 'edit', options.tag, *repo_args, '--draft=false', '--prerelease'])
     run(['gh', 'release', 'view', options.tag, *repo_args, '--json', 'url,isDraft,isPrerelease'])
 

@@ -62,3 +62,13 @@ Godot consumes `--main-pack` before exposing engine arguments to application scr
 `actions_network.gd` uses UDP 24727: host with `-- --host`, client without it (or `-- --ui --qa` for the actual player creator and tactical targeting). It checks pending character submissions, DM acceptance, owner-only cosmetics, unchanged stats, invalid model rejection, hidden/private data filtering, grapple resources, free off-turn release, Help and replicated miniatures. Run fixed-port suites serially. `portable.gd` additionally verifies created identity and appearance after restoring an embedded campaign.
 
 Cloud helpers support `python3 /workspace/hearthtable-toolchain/check.py headless --suite actions`, `ui --suite creator_ui`, `network --suite actions_network`, and `network-ui --suite actions_network`. They retain the existing proven disposable user-data isolation. These are Linux/matching-pack checks, not native Windows validation.
+
+## Application updates and ornate UI (0.12)
+
+`updates.gd` validates package parsing, supported pack/engine/manifest bounds, fixed-release digest provenance, tamper and downgrade rejection, pending state, startup confirmation, failed-start/corruption rollback, duplicate imports, active-code selection during staging, and byte-for-byte campaign preservation. It uses synthetic metadata directly at the verification boundary; the product UI always fetches metadata from the fixed HTTPS GitHub origin.
+
+`ornate_ui.gd` checks the actual desktop, Settings entry, update review/verification/install controls, offline-session gate, complete pre-update backup, character preview, expanded HUD and minimum window. Screenshots remain in disposable user data. `icons.gd` checks the dedicated illustrations for the added combat actions.
+
+`tools/test_updates.py --engine /path/to/godot --program /path/to/exported-linux-program --templates /path/to/export_templates --output /new/disposable/folder` creates a synthetic updated full pack in a disposable project copy. It launches the real exported program through install, restart with changed compiled World code, updated portable campaign export, transfer to fresh user data, rollback and restart into base code. Every process has a proven disposable user-data path. The release builder runs this test and retains its separate logs; no synthetic update or campaign is uploaded.
+
+The `.hearthupdate` player artifact is produced from the exact clean release resources. It is distinct from test fixtures, private campaigns and rollback backups. Native Windows execution remains unverified; do not substitute Linux XDG settings for Windows isolation.

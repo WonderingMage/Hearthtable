@@ -1,1 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="16"><defs><linearGradient id="g" x2="0" y2="1"><stop stop-color="#d0ebc0"/><stop offset=".25" stop-color="#669d79"/><stop offset="1" stop-color="#264b3e"/></linearGradient></defs><rect x="1" y="1" width="126" height="14" rx="2" fill="url(#g)"/><path d="M3 2H125" stroke="#d0ebc0" stroke-opacity=".7"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><defs>
+<linearGradient id="metal" x2="0" y2="1"><stop stop-color="#f5dfaa"/><stop offset=".15" stop-color="#9f7136"/><stop offset=".37" stop-color="#e9c47b"/><stop offset=".52" stop-color="#6f4528"/><stop offset=".75" stop-color="#b88743"/><stop offset="1" stop-color="#ecd39a"/></linearGradient>
+<linearGradient id="leather" x2=".3" y2="1"><stop stop-color="#3c2d28"/><stop offset=".48" stop-color="#201d21"/><stop offset="1" stop-color="#100f14"/></linearGradient>
+<linearGradient id="wine" x2="0" y2="1"><stop stop-color="#7b3039"/><stop offset=".5" stop-color="#491d2b"/><stop offset="1" stop-color="#240e1c"/></linearGradient>
+<linearGradient id="jade" x2="0" y2="1"><stop stop-color="#385854"/><stop offset="1" stop-color="#172b31"/></linearGradient>
+<linearGradient id="vellum" x2="0" y2="1"><stop stop-color="#38322b"/><stop offset="1" stop-color="#1f2025"/></linearGradient>
+<radialGradient id="gem"><stop stop-color="#e8d8a7"/><stop offset=".2" stop-color="#be9b62"/><stop offset=".5" stop-color="#8a3c31"/><stop offset="1" stop-color="#29121c"/></radialGradient>
+</defs><rect width="256" height="256" fill="#130e17"/><rect x="2" y="2" width="252" height="252" fill="#b68e4d"/><path d="M0 5H256M0 15H256" stroke="#f7d797" stroke-width="2" opacity=".5"/><path d="M0 235H256" stroke="#351824" stroke-width="8"/></svg>

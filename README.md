@@ -1,6 +1,6 @@
 # Hearthtable
 
-An editable Godot **4.5.1** virtual tabletop for original **2014 D&D 5e**. The development version is **0.12.0-dev**, campaign schema **1**, multiplayer protocol **10**. The last published release is **0.11.1** (protocol 9); this development branch requires matching protocol-10 hosts and guests.
+An editable Godot **4.5.1** virtual tabletop for original **2014 D&D 5e**. The current version is **0.12.0**, campaign schema **1**, multiplayer protocol **10**. Hosts and guests need the same version; older 0.11.1 uses protocol 9.
 
 The repository root is the Godot project directory: open `project.godot` here. The complete source is in `scripts/`, `assets/`, `tests/`, `art/` and `tools/`; there is no additional `Source` wrapper in this checkout.
 
@@ -15,7 +15,11 @@ Tests intentionally reset their campaign. Use isolated user data; never use real
 
 The Windows export preset embeds the engine/game pack in a single executable. Generated programs, caches, personal characters and campaign snapshots do not belong in source commits. Native Windows launch and external port-forwarded play remain separate validation tasks.
 
-Releases attach `Hearthtable_Portable.exe` directly for a one-file player download. New releases are published only on request; see `docs/releases.md`.
+Releases attach `Hearthtable_Portable.exe` directly for a one-file player download, plus a matching `.hearthupdate` application update. Download 0.12.0’s portable EXE once to obtain the updater; later code/assets packages import through Settings with a review, public-release verification, campaign backup, restart and rollback. Portable campaign copies also embed the active updated code. See `docs/application-updates.md`. New releases are published only on request; see `docs/releases.md`.
+
+## Interface
+
+Original painted party portraits, sculpted bronze frames, wine-red controls, codex tabs, illustrated combat cards and visible ability/weapon summaries replace the flat interface. The rich fantasy style preserves the DM isometric and player tactical views, original 2014 rules and minimum-window controls. `art/build_chronicle_ui.py` reproduces the vector materials and action illustrations; user portrait imports take precedence over the bundled archetypes.
 
 ## Characters and actions
 
