@@ -258,7 +258,11 @@ test('real Windows Codex sandbox stages and commits a linked-worktree change wit
   const f=fixture(t,parent),linked=path.join(f.base,"linked worktree & quote's");
   f.git('worktree','add','-b','automation/git-permission-proof',linked,'HEAD');
   const mainHead=f.git('rev-parse','HEAD'),common=f.git('rev-parse','--path-format=absolute','--git-common-dir');
-  const run=path.join(f.base,'git permission reports');fs.mkdirSync(run);
+  // Keep the harness entry in TEMP, whose parents Node can inspect. The Git
+  // worktree/admin paths remain under Dev, matching the owner without granting
+  // sandbox listing access to that private parent directory.
+  const run=fs.mkdtempSync(path.join(os.tmpdir(),'hearthtable-git-permission-reports-'));
+  t.after(()=>fs.rmSync(run,{recursive:true,force:true}));
   const config=sessionConfig({project:linked},pythonCommand(),run,common);
   const probe=path.join(run,'commit-probe.mjs');
   fs.writeFileSync(probe,`import fs from 'node:fs';import path from 'node:path';import{spawnSync}from'node:child_process';
