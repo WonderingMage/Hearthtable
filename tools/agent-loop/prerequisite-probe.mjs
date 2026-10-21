@@ -2,12 +2,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {pythonCommand} from '../python-runtime.mjs';
-import {engine,isolated} from '../lite-local.mjs';
+import {engine,isolated,toolHome} from '../lite-local.mjs';
 
 const args=process.argv.slice(2),get=key=>args[args.indexOf(key)+1];
 const python=get('--python'),output=get('--output');
 if(!args.includes('--python') || !path.isAbsolute(python || '') || !args.includes('--output') || !path.isAbsolute(output || ''))throw Error('Expected absolute --python and --output paths.');
-const result={passed:false,cwd:process.cwd(),python,exists:fs.existsSync(python),systemRootPresent:Boolean(process.env.SystemRoot || process.env.SYSTEMROOT)};
+const result={passed:false,cwd:process.cwd(),python,exists:fs.existsSync(python),systemRootPresent:Boolean(process.env.SystemRoot || process.env.SYSTEMROOT),toolchain:toolHome({})};
 try {
   const runtime=pythonCommand(python);
   result.runtime=runtime;

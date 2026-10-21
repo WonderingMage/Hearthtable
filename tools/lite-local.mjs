@@ -93,7 +93,7 @@ export async function engine(o) {
     const exe=fs.realpathSync.native(o.godot);const r=spawnSync(exe,['--version'],{encoding:'utf8',windowsHide:true});if(r.status!==0 || !r.stdout.trim().startsWith(official))throw Error('Use the official Godot 4.5.1 editor.');return {exe,templates:o.templates && fs.realpathSync.native(o.templates)};
   }
   const home=toolHome(o), manifestFile=path.join(home,'manifest.json');
-  if(!fs.existsSync(manifestFile))throw Error('Godot is not set up yet. Run: node tools/lite-local.mjs setup');
+  if(!fs.existsSync(manifestFile))throw Error('Godot is not set up or its manifest is inaccessible: '+manifestFile+'. Verify it outside the sandbox before considering setup; do not reinstall working tools.');
   const manifest=JSON.parse(fs.readFileSync(manifestFile,'utf8'));
   if(manifest.engine!==official || !manifest.files || Object.keys(manifest.files).length!==5)throw Error('Unexpected toolchain manifest.');
   for(const rel of Object.keys(manifest.files))if(path.isAbsolute(rel) || rel.split(/[\\/]/).includes('..'))throw Error('Unexpected toolchain manifest path.');

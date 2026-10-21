@@ -7,6 +7,7 @@ import {spawn,spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {parseArgs,location,preflight,validateReport,taskXml,sessionConfig,probeRuntime,codexCommand} from './agent-loop.mjs';
 import {pythonCommand} from './python-runtime.mjs';
+import {toolHome} from './lite-local.mjs';
 const runner=fileURLToPath(new URL('./agent-loop.mjs',import.meta.url));
 function command(exe,args,options={}) {
   const r=spawnSync(exe,args,{encoding:'utf8',windowsHide:true,...options});
@@ -184,6 +185,9 @@ test('real Windows Codex sandbox validates Python, Godot, source, UI, network an
   // inside the real sandbox. Apply only read/execute access to this disposable
   // tool installation, using Codex's own Windows group; never grant writes.
   command('icacls.exe',[install,'/grant','CodexSandboxUsers:(OI)(CI)(RX)','/T','/Q']);
+  // Same scoped tool-only RX on this fresh VM. The owner already launched
+  // Godot inside workers; never infer they need a grant or reinstall from CI.
+  command('icacls.exe',[toolHome({}),'/grant','CodexSandboxUsers:(OI)(CI)(RX)','/T','/Q']);
   const run=path.join(f.base,'live sandbox reports');fs.mkdirSync(run);
   const source=path.dirname(path.dirname(runner)),loc={project:source},codex=codexCommand(process.env.HEARTHTABLE_REAL_CODEX);
   const common=command('git',['-C',source,'rev-parse','--path-format=absolute','--git-common-dir']);

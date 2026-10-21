@@ -110,7 +110,7 @@ async function execute(command,args,prompt,log,timeout,project,python,toolchain)
   } finally {clearTimeout(timer);await new Promise(resolve=>output.end(resolve));}
 }
 export function sessionConfig(loc,python,run,common) {
-  // Extends the same workspace-write baseline; adds only READ access to Python.
+  // Extends the workspace-write baseline; existing tools receive READ access.
   // Keep the original explicitly writable report and Git-common directories.
   const profile='hearthtable_loop';
   const toolchain=toolHome({});
