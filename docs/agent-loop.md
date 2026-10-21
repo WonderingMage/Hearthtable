@@ -280,3 +280,23 @@ parent-directory access. Ordinary Windows helper checks also passed on
 154 source, 37 network and 154 compiled assertions, matching update packaging
 and unchanged normal data/source. None of these start real agents or schedules.
 The owner must still apply the scoped permission and pass the probe on their PC.
+
+The owner subsequently passed the real Python probe after that scoped repair,
+then a worker's Godot isolation probe failed on the Windows ROOT-store message
+despite proving the correct disposable save path. The verified bundled-CA
+handling and expanded free prerequisite probe passed on helper source
+`d9eb2ad7c15b6699228a5482d4c1d93e6e2795a1` in
+[real Windows sandbox run 39574388306](https://github.com/WonderingMage/Hearthtable/actions/runs/39574388306):
+29 launcher/runtime checks, actual Python/Godot prerequisites, 233 source/UI
+assertions, 37 multiplayer assertions and 154 compiled-EXE assertions, matching
+update preparation and unchanged ordinary-save sentinel/source. This reproduced
+the certificate-store diagnostic and verified Godot's existing bundled fallback
+inside the restricted account, including compiled execution. Only on this fresh
+hosted VM, the test grants Codex's group read/execute on its installed Godot
+folder and disposable Python copy. It does not change the owner's ACLs or trust
+stores. Missing/inaccessible-tool errors now include the exact manifest path;
+do not reinstall a working Godot installation based on a sandbox lookup failure.
+[Normal Windows run 39574388325](https://github.com/WonderingMage/Hearthtable/actions/runs/39574388325)
+passed source, networking, compiled execution and update packaging separately.
+The owner must still update the worktree and pass the expanded free probe locally.
+No model cycle, active schedule, installation or release was started by these checks.

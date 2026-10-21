@@ -11,8 +11,22 @@ Raw diagnostics remain in logs; all other errors, failed TLS parsing, exit
 codes, assertion summaries and path checks remain enforced. Python and Godot
 startup/isolation are both checked by `agent-loop.mjs probe` before model usage.
 No certificate-store permissions, TLS validation, gameplay or app version changed.
-Native sandbox validation of this fix is pending; do not call it proven on the
-owner's PC, start a schedule or publish a release. See `docs/agent-loop.md`.
+Native sandbox validation passed on helper source
+`d9eb2ad7c15b6699228a5482d4c1d93e6e2795a1` in run `39574388306`:
+29 launcher/runtime checks plus actual Codex 0.163 sandbox prerequisites,
+233 source/UI, 37 multiplayer and 154 compiled-Windows assertions, matching
+update preparation, unchanged source and normal-save sentinel. The real
+restricted account reproduced the ROOT-store failure and confirmed the bundled
+CA fallback across probes, imports, tests and compiled execution. Godot's existing
+folder is pinned through `HEARTHTABLE_TOOLCHAIN` and given a read-only profile
+entry. This fresh VM needed scoped RX for its Godot tool folder as well as the
+disposable Python copy; this CI-only grant does not modify the owner's PC.
+Normal Windows run `39574388325` passed source/network/compiled checks too.
+The owner already launched Godot inside workers; do not infer they need a
+reinstall or new ACL change from the fresh VM. They must fetch/fast-forward and
+pass the expanded free probe on their PC before another paid cycle. A successful
+manual model cycle and schedule enable remain pending. No release was published.
+See `docs/agent-loop.md`.
 
 This branch is **Hearthtable Lite 1.0.2 in development** (`edition/lite`; latest published prerelease remains `lite-v1.0.1`), Godot 4.5.1, protocol 11, schema 1. Read `docs/lite.md` and `assets/help/lite.txt` for the active product contract. The user explicitly requested this separate DM-led edition; classic Hearthtable remains on `main` with its existing releases.
 
