@@ -9,6 +9,10 @@ on:
         description: Existing version tag to release
         required: true
         type: string
+      windows_probe:
+        description: Only test the published Windows EXE (does not publish)
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -19,6 +23,7 @@ concurrency:
 
 jobs:
   release:
+    if: inputs.windows_probe != true
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
@@ -55,3 +60,22 @@ jobs:
           print('::error title=Portable release diagnostic::'+text)
           PYLOG
           exit 1
+  windows-probe:
+    if: inputs.windows_probe == true
+    runs-on: windows-2022
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      - name: Run the actual published Windows executable
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git -c credential.helper='!gh auth git-credential' clone --no-checkout "https://github.com/$env:GITHUB_REPOSITORY.git" source
+          if ($LASTEXITCODE -ne 0) { throw 'Clone failed' }
+          git -C source checkout --detach $env:GITHUB_SHA
+          if ($LASTEXITCODE -ne 0) { throw 'Checkout failed' }
+          & ./source/tools/windows_probe.ps1 -Tag $env:RELEASE_TAG -Repository $env:GITHUB_REPOSITORY
