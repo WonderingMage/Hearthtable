@@ -183,7 +183,7 @@ The launcher also passed all 13 Windows checks on that source in
 [run 39561758352](https://github.com/WonderingMage/Hearthtable/actions/runs/39561758352).
 The owner subsequently reported successful local Windows checks: 233 core/UI
 assertions, 37 real network assertions and a separate 154-core-assertion run.
-The first real cycle and enabling the local schedule remain pending confirmation.
+The first successful manual cycle and enabling the local schedule remain pending confirmation.
 
 One separate Linux network run on that source logged `Unable to send packet on
 channel 0, max channels: 0` when both guests left together. Although all 37
@@ -192,3 +192,15 @@ Windows run did not reproduce it. Keep this intermittent shutdown defect as a
 concrete first-cycle investigation candidate; do not weaken error detection or
 claim networking is universally clean. No gameplay source was changed by this
 tooling setup.
+
+The Python handoff fix at `9ac9b36eda3a5350538d2646509927b146c8c13b` passed
+all **24 native Windows launcher/runtime checks** in
+[run 39565904566](https://github.com/WonderingMage/Hearthtable/actions/runs/39565904566),
+including empty-PATH Python discovery, explicit-path failure diagnostics,
+interpreter handoff and failure before agent invocation.
+[Run 39565904592](https://github.com/WonderingMage/Hearthtable/actions/runs/39565904592)
+passed 154 source, 37 network and 154 compiled Windows assertions plus update
+packaging and unchanged ordinary-user-data/source checks with the new resolver.
+These use fake agents or direct tools, not real model cycles. The owner confirmed
+Python 3.13.7 is already installed; a fresh manual cycle must confirm its use
+inside the actual Codex sandbox. No reinstall or schedule activation occurred.
