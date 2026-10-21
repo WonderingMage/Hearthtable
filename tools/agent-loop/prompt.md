@@ -1,27 +1,60 @@
 Perform ONE bounded improvement cycle on Hearthtable Lite, then stop.
 
-Read AGENTS.md, CODEX_HANDOFF.md, docs/lite.md and tests/README.md. This task
+Read AGENTS.md, CODEX_HANDOFF.md, docs/lite.md,
+docs/campaign-experience.md and tests/README.md. This task
 explicitly authorizes exactly three worker agents: Builder, Tester and Critic,
 managed by you as coordinator. If worker tools are unavailable, report blocked;
 do not silently substitute a single-agent run. Do not create further workers.
 After prerequisites pass, actually launch each worker and retain its agent ID
 with its findings. If blocked before launching workers, say they were not
 started; never invent worker findings or report your own review as independent.
+The owner explicitly requires GPT-6 Luna: gpt-6-luna for the coordinator and all
+three workers. The launcher pins model and agents.default_subagent_model for
+this invocation. Use the default worker type, preserving that model; if the
+spawn tool requires an explicit model, select gpt-6-luna. Do not override it
+with another model or use a role with a different model configuration. Report
+unavailable model access as blocked; never silently fall back. Record actual
+worker IDs and model metadata when exposed; distinguish requested settings
+from observed metadata rather than inventing model verification.
 
 On Windows, use shell tools with login=false and an explicit project workdir.
 If invoking PowerShell yourself, use -NoProfile and Set-Location -LiteralPath
 with the supplied project path; a profile may otherwise reset the location.
 
 Before editing, Critic inspects the current program and recent Git history to
-identify concrete defects or usability problems. Tester checks whether the
-problem can be reproduced and whether relevant validation is available safely.
-Select at most ONE well-supported improvement. Builder alone edits application
-source; Tester and Critic are independent and do not change application files.
+identify missing campaign capabilities, concrete defects or usability problems.
+Tester reproduces a campaign scenario and checks that relevant validation is
+available safely. Select at most ONE coherent, useful improvement. A feature
+may span several files; it is not limited to a small bug fix. Builder alone edits
+application source; Tester and Critic are independent and do not change it.
 Coordinate tests so fixed network ports and test data are never shared at once.
 
-The owner's explicit goal is to improve the VTT itself. Prioritize missing,
-incomplete or inaccessible spell descriptions and useful fixes to existing
-functions. Audit assets/spells.json (desc and higher_level) and trace the actual
+The owner's goal is a polished multiplayer 2014 5e homebrew VTT and character
+sheet, not merely fewer bugs. Build missing, useful capabilities as well as
+fixing defects. Follow the campaign brief's class/scenario rotation and record
+evidence-backed coverage there when accepting an app improvement. Audit at least
+one class-specific situation and one shared campaign interaction each cycle;
+use recent history/coverage to visit different classes rather than repeatedly
+polishing spell wording. Prioritize the highest-impact interruption to real play.
+Start with the owner's Druid -> Dire Wolf Wild Shape scenario unless the current
+checkout already supports it with end-to-end evidence. An existing use counter
+or a feature description is not working transformation support. Implement safe,
+tested feature slices without exposing unfinished controls. A larger feature
+can take several cycles; keep its remaining work in the campaign brief. Do not
+replace requested feature development with repeated documentation-only edits.
+
+Use D&D Beyond as a usability reference: familiar sheet sections and precise
+labels, discoverable actions/bonus actions/reactions, readable spell/feature
+text, equipped/prepared choices, clear resource and active-effect state. Keep
+Hearthtable's own design and DM-led workflow. Use the 2014 SRD reference identified
+in the campaign brief for rules; keep homebrew/custom overrides explicit and
+distinguish 2024 rules.
+Use synthetic campaigns for tests. Public, accessible play examples may inform
+scenarios when their source is recorded; never claim to have played/watched a
+campaign you have not inspected or access private campaigns/accounts.
+
+Continue auditing missing, incomplete or inaccessible spell information.
+Audit assets/spells.json (desc and higher_level) and trace the actual
 sheet's Read full spell view, casting proposal and DM inbox. Check casting time,
 range, components/material costs, duration, concentration/ritual, effects,
 saves/attacks and higher-slot effects where applicable against the existing
@@ -33,15 +66,21 @@ and resource spending under the DM's control.
 
 Also inspect broken/incomplete controls, awkward existing workflows, PDF import
 reliability, readable DM/player screens, keyboard/accessibility and clear
-interactions. Tie function improvements to concrete player/DM benefit and test
-the affected interaction; avoid refactoring just to create activity. Each cycle
-still selects at most ONE supported improvement. Use actual rendered before/after
-screens for visual changes when possible. Do not invent features or churn the
-design merely to make a change. A well-supported no_change result is valid.
+interactions. Tie each change to a concrete player/DM benefit and test the
+affected interaction; avoid refactoring just to create activity. Use actual
+rendered before/after screens for visual changes. New features consistent with
+the owner's campaign brief are authorized. Do not add unrelated features or
+churn the design merely to make a change. A well-supported no_change result is
+valid only after considering missing campaign capabilities as well as bugs.
 
 Preserve DM authority, packet privacy, player movement rules, DM-only doors,
-PDF-only review, cosmetic miniatures and save/update compatibility. No new
-character creator, automated combat, protocol/schema/engine change, licensing
+PDF-only review, cosmetic customization and save/update compatibility. A DM-approved
+transformation is a rules-state change, separate from cosmetic customization;
+update the usable sheet after approval without authorizing player-side stat
+mutation or automatic outcomes. Compatible optional fields must load older saves
+and survive save/reload/reconnect; if a protocol/schema break is essential,
+report the required migration plan as blocked rather than silently changing it.
+No new character creator, automated combat, protocol/schema/engine change, licensing
 change, signing change, paid service or external messages. Do not merge, push,
 create PRs, tag, release, install updates, change Windows security settings,
 modify scheduled tasks, or edit these loop controls/instructions. Operate only
@@ -77,6 +116,12 @@ Run tests through
 `node tools/lite-local.mjs test --output <run-report-dir>/unique-test-name`.
 Use --suite lite/updates/pdf_import or --ui for rendered checks; network changes
 also require the `network` action (add --ui for rendered player controls).
+Features that change a player's usable sheet or state require real DM/two-player
+network coverage as well as relevant core/rendered checks: only the assigned
+player receives their full sheet, observers receive permitted visuals, and
+unauthorized requests cannot change state. Exercise save/load/reconnect where
+the feature persists. Test a complete usable scenario, not just that a new
+button or text field exists.
 All outputs must be new folders under this cycle's writable run-report directory.
 The helper snapshots tracked working files without modifying source; Builder
 must git add new source files before tests so the snapshot includes them.
@@ -106,4 +151,6 @@ For no_change, make no commit or edits. For accepted, a new commit, passing test
 and both approvals are required. For blocked, explain the missing tool or failed
 check and the next step. Each role_reports entry must summarize that worker's
 actual findings. Review previous reports/history to avoid repeating the same
-work. Never hide a missing test, worker or approval behind a success status.
+work. Identify the class/scenarios inspected, rules source actually consulted,
+and any remaining feature slice in the report. Never hide a missing test, worker
+or approval behind a success status.

@@ -12,6 +12,7 @@ import {toolHome} from './lite-local.mjs';
 const script = fileURLToPath(import.meta.url);
 const tools = path.dirname(script);
 const branch = 'automation/lite-improvements';
+export const loopModel = 'gpt-6-luna';
 export function parseArgs(args) {
   const options={action:args.shift() || 'doctor',project:path.dirname(tools),scheduled:false,timeout:40*60_000};
   const values={'--project':'project','--state':'state','--codex':'codex','--timeout-ms':'timeout'};
@@ -112,7 +113,7 @@ async function execute(command,args,prompt,log,timeout,project,python,toolchain)
 }
 export function sessionConfig(loc,python,run,common) {
   // Extends the workspace-write baseline; existing tools receive READ access.
-  // Keep the original explicitly writable report and Git-common directories.
+  // Reports and the scoped Git metadata below receive write access.
   const profile='hearthtable_loop';
   const toolchain=toolHome({});
   // Codex protects a linked worktree's resolved gitdir separately. A broader
@@ -125,7 +126,7 @@ export function sessionConfig(loc,python,run,common) {
   const metadata=[path.join(common,'objects'),path.join(common,'refs'),path.join(common,'logs')].filter(dir=>fs.existsSync(dir));
   const entries=new Map([[path.dirname(python.exe),'read'],[toolchain,'read'],[run,'write'],[common,'read'],...metadata.map(dir=>[dir,'write']),[gitdir,'write']]);
   const filesystem=[...entries].map(([dir,mode])=>JSON.stringify(dir)+'='+JSON.stringify(mode)).join(',');
-  return {profile,toolchain,gitdir,common,args:['-a','never','-c','permissions.'+profile+'={extends=":workspace",filesystem={'+filesystem+'}}','-c','default_permissions='+JSON.stringify(profile),'-c','shell_environment_policy.set.HEARTHTABLE_PYTHON='+JSON.stringify(python.exe),'-c','shell_environment_policy.set.HEARTHTABLE_TOOLCHAIN='+JSON.stringify(toolchain)]};
+  return {profile,toolchain,gitdir,common,args:['-a','never','-c','model='+JSON.stringify(loopModel),'-c','agents.default_subagent_model='+JSON.stringify(loopModel),'-c','permissions.'+profile+'={extends=":workspace",filesystem={'+filesystem+'}}','-c','default_permissions='+JSON.stringify(profile),'-c','shell_environment_policy.set.HEARTHTABLE_PYTHON='+JSON.stringify(python.exe),'-c','shell_environment_policy.set.HEARTHTABLE_TOOLCHAIN='+JSON.stringify(toolchain)]};
 }
 export async function probeRuntime(loc,command,python,run,common) {
   const config=sessionConfig(loc,python,run,common);
@@ -155,7 +156,7 @@ export async function runCycle(options,loc,command) {
     const run=path.join(loc.state,'runs',new Date().toISOString().replace(/[:.]/g,'-')+'-'+token.slice(0,8));fs.mkdirSync(run,{recursive:true});
     const report=path.join(run,'report.json');const log=path.join(run,'console.txt');
     const python=pythonCommand();
-    fs.writeFileSync(path.join(run,'runtime.json'),JSON.stringify({python:python.exe,version:python.version,toolchain:toolHome({}),project:loc.project},null,2));
+    fs.writeFileSync(path.join(run,'runtime.json'),JSON.stringify({python:python.exe,version:python.version,toolchain:toolHome({}),project:loc.project,model:loopModel,subagent_model:loopModel},null,2));
     const common=git(loc.project,'rev-parse','--path-format=absolute','--git-common-dir');
     console.log('Verified Python '+python.version+': '+python.exe+'\nChecking the real Codex sandbox without model calls. Reports: '+run);
     const config=await probeRuntime(loc,command,python,run,common);
@@ -165,7 +166,7 @@ export async function runCycle(options,loc,command) {
     prompt+='\nWrite any additional reports under '+run+'. Starting revision: '+before+'.';
     prompt+='\nVerified Python '+python.version+': '+JSON.stringify(python.exe)+'. HEARTHTABLE_PYTHON is set for your shells; lite-local.mjs uses it automatically. If necessary pass this same absolute path with --python, and report its actual error if it cannot start. Project directory: '+JSON.stringify(loc.project)+'.';
     const args=['--enable','multi_agent',...config.args,'exec','-C',loc.project,'--output-schema',path.join(tools,'agent-loop','report.schema.json'),'--output-last-message',report,'--color','never','-'];
-    console.log('Verified Python '+python.version+': '+python.exe+'\nStarting one cycle. Reports: '+run+'\nThe automatic schedule has not been enabled by this command.');
+    console.log('Verified Python '+python.version+': '+python.exe+'\nCoordinator and worker model: '+loopModel+'\nStarting one cycle. Reports: '+run+'\nThe automatic schedule has not been enabled by this command.');
     await execute(command,args,prompt,log,options.timeout,loc.project,python,config.toolchain);
     const after=git(loc.project,'rev-parse','HEAD');const result=json(report);validateReport(result,before,after);
     preflight(loc);
@@ -216,7 +217,7 @@ export async function main(args=process.argv.slice(2)) {
     return;
   }
   const head=preflight(loc);const command=codexCommand(options.codex);const version=cli(command,['--version']);cli(command,['login','status']);
-  if(options.action==='doctor') {console.log('Workspace: '+loc.project+'\nBranch: '+branch+'\nCodex: '+version+'\nReports: '+loc.state+'\nNext: run one manual cycle. This check did not start agents or create a scheduled task.');return;}
+  if(options.action==='doctor') {console.log('Workspace: '+loc.project+'\nBranch: '+branch+'\nCodex: '+version+'\nCoordinator and worker model: '+loopModel+'\nReports: '+loc.state+'\nNext: run one manual cycle. This check did not start agents or create a scheduled task.');return;}
   if(['run','probe'].includes(options.action)) {await runCycle(options,loc,command);return;}
   if(process.platform!=='win32') throw new Error('Schedule installation is Windows-only.');
   initialize(loc);

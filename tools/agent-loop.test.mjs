@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawn,spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {parseArgs,location,preflight,validateReport,taskXml,sessionConfig,probeRuntime,codexCommand} from './agent-loop.mjs';
+import {parseArgs,location,preflight,validateReport,taskXml,sessionConfig,probeRuntime,codexCommand,loopModel} from './agent-loop.mjs';
 import {pythonCommand} from './python-runtime.mjs';
 import {toolHome} from './lite-local.mjs';
 import {gitPrerequisite} from './agent-loop/git-prerequisite.mjs';
@@ -29,6 +29,8 @@ if(args.includes('--version')){console.log('codex-cli test-double');process.exit
 if(args[0]==='login'){process.exit(0);}
 const value=k=>args[args.indexOf(k)+1];const dir=value('-C');
 if(process.cwd()!==dir)throw Error('Agent process did not start in the project directory');
+const model=args.find(x=>x.startsWith('model='));const subagentModel=args.find(x=>x.startsWith('agents.default_subagent_model='));
+if(model!=='model="gpt-6-luna"' || subagentModel!=='agents.default_subagent_model="gpt-6-luna"')throw Error('Coordinator and worker Luna model overrides missing');
 const config=args.find(x=>x.startsWith('shell_environment_policy.set.HEARTHTABLE_PYTHON='));
 if(!config)throw Error('Python shell policy missing');
 const python=JSON.parse(config.slice(config.indexOf('=')+1));
@@ -43,7 +45,8 @@ const result={passed:true,runtime:{exe:python},git:{passed:true},godot:{actual:{
 if(process.env.LOOP_TEST_MODE==='godot-fail'){result.passed=false;result.error='synthetic Godot startup failure';delete result.godot;}
 fs.writeFileSync(value('--output'),JSON.stringify(result));
 console.log(JSON.stringify(result));process.exit(result.passed?0:1);}
-fs.writeFileSync(value('--output-last-message')+'.startup.json',JSON.stringify({cwd:process.cwd(),python,config}));
+fs.writeFileSync(value('--output-last-message')+'.startup.json',JSON.stringify({cwd:process.cwd(),python,config,model,subagentModel}));
+if(process.env.LOOP_TEST_MODE==='model-unavailable'){console.error('gpt-6-luna is unavailable for this test account');process.exit(1);}
 const git=(...a)=>{const r=spawnSync('git',['-C',dir,...a],{encoding:'utf8'});if(r.status)throw Error(r.stderr);return r.stdout.trim();};
 if(process.env.LOOP_TEST_MODE==='hang'){setInterval(()=>{},1000);}else{
 if(['dirty','blocked-dirty'].includes(process.env.LOOP_TEST_MODE))fs.writeFileSync(dir+'/unfinished.txt','keep me');
@@ -86,6 +89,8 @@ test('a no-change cycle records state without calling a shell or changing source
   const runtime=JSON.parse(fs.readFileSync(path.join(f.state,'runs',run,'runtime.json')));
   const startup=JSON.parse(fs.readFileSync(path.join(f.state,'runs',run,'report.json.startup.json')));
   assert.equal(startup.python,runtime.python);assert.equal(startup.cwd,fs.realpathSync(f.project));
+  assert.equal(runtime.model,'gpt-6-luna');assert.equal(runtime.subagent_model,'gpt-6-luna');
+  assert.equal(startup.model,'model="'+loopModel+'"');assert.equal(startup.subagentModel,'agents.default_subagent_model="'+loopModel+'"');
   assert.ok(path.isAbsolute(runtime.python));
 });
 test('a broken Python configuration pauses before invoking any agent',t=>{
@@ -171,9 +176,11 @@ test('blocked or unfinished work pauses future scheduled calls, preserving files
   const scheduled=f.invoke('run','accepted',['--scheduled']);assert.equal(scheduled.status,0,scheduled.stderr);assert.match(scheduled.stdout,/PAUSED/);assert.ok(!fs.existsSync(path.join(f.project,'improvement.txt')));
   assert.equal(f.invoke('run').status,0);assert.ok(!fs.existsSync(path.join(f.state,'PAUSED')));
 });
-test('bad JSON and explicit blockers never mark a cycle ready',t=>{
+test('bad JSON, model unavailability and explicit blockers never mark a cycle ready',t=>{
   const f=fixture(t);
-  for(const mode of ['bad-json','blocked']) {const r=f.invoke('run',mode);assert.notEqual(r.status,0);assert.ok(fs.existsSync(path.join(f.state,'PAUSED')));assert.ok(!fs.existsSync(path.join(f.state,'ready.json')));}
+  const before=f.git('rev-parse','HEAD');
+  for(const mode of ['bad-json','blocked','model-unavailable']) {const r=f.invoke('run',mode);assert.notEqual(r.status,0);assert.ok(fs.existsSync(path.join(f.state,'PAUSED')));assert.ok(!fs.existsSync(path.join(f.state,'ready.json')));if(mode==='model-unavailable')assert.match(r.stdout,/gpt-6-luna is unavailable/);}
+  assert.equal(f.git('rev-parse','HEAD'),before);assert.equal(f.git('status','--porcelain'),'');
 });
 test('an unfinished blocked cycle retains its specific report instead of hiding it behind dirty status',t=>{
   const f=fixture(t),result=f.invoke('run','blocked-dirty');

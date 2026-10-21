@@ -1,5 +1,20 @@
 # Hearthtable Lite development handoff
 
+The latest instruction broadens the local loop from bug fixing to substantial
+campaign feature development, using **GPT-6 Luna (`gpt-6-luna`)** for coordinator,
+Builder, Tester and Critic. Invocation-scoped `model` and
+`agents.default_subagent_model` settings pin it without changing global config;
+unavailable model access pauses rather than falling back. Startup/runtime logs
+record requested settings, not proof of account entitlement. Read
+`docs/campaign-experience.md`: first priority is a DM-approved Druid -> Dire Wolf
+Wild Shape that updates the effective sheet and safely restores the base form.
+It includes 2014 eligibility/subclass rules, distinct HP, inherited traits,
+gear/concentration, DM-controlled reversion and owned-sheet multiplayer/save
+coverage. The broader class/scenario rotation uses Beyond-style organization
+and explicit homebrew decisions. Those are development goals, not implemented
+app features in this cloud tooling commit. Preserve the owner's newer local
+app commits. Ten-minute scheduling stays opt-in; activation remains unconfirmed.
+
 Latest owner checkpoint (October 21, 17:31 UTC): the real manual cycle was
 ACCEPTED. It restored Shield's missing 2014 reaction trigger in the full spell
 view, casting proposal and DM inbox, committed the fix and built matching local

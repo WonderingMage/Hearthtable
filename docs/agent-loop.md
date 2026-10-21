@@ -168,7 +168,23 @@ node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\agent-loop.mjs" run
 ```
 
 This consumes Codex allowance. The prompt requires all three worker agents and
-real validation before accepting code. Before any model call, the launcher
+real validation before accepting code. The coordinator and Builder, Tester and
+Critic are pinned to **GPT-6 Luna** (`gpt-6-luna`) for this invocation via `model`
+and `agents.default_subagent_model` (Codex 0.163 configuration). Your global
+Codex settings are unchanged. `doctor` and cycle startup print the requested
+model; private `runtime.json` records both settings. Free prerequisite probes
+test tools/sandbox access, not account entitlement to this model. If the account
+cannot use Luna, the cycle fails and pauses instead of switching models.
+
+The product brief in [campaign-experience.md](campaign-experience.md) directs
+feature development as well as bug fixes. First priority is a DM-approved
+Druid/Dire Wolf transformation with a usable effective sheet and safe reversion.
+Subsequent cycles examine different classes and campaign situations, using
+2014 references and D&D Beyond-style sheet organization. Accepted work needs
+real evidence and independent reviews; the brief is not a claim that those
+features already exist. A larger feature can take several tested slices.
+
+Before any model call, the launcher
 verifies the actual Python interpreter and supplies its absolute path to Codex
 and its shell environment as `HEARTHTABLE_PYTHON`, then runs the actual sandbox
 Python/Godot probe before launching the coordinator. It records the interpreter in the private
@@ -210,8 +226,8 @@ timeout, so a longer run can skip the next scheduled start. Do not run tests or
 edit this same worktree in a separate session during a cycle.
 
 At up to 144 starts/day, three workers plus a coordinator can consume substantial Codex
-allowance. The tool uses your existing Codex model/account configuration, with
-no separate API key, paid service or forced model selection. Monitor usage.
+allowance. The tool uses your existing Codex account, with
+no separate API key or service, and pins GPT-6 Luna as requested. Monitor usage.
 
 Pause future agent calls at any time:
 
