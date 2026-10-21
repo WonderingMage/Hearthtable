@@ -7,6 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash, randomUUID} from 'node:crypto';
 import {spawn, spawnSync} from 'node:child_process';
 import {pythonCommand} from './python-runtime.mjs';
+import {toolHome} from './lite-local.mjs';
 
 const script = fileURLToPath(import.meta.url);
 const tools = path.dirname(script);
@@ -90,9 +91,9 @@ export function validateReport(report,before,after) {
   if(report.status==='no_change' && before!==after) throw new Error('A no-change report unexpectedly changed Git HEAD.');
   if(report.status==='accepted' && (before===after || report.tester_approved!==true || report.critic_approved!==true || !Array.isArray(report.tests) || !report.tests.length || report.tests.some(t=>typeof t!=='string' || !t.trim()))) throw new Error('Accepted changes require a new commit, test evidence and both independent approvals.');
 }
-async function execute(command,args,prompt,log,timeout,project,python) {
+async function execute(command,args,prompt,log,timeout,project,python,toolchain) {
   const output=fs.createWriteStream(log,{flags:'wx'});
-  const child=spawn(command.exe,[...command.prefix,...args],{cwd:project,env:{...process.env,HEARTHTABLE_PYTHON:python.exe},windowsHide:true,detached:process.platform!=='win32',stdio:['pipe','pipe','pipe']});
+  const child=spawn(command.exe,[...command.prefix,...args],{cwd:project,env:{...process.env,HEARTHTABLE_PYTHON:python.exe,HEARTHTABLE_TOOLCHAIN:toolchain},windowsHide:true,detached:process.platform!=='win32',stdio:['pipe','pipe','pipe']});
   let expired=false;
   const timer=setTimeout(()=>{
     if(child.exitCode!==null || child.signalCode!==null || !child.pid) return;
@@ -112,15 +113,16 @@ export function sessionConfig(loc,python,run,common) {
   // Extends the same workspace-write baseline; adds only READ access to Python.
   // Keep the original explicitly writable report and Git-common directories.
   const profile='hearthtable_loop';
-  const entries=[[path.dirname(python.exe),'read'],[run,'write'],[common,'write']];
+  const toolchain=toolHome({});
+  const entries=[[path.dirname(python.exe),'read'],[toolchain,'read'],[run,'write'],[common,'write']];
   const filesystem=entries.map(([dir,mode])=>JSON.stringify(dir)+'='+JSON.stringify(mode)).join(',');
-  return {profile,args:['-a','never','-c','permissions.'+profile+'={extends=":workspace",filesystem={'+filesystem+'}}','-c','default_permissions='+JSON.stringify(profile),'-c','shell_environment_policy.set.HEARTHTABLE_PYTHON='+JSON.stringify(python.exe)]};
+  return {profile,toolchain,args:['-a','never','-c','permissions.'+profile+'={extends=":workspace",filesystem={'+filesystem+'}}','-c','default_permissions='+JSON.stringify(profile),'-c','shell_environment_policy.set.HEARTHTABLE_PYTHON='+JSON.stringify(python.exe),'-c','shell_environment_policy.set.HEARTHTABLE_TOOLCHAIN='+JSON.stringify(toolchain)]};
 }
 export async function probeRuntime(loc,command,python,run,common) {
   const config=sessionConfig(loc,python,run,common);
   const output=path.join(run,'prerequisite.json'),log=path.join(run,'prerequisite.log');
   const args=[...config.args,'sandbox','-P',config.profile,'-C',loc.project,'--',process.execPath,path.join(tools,'agent-loop','prerequisite-probe.mjs'),'--python',python.exe,'--output',output];
-  try {await execute(command,args,'',log,180000,loc.project,python);}
+  try {await execute(command,args,'',log,180000,loc.project,python,config.toolchain);}
   catch(error) {
     let detail='';
     if(fs.existsSync(output)) {detail=fs.readFileSync(output,'utf8').slice(0,8000);fs.appendFileSync(log,'\n'+detail+'\n');}
@@ -144,7 +146,7 @@ export async function runCycle(options,loc,command) {
     const run=path.join(loc.state,'runs',new Date().toISOString().replace(/[:.]/g,'-')+'-'+token.slice(0,8));fs.mkdirSync(run,{recursive:true});
     const report=path.join(run,'report.json');const log=path.join(run,'console.txt');
     const python=pythonCommand();
-    fs.writeFileSync(path.join(run,'runtime.json'),JSON.stringify({python:python.exe,version:python.version,project:loc.project},null,2));
+    fs.writeFileSync(path.join(run,'runtime.json'),JSON.stringify({python:python.exe,version:python.version,toolchain:toolHome({}),project:loc.project},null,2));
     const common=git(loc.project,'rev-parse','--path-format=absolute','--git-common-dir');
     console.log('Verified Python '+python.version+': '+python.exe+'\nChecking the real Codex sandbox without model calls. Reports: '+run);
     const config=await probeRuntime(loc,command,python,run,common);
@@ -155,7 +157,7 @@ export async function runCycle(options,loc,command) {
     prompt+='\nVerified Python '+python.version+': '+JSON.stringify(python.exe)+'. HEARTHTABLE_PYTHON is set for your shells; lite-local.mjs uses it automatically. If necessary pass this same absolute path with --python, and report its actual error if it cannot start. Project directory: '+JSON.stringify(loc.project)+'.';
     const args=['--enable','multi_agent',...config.args,'exec','-C',loc.project,'--output-schema',path.join(tools,'agent-loop','report.schema.json'),'--output-last-message',report,'--color','never','-'];
     console.log('Verified Python '+python.version+': '+python.exe+'\nStarting one cycle. Reports: '+run+'\nThe automatic schedule has not been enabled by this command.');
-    await execute(command,args,prompt,log,options.timeout,loc.project,python);
+    await execute(command,args,prompt,log,options.timeout,loc.project,python,config.toolchain);
     const after=preflight(loc);const result=json(report);validateReport(result,before,after);
     fs.copyFileSync(report,path.join(loc.state,'latest.json'));
     fs.writeFileSync(path.join(loc.state,'ready.json'),JSON.stringify({revision:after,when:new Date().toISOString(),report},null,2));

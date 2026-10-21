@@ -45,7 +45,7 @@ export function outside(project,target) {
   const relative=path.relative(project,target);
   if(relative==='' || (!relative.startsWith('..'+path.sep) && relative!=='..' && !path.isAbsolute(relative)))throw Error('Output must be outside the source checkout.');
 }
-export function toolHome(o) {return path.resolve(o.toolchain || path.join(process.env.LOCALAPPDATA || path.join(os.homedir(),'.local','share'),'HearthtableCodexTools','Godot-4.5.1'));}
+export function toolHome(o) {return path.resolve(o.toolchain || process.env.HEARTHTABLE_TOOLCHAIN || path.join(process.env.LOCALAPPDATA || path.join(os.homedir(),'.local','share'),'HearthtableCodexTools','Godot-4.5.1'));}
 async function hash(file,algorithm='sha256') {const h=createHash(algorithm);for await(const chunk of fs.createReadStream(file))h.update(chunk);return h.digest('hex');}
 function ps(body) {
   const r=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from("$ErrorActionPreference='Stop';"+body,'utf16le').toString('base64')],{encoding:'utf8',windowsHide:true,timeout:180000});

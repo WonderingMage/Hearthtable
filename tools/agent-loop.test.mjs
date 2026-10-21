@@ -31,6 +31,8 @@ const config=args.find(x=>x.startsWith('shell_environment_policy.set.HEARTHTABLE
 if(!config)throw Error('Python shell policy missing');
 const python=JSON.parse(config.slice(config.indexOf('=')+1));
 if(python!==process.env.HEARTHTABLE_PYTHON)throw Error('Agent and shell Python paths differ');
+const toolsConfig=args.find(x=>x.startsWith('shell_environment_policy.set.HEARTHTABLE_TOOLCHAIN='));
+if(!toolsConfig || JSON.parse(toolsConfig.slice(toolsConfig.indexOf('=')+1))!==process.env.HEARTHTABLE_TOOLCHAIN)throw Error('Godot toolchain handoff missing');
 if(args.includes('sandbox')){
 if(process.env.LOOP_TEST_MODE==='sandbox-fail'){console.error('synthetic sandbox Python visibility failure');process.exit(1);}
 // This launcher unit fixture models prerequisite results; the optional native
@@ -120,6 +122,7 @@ test('the permission profile grants Python read access and keeps the workspace s
   assert.ok(profile.includes('extends=":workspace"'));
   assert.ok(profile.includes(JSON.stringify(path.dirname(runtime.exe))+'="read"'));
   assert.ok(!profile.includes(JSON.stringify(path.dirname(runtime.exe))+'="write"'));
+  assert.ok(profile.includes(JSON.stringify(config.toolchain)+'="read"'));
   assert.ok(!config.args.some(x=>x.includes('danger-full-access') || x.includes('bypass')));
 });
 test('accepted changes require actual new HEAD, evidence and approvals',t=>{
@@ -196,7 +199,7 @@ test('real Windows Codex sandbox validates Python, Godot, source, UI, network an
   for(const [action,extra] of [['test',['--ui']],['network',[]],['build',[]]]) {
     const output=path.join(run,action);
     const args=[...codex.prefix,...config.args,'sandbox','-P',config.profile,'-C',source,'--',process.execPath,path.join(source,'tools','lite-local.mjs'),action,'--project',source,'--output',output,...extra];
-    const result=spawnSync(codex.exe,args,{cwd:source,env:{...process.env,HEARTHTABLE_PYTHON:copied.exe},encoding:'utf8',windowsHide:true,timeout:600000,maxBuffer:8000000});
+    const result=spawnSync(codex.exe,args,{cwd:source,env:{...process.env,HEARTHTABLE_PYTHON:copied.exe,HEARTHTABLE_TOOLCHAIN:config.toolchain},encoding:'utf8',windowsHide:true,timeout:600000,maxBuffer:8000000});
     if(result.error || result.status!==0) {
       // Failure reports retain the actual Godot diagnostics, not only the wrapper.
       function logs(dir) {if(!fs.existsSync(dir))return;for(const entry of fs.readdirSync(dir,{withFileTypes:true})){const file=path.join(dir,entry.name);if(entry.isDirectory())logs(file);else if(entry.name.endsWith('.log'))console.log(file+'\n'+fs.readFileSync(file,'utf8').slice(-3000));}}

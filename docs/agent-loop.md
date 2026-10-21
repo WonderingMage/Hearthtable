@@ -97,10 +97,13 @@ game autoloads to prove its disposable save path and certificate initialization.
 It does not load a campaign or run the application/UI suites. The
 per-invocation `hearthtable_loop` permission profile extends Codex’s built-in
 `:workspace` profile (the workspace-write baseline). It grants read access to
-only the verified Python installation folder; source, reports and the Git common
+only the Python installation and pinned Godot toolchain folders; source, reports and the Git common
 directory keep their existing write access. It does not grant Python-folder
 write access, disable the sandbox or change account-wide Codex configuration.
 The same profile is used for the probe and subsequent model cycle.
+The parent pins the existing Godot folder as `HEARTHTABLE_TOOLCHAIN` for the
+probe and workers, so a sandbox account's different LocalAppData does not make
+the installed tools appear missing. `--toolchain` still takes precedence.
 
 If ordinary Python verification succeeds but the sandbox reports the executable
 is invisible (`exists: false`, `ENOENT`), its Windows folder ACL may not allow
