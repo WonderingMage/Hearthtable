@@ -85,7 +85,7 @@ Ordinary results live under `%LOCALAPPDATA%\HearthtableCodexQA`; agents instead
 pass a new `--output` folder under their writable cycle report directory.
 Existing result folders are never overwritten. Keep these QA folders private.
 
-Before spending model allowance, check Python and Godot inside the **actual Codex sandbox**:
+Before spending model allowance, check Python, Godot and Git metadata writes inside the **actual Codex sandbox**:
 
 ```powershell
 node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\agent-loop.mjs" probe
@@ -97,8 +97,9 @@ game autoloads to prove its disposable save path and certificate initialization.
 It does not load a campaign or run the application/UI suites. The
 per-invocation `hearthtable_loop` permission profile extends Codex’s built-in
 `:workspace` profile (the workspace-write baseline). It grants read access to
-only the Python installation and pinned Godot toolchain folders; source, reports and the Git common
-directory keep their existing write access. It does not grant Python-folder
+only the Python installation and pinned Godot toolchain folders; source, reports,
+the Git common directory and the current worktree's exact Git admin directory
+have write access. It does not grant Python-folder
 write access, disable the sandbox or change account-wide Codex configuration.
 The same profile is used for the probe and subsequent model cycle.
 The parent pins the existing Godot folder as `HEARTHTABLE_TOOLCHAIN` for the
@@ -130,6 +131,18 @@ a successful-cycle checkpoint or clear an existing pause. Results and errors
 are retained as private `prerequisite.json` / `prerequisite.log` in the run
 folder, including whether the Python path is visible inside the sandbox. A
 failed probe stops before model usage; preserve its diagnostics.
+
+The Git check exclusively creates and removes randomly named temporary files
+in the current Git admin directory, common directory and object-store directory.
+It does not touch the index, refs, commits or application source. A linked
+worktree has its own admin directory under the main checkout's `.git/worktrees`.
+Codex 0.163 protects that exact directory separately; granting only the broader
+common directory leaves `index.lock` creation denied. The launcher explicitly
+grants the current admin directory while keeping the worktree's `.git` pointer
+protected. A permission-denied `index.lock` message is not evidence of a stale
+lock: do not delete a lock or disable sandboxing as a repair.
+See Codex's pinned
+[worktree carveout handling](https://github.com/openai/codex/blob/rust-v0.163.0/codex-rs/protocol/src/permissions.rs#L1684).
 
 Godot 4.5.1 can print `Failed to read the root certificate store` under the
 Windows sandbox account even though it then loads its bundled trusted CA set.

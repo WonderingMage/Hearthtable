@@ -42,7 +42,8 @@ function git(project,...args) {
 }
 export function preflight(loc) {
   if(git(loc.project,'branch','--show-current')!==branch) throw new Error('Use the separate '+branch+' workspace. No agent was started.');
-  if(git(loc.project,'status','--porcelain')) throw new Error('This workspace has uncommitted changes. Preserve/review them before continuing; nothing was discarded.');
+  const changes=git(loc.project,'status','--porcelain');
+  if(changes) throw new Error('This workspace has uncommitted changes. Preserve/review them before continuing; nothing was discarded.\nChanged items:\n'+changes);
   const project=fs.readFileSync(path.join(loc.project,'project.godot'),'utf8');
   if(!project.includes('config/edition="lite"')) throw new Error('Expected the Hearthtable Lite project.');
   const remote=git(loc.project,'remote','get-url','origin').replace(/\.git$/,'').replace(/\/$/,'');
@@ -114,9 +115,12 @@ export function sessionConfig(loc,python,run,common) {
   // Keep the original explicitly writable report and Git-common directories.
   const profile='hearthtable_loop';
   const toolchain=toolHome({});
-  const entries=[[path.dirname(python.exe),'read'],[toolchain,'read'],[run,'write'],[common,'write']];
-  const filesystem=entries.map(([dir,mode])=>JSON.stringify(dir)+'='+JSON.stringify(mode)).join(',');
-  return {profile,toolchain,args:['-a','never','-c','permissions.'+profile+'={extends=":workspace",filesystem={'+filesystem+'}}','-c','default_permissions='+JSON.stringify(profile),'-c','shell_environment_policy.set.HEARTHTABLE_PYTHON='+JSON.stringify(python.exe),'-c','shell_environment_policy.set.HEARTHTABLE_TOOLCHAIN='+JSON.stringify(toolchain)]};
+  // Codex protects a linked worktree's resolved gitdir separately. A broader
+  // common-dir grant does not override that exact default read-only carveout.
+  const gitdir=git(loc.project,'rev-parse','--path-format=absolute','--git-dir');
+  const entries=new Map([[path.dirname(python.exe),'read'],[toolchain,'read'],[run,'write'],[common,'write'],[gitdir,'write']]);
+  const filesystem=[...entries].map(([dir,mode])=>JSON.stringify(dir)+'='+JSON.stringify(mode)).join(',');
+  return {profile,toolchain,gitdir,common,args:['-a','never','-c','permissions.'+profile+'={extends=":workspace",filesystem={'+filesystem+'}}','-c','default_permissions='+JSON.stringify(profile),'-c','shell_environment_policy.set.HEARTHTABLE_PYTHON='+JSON.stringify(python.exe),'-c','shell_environment_policy.set.HEARTHTABLE_TOOLCHAIN='+JSON.stringify(toolchain)]};
 }
 export async function probeRuntime(loc,command,python,run,common) {
   const config=sessionConfig(loc,python,run,common);
@@ -129,7 +133,7 @@ export async function probeRuntime(loc,command,python,run,common) {
     throw new Error('Sandbox prerequisite probe failed before any model call. See '+log+'. '+error.message+(detail?'\n'+detail:''));
   }
   const result=json(output);
-  if(result.passed!==true || !result.godot?.actual || fs.realpathSync.native(result.runtime?.exe || '')!==python.exe)throw new Error('Invalid sandbox prerequisite result. No model was started. See '+output);
+  if(result.passed!==true || result.git?.passed!==true || !result.godot?.actual || fs.realpathSync.native(result.runtime?.exe || '')!==python.exe)throw new Error('Invalid sandbox prerequisite result. No model was started. See '+output);
   return config;
 }
 export async function runCycle(options,loc,command) {
@@ -158,7 +162,8 @@ export async function runCycle(options,loc,command) {
     const args=['--enable','multi_agent',...config.args,'exec','-C',loc.project,'--output-schema',path.join(tools,'agent-loop','report.schema.json'),'--output-last-message',report,'--color','never','-'];
     console.log('Verified Python '+python.version+': '+python.exe+'\nStarting one cycle. Reports: '+run+'\nThe automatic schedule has not been enabled by this command.');
     await execute(command,args,prompt,log,options.timeout,loc.project,python,config.toolchain);
-    const after=preflight(loc);const result=json(report);validateReport(result,before,after);
+    const after=git(loc.project,'rev-parse','HEAD');const result=json(report);validateReport(result,before,after);
+    preflight(loc);
     fs.copyFileSync(report,path.join(loc.state,'latest.json'));
     fs.writeFileSync(path.join(loc.state,'ready.json'),JSON.stringify({revision:after,when:new Date().toISOString(),report},null,2));
     console.log('\n'+result.status.toUpperCase()+': '+result.summary+'\nNext: '+result.next_step+'\nReport: '+report);

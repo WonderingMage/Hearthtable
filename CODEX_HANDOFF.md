@@ -1,5 +1,24 @@
 # Hearthtable Lite development handoff
 
+Latest owner checkpoint: their expanded Python/Godot probe passed on the real
+PC. The preserved spell-slot preview fix passed 237 native core/UI assertions
+and was committed locally as `564eba1cdccd712f468fc9e8e35fd3c66a861a2e` on
+`automation/lite-improvements`; that commit is not on this cloud branch. An
+untracked `top` item was moved to a private backup outside the worktree. The
+next actual three-worker cycle fixed ritual/innate proposals retaining higher
+slots, passed 250 assertions and both independent approvals, but could not
+create `C:/Users/fstre/Dev/Hearthtable/.git/worktrees/Hearthtable-Autopilot/index.lock`.
+It left three modified files (sheet, UI tests, highlights), no new commit and
+no matching build/update. Preserve those edits and the prior local commit.
+The launcher previously granted only the Git common directory. Pinned Codex
+protects the exact worktree admin directory separately. The profile now grants
+that exact directory and the free prerequisite checks real metadata writes
+using owned temporary files, without touching index/refs/source. Blocked cycle
+reports are read before checking for remaining edits, preserving the actual
+failure instead of replacing it with a generic dirty-worktree message. Native
+Windows linked-worktree commit validation is pending. Do not enable a schedule
+or rerun a paid cycle until this Git permission fix is proven locally.
+
 Current local-loop blocker (October 21): the owner passed the actual sandbox
 Python probe after the scoped RX repair, then Godot's no-autoload isolation
 probe resolved the correct disposable save path but logged `Failed to read the

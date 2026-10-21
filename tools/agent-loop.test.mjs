@@ -8,6 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {parseArgs,location,preflight,validateReport,taskXml,sessionConfig,probeRuntime,codexCommand} from './agent-loop.mjs';
 import {pythonCommand} from './python-runtime.mjs';
 import {toolHome} from './lite-local.mjs';
+import {gitPrerequisite} from './agent-loop/git-prerequisite.mjs';
 const runner=fileURLToPath(new URL('./agent-loop.mjs',import.meta.url));
 function command(exe,args,options={}) {
   const r=spawnSync(exe,args,{encoding:'utf8',windowsHide:true,...options});
@@ -38,16 +39,16 @@ if(args.includes('sandbox')){
 if(process.env.LOOP_TEST_MODE==='sandbox-fail'){console.error('synthetic sandbox Python visibility failure');process.exit(1);}
 // This launcher unit fixture models prerequisite results; the optional native
 // integration below runs the real script, Python and Godot inside Codex.
-const result={passed:true,runtime:{exe:python},godot:{actual:{editor:true}}};
+const result={passed:true,runtime:{exe:python},git:{passed:true},godot:{actual:{editor:true}}};
 if(process.env.LOOP_TEST_MODE==='godot-fail'){result.passed=false;result.error='synthetic Godot startup failure';delete result.godot;}
 fs.writeFileSync(value('--output'),JSON.stringify(result));
 console.log(JSON.stringify(result));process.exit(result.passed?0:1);}
 fs.writeFileSync(value('--output-last-message')+'.startup.json',JSON.stringify({cwd:process.cwd(),python,config}));
 const git=(...a)=>{const r=spawnSync('git',['-C',dir,...a],{encoding:'utf8'});if(r.status)throw Error(r.stderr);return r.stdout.trim();};
 if(process.env.LOOP_TEST_MODE==='hang'){setInterval(()=>{},1000);}else{
-if(process.env.LOOP_TEST_MODE==='dirty')fs.writeFileSync(dir+'/unfinished.txt','keep me');
+if(['dirty','blocked-dirty'].includes(process.env.LOOP_TEST_MODE))fs.writeFileSync(dir+'/unfinished.txt','keep me');
 if(process.env.LOOP_TEST_MODE==='accepted'){fs.writeFileSync(dir+'/improvement.txt','synthetic');git('add','improvement.txt');git('commit','-m','synthetic improvement');}
-const status=process.env.LOOP_TEST_MODE==='blocked'?'blocked':process.env.LOOP_TEST_MODE==='accepted'?'accepted':'no_change';
+const status=['blocked','blocked-dirty'].includes(process.env.LOOP_TEST_MODE)?'blocked':process.env.LOOP_TEST_MODE==='accepted'?'accepted':'no_change';
 const report={status,summary:'TEST DOUBLE ONLY',revision:git('rev-parse','HEAD'),role_reports:{builder:'mock builder',tester:'mock tester',critic:'mock critic'},tests:['mock check'],tester_approved:true,critic_approved:true,next_step:'fixture next step'};
 if(process.env.LOOP_TEST_MODE==='bad-json')fs.writeFileSync(value('--output-last-message'),'not json');else fs.writeFileSync(value('--output-last-message'),JSON.stringify(report));
 console.log('mock cycle completed');console.error('mock stderr preserved');}
@@ -126,6 +127,34 @@ test('the permission profile grants Python read access and keeps the workspace s
   assert.ok(profile.includes(JSON.stringify(config.toolchain)+'="read"'));
   assert.ok(!config.args.some(x=>x.includes('danger-full-access') || x.includes('bypass')));
 });
+test('linked worktrees explicitly authorize their own Git admin directory',t=>{
+  const f=fixture(t),linked=path.join(f.base,"linked worktree & quote's");
+  f.git('worktree','add','-b','automation/permission-check',linked,'HEAD');
+  const common=command('git',['-C',linked,'rev-parse','--path-format=absolute','--git-common-dir']);
+  const gitdir=command('git',['-C',linked,'rev-parse','--path-format=absolute','--git-dir']);
+  assert.notEqual(gitdir,common);
+  const config=sessionConfig({project:linked},pythonCommand(),f.state,common);
+  const profile=config.args.find(x=>x.startsWith('permissions.'));
+  assert.ok(profile.includes(JSON.stringify(gitdir)+'="write"'));
+  assert.ok(profile.includes(JSON.stringify(common)+'="write"'));
+  assert.ok(!profile.includes(JSON.stringify(path.join(linked,'.git'))+'="write"'),'The worktree pointer stays protected');
+  // A normal checkout has the same gitdir/common path; duplicate TOML keys fail.
+  const normal=sessionConfig({project:f.project},pythonCommand(),f.state,f.git('rev-parse','--path-format=absolute','--git-common-dir'));
+  const metadataKey=JSON.stringify(normal.gitdir)+'="write"';
+  assert.equal(normal.args.find(x=>x.startsWith('permissions.')).split(metadataKey).length-1,1);
+});
+test('the Git prerequisite leaves linked-worktree source, index, refs and metadata intact',t=>{
+  const f=fixture(t),linked=path.join(f.base,'linked probe');
+  f.git('worktree','add','-b','automation/probe-check',linked,'HEAD');
+  const metadata=command('git',['-C',linked,'rev-parse','--path-format=absolute','--git-dir']);
+  const index=fs.readFileSync(path.join(metadata,'index')),head=f.git('rev-parse','HEAD');
+  const before=fs.readdirSync(metadata);
+  const result=gitPrerequisite(linked);
+  assert.equal(result.passed,true);assert.deepEqual(fs.readdirSync(metadata),before);
+  assert.deepEqual(fs.readFileSync(path.join(metadata,'index')),index);assert.equal(f.git('rev-parse','HEAD'),head);
+  for(const directory of result.checked)assert.ok(!fs.readdirSync(directory).some(name=>name.startsWith('hearthtable-permission-probe-')));
+  assert.equal(command('git',['-C',linked,'status','--porcelain']),'');
+});
 test('accepted changes require actual new HEAD, evidence and approvals',t=>{
   const f=fixture(t);const before=f.git('rev-parse','HEAD');const r=f.invoke('run','accepted');assert.equal(r.status,0,r.stderr);const after=f.git('rev-parse','HEAD');assert.notEqual(after,before);
   const report=JSON.parse(fs.readFileSync(path.join(f.state,'latest.json')));
@@ -144,6 +173,13 @@ test('blocked or unfinished work pauses future scheduled calls, preserving files
 test('bad JSON and explicit blockers never mark a cycle ready',t=>{
   const f=fixture(t);
   for(const mode of ['bad-json','blocked']) {const r=f.invoke('run',mode);assert.notEqual(r.status,0);assert.ok(fs.existsSync(path.join(f.state,'PAUSED')));assert.ok(!fs.existsSync(path.join(f.state,'ready.json')));}
+});
+test('an unfinished blocked cycle retains its specific report instead of hiding it behind dirty status',t=>{
+  const f=fixture(t),result=f.invoke('run','blocked-dirty');
+  assert.notEqual(result.status,0);assert.match(result.stderr,/BLOCKED: TEST DOUBLE ONLY/);
+  assert.doesNotMatch(result.stderr,/This workspace has uncommitted changes/);
+  assert.equal(fs.readFileSync(path.join(f.project,'unfinished.txt'),'utf8'),'keep me');
+  assert.ok(!fs.existsSync(path.join(f.state,'ready.json')));
 });
 test('an existing cycle lock skips all agent work',t=>{
   const f=fixture(t);fs.mkdirSync(f.state);fs.writeFileSync(path.join(f.state,'workspace.json'),JSON.stringify({project:fs.realpathSync(f.project)}));
@@ -214,4 +250,32 @@ test('real Windows Codex sandbox validates Python, Godot, source, UI, network an
   }
   assert.deepEqual(fs.readdirSync(normal),['sentinel.txt']);assert.equal(fs.readFileSync(path.join(normal,'sentinel.txt'),'utf8'),'unchanged');
   assert.equal(command('git',['-C',source,'status','--porcelain']),before);assert.equal(f.git('status','--porcelain'),'');
+});
+test('real Windows Codex sandbox stages and commits a linked-worktree change with its exact metadata grant',{skip:process.platform!=='win32' || !process.env.HEARTHTABLE_REAL_CODEX,timeout:300000},t=>{
+  const f=fixture(t),linked=path.join(f.base,"linked worktree & quote's");
+  f.git('worktree','add','-b','automation/git-permission-proof',linked,'HEAD');
+  const mainHead=f.git('rev-parse','HEAD'),common=f.git('rev-parse','--path-format=absolute','--git-common-dir');
+  const run=path.join(f.base,'git permission reports');fs.mkdirSync(run);
+  const config=sessionConfig({project:linked},pythonCommand(),run,common);
+  const probe=path.join(run,'commit-probe.mjs');
+  fs.writeFileSync(probe,`import fs from 'node:fs';import path from 'node:path';import{spawnSync}from'node:child_process';
+const project=process.cwd(),file=path.join(project,'metadata-proof.txt');
+const git=(...args)=>{const r=spawnSync('git',['-C',project,'-c','commit.gpgsign=false',...args],{encoding:'utf8'});if(r.error||r.status!==0)throw Error(r.error?.message||r.stderr);return r.stdout.trim();};
+fs.writeFileSync(file,'Synthetic sandbox permission proof.');
+git('add','--','metadata-proof.txt');git('commit','-m','Synthetic linked-worktree sandbox proof');
+let protectedPointer=false;try{const fd=fs.openSync(path.join(project,'.git'),'r+');fs.closeSync(fd);}catch(error){if(!['EACCES','EPERM'].includes(error.code))throw error;protectedPointer=true;}
+if(!protectedPointer)throw Error('The worktree Git pointer must remain protected');
+console.log('GIT_SANDBOX_COMMIT_OK '+git('rev-parse','HEAD'));
+`);
+  const codex=codexCommand(process.env.HEARTHTABLE_REAL_CODEX);
+  const invoke=args=>spawnSync(codex.exe,[...codex.prefix,...args,'sandbox','-P',config.profile,'-C',linked,'--',process.execPath,probe],{cwd:linked,encoding:'utf8',windowsHide:true,timeout:120000,maxBuffer:2000000});
+  const oldArgs=config.args.map(arg=>arg.startsWith('permissions.')?arg.replace(','+JSON.stringify(config.gitdir)+'="write"',''):arg);
+  const denied=invoke(oldArgs);
+  assert.notEqual(denied.status,0);assert.match((denied.stderr||'')+(denied.stdout||''),/index\.lock/);
+  console.log('Reproduced linked-worktree index.lock denial with the old broader grant.');
+  const allowed=invoke(config.args);
+  assert.equal(allowed.status,0,allowed.error?.message || allowed.stderr+'\n'+allowed.stdout);
+  assert.match(allowed.stdout,/GIT_SANDBOX_COMMIT_OK/);console.log(allowed.stdout.trim());
+  assert.notEqual(command('git',['-C',linked,'rev-parse','HEAD']),mainHead);
+  assert.equal(command('git',['-C',linked,'status','--porcelain']),'');assert.equal(f.git('rev-parse','HEAD'),mainHead);assert.equal(f.git('status','--porcelain'),'');
 });

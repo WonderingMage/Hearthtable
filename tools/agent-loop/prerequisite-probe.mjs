@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {pythonCommand} from '../python-runtime.mjs';
 import {engine,isolated,toolHome} from '../lite-local.mjs';
+import {gitPrerequisite} from './git-prerequisite.mjs';
 
 const args=process.argv.slice(2),get=key=>args[args.indexOf(key)+1];
 const python=get('--python'),output=get('--output');
@@ -11,6 +12,7 @@ const result={passed:false,cwd:process.cwd(),python,exists:fs.existsSync(python)
 try {
   const runtime=pythonCommand(python);
   result.runtime=runtime;
+  result.git=gitPrerequisite(process.cwd());
   const tool=await engine({});
   const base=path.join(path.dirname(output),'godot-prerequisite');
   await isolated(base,tool.exe);

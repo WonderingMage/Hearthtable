@@ -63,6 +63,10 @@ same path with --python if an environment setting is absent. If it cannot run,
 retain the actual error and report a session/permission blocker rather than
 assuming the owner must reinstall Python. Never disable the sandbox.
 The launcher also probes pinned Godot startup/isolation before model usage.
+It also checks actual Git metadata writability without changing the index or
+refs. If committing later fails, preserve the real index.lock path/error and
+candidate edits. Permission denied is not a stale lock; do not remove locks,
+change ACLs or disable sandboxing. Return the specific blocker and approvals.
 The helper retains a Windows ROOT-store diagnostic but accepts it only when
 the same official 4.5.1 process proves its bundled trusted CA fallback loaded.
 This does not disable TLS checks. Use the helper's result and isolation report;
