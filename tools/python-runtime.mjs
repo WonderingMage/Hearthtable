@@ -36,10 +36,12 @@ export function pythonCommand(explicit,env=process.env) {
   }
   for(const candidate of candidates) {
     try {
-      const detected=check(candidate.exe,candidate.prefix),exe=fs.realpathSync(detected.executable);
+      // On Windows the JS realpath walker lstats every ancestor. A sandbox may
+      // read this installation while AppData itself remains non-enumerable.
+      const detected=check(candidate.exe,candidate.prefix),exe=fs.realpathSync.native(detected.executable);
       // Always prove that the resolved interpreter runs without its launcher.
       const direct=check(exe);
-      if(fs.realpathSync(direct.executable)!==exe)throw Error('resolved interpreter changed during verification');
+      if(fs.realpathSync.native(direct.executable)!==exe)throw Error('resolved interpreter changed during verification');
       return {exe,prefix:[],version:direct.version.join('.')};
     } catch(error) {failures.push(candidate.exe+': '+error.message);}
   }

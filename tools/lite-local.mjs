@@ -34,7 +34,8 @@ export function git(project,...args) {
   const r=spawnSync('git',['-C',project,...args],{encoding:'utf8',windowsHide:true});if(r.error || r.status!==0)throw Error('Git failed: '+(r.error?.message || r.stderr));return r.stdout.trim();
 }
 function resolvedTarget(target) {
-  if(fs.existsSync(target))return fs.realpathSync(target);
+  // Resolve the accessible file directly, without enumerating private parents.
+  if(fs.existsSync(target))return fs.realpathSync.native(target);
   const parent=path.dirname(target);
   return parent===target?target:path.join(resolvedTarget(parent),path.basename(target));
 }
@@ -64,7 +65,7 @@ async function extract(zip,destination,entries) {
 }
 export async function setup(o) {
   if(process.platform!=='win32')throw Error('Automatic toolchain setup is for Windows; other platforms may use an explicit --godot editor.');
-  const home=toolHome(o);outside(fs.realpathSync(o.project),home);
+  const home=toolHome(o);outside(fs.realpathSync.native(o.project),home);
   if(fs.existsSync(home)) {await engine(o);console.log('Verified existing Godot '+official+' and export templates.');return;}
   const parent=path.dirname(home);fs.mkdirSync(parent,{recursive:true});
   const lock=home+'.setup-lock';let fd;
@@ -88,7 +89,7 @@ export async function setup(o) {
 }
 export async function engine(o) {
   if(o.godot) {
-    const exe=fs.realpathSync(o.godot);const r=spawnSync(exe,['--version'],{encoding:'utf8',windowsHide:true});if(r.status!==0 || !r.stdout.trim().startsWith(official))throw Error('Use the official Godot 4.5.1 editor.');return {exe,templates:o.templates && fs.realpathSync(o.templates)};
+    const exe=fs.realpathSync.native(o.godot);const r=spawnSync(exe,['--version'],{encoding:'utf8',windowsHide:true});if(r.status!==0 || !r.stdout.trim().startsWith(official))throw Error('Use the official Godot 4.5.1 editor.');return {exe,templates:o.templates && fs.realpathSync.native(o.templates)};
   }
   const home=toolHome(o), manifestFile=path.join(home,'manifest.json');
   if(!fs.existsSync(manifestFile))throw Error('Godot is not set up yet. Run: node tools/lite-local.mjs setup');
@@ -146,7 +147,7 @@ function templatesAt(env,templates) {
   for(const name of ['version.txt','windows_release_x86_64.exe','windows_release_x86_64_console.exe'])fs.copyFileSync(path.join(templates,name),path.join(target,name));
 }
 export async function main(args=process.argv.slice(2)) {
-  const o=options([...args]);o.project=fs.realpathSync(o.project);checkedProject(fs.readFileSync(path.join(o.project,'project.godot'),'utf8'));
+  const o=options([...args]);o.project=fs.realpathSync.native(o.project);checkedProject(fs.readFileSync(path.join(o.project,'project.godot'),'utf8'));
   if(fs.existsSync(path.join(o.project,'override.cfg')))throw Error('Review/remove project override.cfg before isolated testing.');
   if(o.action==='setup'){await setup(o);return;}
   const tool=await engine(o);

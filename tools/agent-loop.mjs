@@ -26,7 +26,7 @@ export function parseArgs(args) {
   return options;
 }
 export function location(options) {
-  const project=fs.realpathSync(options.project);
+  const project=fs.realpathSync.native(options.project);
   const id=createHash('sha256').update(process.platform==='win32'?project.toLowerCase():project).digest('hex').slice(0,12);
   const base=process.env.LOCALAPPDATA || path.join(os.homedir(),'.local','state');
   const state=path.resolve(options.state || path.join(base,'HearthtableCodexLoop',id));
@@ -52,7 +52,7 @@ export function preflight(loc) {
 }
 export function codexCommand(override) {
   if(override) {
-    const resolved=fs.realpathSync(override);
+    const resolved=fs.realpathSync.native(override);
     if(/\.[cm]?js$/i.test(resolved)) return {exe:process.execPath,prefix:[resolved]};
     if(/\.(cmd|bat|ps1)$/i.test(resolved)) throw new Error('Use the Codex .js entry point or native .exe, not a shell shim.');
     return {exe:resolved,prefix:[]};
@@ -127,7 +127,7 @@ export async function probeRuntime(loc,command,python,run,common) {
     throw new Error('Sandbox prerequisite probe failed before any model call. See '+log+'. '+error.message+(detail?'\n'+detail:''));
   }
   const result=json(output);
-  if(result.passed!==true || fs.realpathSync(result.runtime?.exe || '')!==python.exe)throw new Error('Invalid sandbox prerequisite result. No model was started. See '+output);
+  if(result.passed!==true || fs.realpathSync.native(result.runtime?.exe || '')!==python.exe)throw new Error('Invalid sandbox prerequisite result. No model was started. See '+output);
   return config;
 }
 export async function runCycle(options,loc,command) {
