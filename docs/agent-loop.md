@@ -85,6 +85,46 @@ Ordinary results live under `%LOCALAPPDATA%\HearthtableCodexQA`; agents instead
 pass a new `--output` folder under their writable cycle report directory.
 Existing result folders are never overwritten. Keep these QA folders private.
 
+Before spending model allowance, check Python inside the **actual Codex sandbox**:
+
+```powershell
+node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\agent-loop.mjs" probe
+```
+
+This uses Codex’s command sandbox, without starting a model or any worker. The
+per-invocation `hearthtable_loop` permission profile extends Codex’s built-in
+`:workspace` profile (the workspace-write baseline). It grants read access to
+only the verified Python installation folder; source, reports and the Git common
+directory keep their existing write access. It does not grant Python-folder
+write access, disable the sandbox or change account-wide Codex configuration.
+The same profile is used for the probe and subsequent model cycle.
+
+If ordinary Python verification succeeds but the sandbox reports the executable
+is invisible (`exists: false`, `ENOENT`), its Windows folder ACL may not allow
+Codex’s sandbox account to read that per-user installation. For the owner’s
+confirmed python.org 3.13 installation, run this **outside Codex**, in ordinary
+PowerShell:
+
+```powershell
+icacls "$env:LOCALAPPDATA\Programs\Python\Python313" /grant "CodexSandboxUsers:(OI)(CI)(RX)" /T /Q
+```
+
+This adds read/execute permissions for Codex’s own Windows sandbox group to the
+Python installation and its children, retaining existing permissions. It grants
+no write access and does not change Windows security policy or remove the
+sandbox. Use only the verified installation folder, never the whole profile or
+AppData. If the group is missing or access is denied, stop and retain the error.
+A different Python installation needs its own verified folder path. Then retry
+the no-model probe. See the pinned Codex 0.163
+[sandbox group definition](https://github.com/openai/codex/blob/rust-v0.163.0/codex-rs/windows-sandbox-rs/src/winutil.rs)
+and [read/execute ACL setup](https://github.com/openai/codex/blob/rust-v0.163.0/codex-rs/windows-sandbox-rs/src/setup_provisioning.rs).
+
+A successful probe prints `PROBE_PASSED`. It does not enable a schedule, create
+a successful-cycle checkpoint or clear an existing pause. Results and errors
+are retained as private `prerequisite.json` / `prerequisite.log` in the run
+folder, including whether the Python path is visible inside the sandbox. A
+failed probe stops before model usage; preserve its diagnostics.
+
 Once tools and baseline checks pass, start **one manual cycle**:
 
 ```powershell
@@ -94,7 +134,8 @@ node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\agent-loop.mjs" run
 This consumes Codex allowance. The prompt requires all three worker agents and
 real validation before accepting code. Before any model call, the launcher
 verifies the actual Python interpreter and supplies its absolute path to Codex
-and its shell environment as `HEARTHTABLE_PYTHON`. It records this in the private
+and its shell environment as `HEARTHTABLE_PYTHON`, then runs the actual sandbox
+probe before launching the coordinator. It records the interpreter in the private
 run's `runtime.json`; the safe test/build helper rechecks that same interpreter.
 The agent process starts in the project directory; Windows shell commands must
 also avoid profiles that change directory. Runtime lookup failures pause the
@@ -204,3 +245,17 @@ packaging and unchanged ordinary-user-data/source checks with the new resolver.
 These use fake agents or direct tools, not real model cycles. The owner confirmed
 Python 3.13.7 is already installed; a fresh manual cycle must confirm its use
 inside the actual Codex sandbox. No reinstall or schedule activation occurred.
+
+The actual pinned Codex 0.163 Windows sandbox check passed on
+`b9e7e71efc6dfec72fa38013a9f9bf5bb1b6b3f4` in
+[run 39570420518](https://github.com/WonderingMage/Hearthtable/actions/runs/39570420518),
+alongside all 27 launcher/runtime checks. It started Python from a disposable
+per-user AppData installation after the scoped RX grant above. Earlier real
+sandbox checks reproduced the invisible executable and then an AppData-parent
+`lstat EPERM`; native file resolution fixed that second failure without granting
+parent-directory access. Ordinary Windows helper checks also passed on
+`0d742102cf43e7e87e417146b0e6e597a9ca8a9e` in
+[run 39569786442](https://github.com/WonderingMage/Hearthtable/actions/runs/39569786442):
+154 source, 37 network and 154 compiled assertions, matching update packaging
+and unchanged normal data/source. None of these start real agents or schedules.
+The owner must still apply the scoped permission and pass the probe on their PC.
