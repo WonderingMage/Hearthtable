@@ -99,3 +99,10 @@ case briefly registers a uniquely named **disabled** task, verifies its
 30-minute cadence/limited-user settings, then removes that test task. The
 separate `Agent loop launcher checks` workflow runs these tests on Windows.
 Game/UI/build validation is separate from testing this launcher.
+
+The launcher at commit `9393717dd75f100c2f77bbc13f205de502a53729` passed
+all **13 native Windows checks** in [run 39556168335](https://github.com/WonderingMage/Hearthtable/actions/runs/39556168335).
+This includes disabled-task registration and the actual scheduled command with
+a fake npm Codex launcher, quoted paths, branch/identity/dirty-work guards,
+report validation, pause/lock handling and process timeout. No real model loop
+or task on the owner's PC has been activated or validated by these tests.
