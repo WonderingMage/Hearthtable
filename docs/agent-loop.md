@@ -149,3 +149,22 @@ This includes disabled-task registration and the actual scheduled command with
 a fake npm Codex launcher, quoted paths, branch/identity/dirty-work guards,
 report validation, pause/lock handling and process timeout. No real model loop
 or task on the owner's PC has been activated or validated by these tests.
+
+The local Godot helper at `d50ece5dd8c3f1df237ba7d2e4cde0375c8cc97b`
+passed [native Windows run 39561758442](https://github.com/WonderingMage/Hearthtable/actions/runs/39561758442):
+7 harness checks, official download/checksum/extraction setup, 154 source
+assertions, 37 real DM/two-player network assertions and 154 assertions against
+the compiled Windows EXE. It prepared a matching candidate `.hearthupdate`
+and verified the normal AppData campaign sentinel and source checkout stayed
+unchanged. No installer, release, model cycle or active schedule was created.
+The launcher also passed all 13 Windows checks on that source in
+[run 39561758352](https://github.com/WonderingMage/Hearthtable/actions/runs/39561758352).
+The owner's local GUI baseline and first real cycle are still pending.
+
+One separate Linux network run on that source logged `Unable to send packet on
+channel 0, max channels: 0` when both guests left together. Although all 37
+assertions passed, the runner correctly rejected the engine error. The native
+Windows run did not reproduce it. Keep this intermittent shutdown defect as a
+concrete first-cycle investigation candidate; do not weaken error detection or
+claim networking is universally clean. No gameplay source was changed by this
+tooling setup.
