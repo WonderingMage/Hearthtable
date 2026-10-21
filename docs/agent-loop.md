@@ -315,3 +315,27 @@ do not reinstall a working Godot installation based on a sandbox lookup failure.
 passed source, networking, compiled execution and update packaging separately.
 The owner must still update the worktree and pass the expanded free probe locally.
 No model cycle, active schedule, installation or release was started by these checks.
+
+The owner next preserved a spell-preview fix in local commit `564eba1` (237
+native assertions). An actual three-worker cycle then produced a ritual/innate
+proposal fix, 250 passing assertions and both independent approvals, but Git
+could not create the linked-worktree index lock. The work remained in three
+modified files; no matching build/update was produced for that second change.
+The Git permission repair passed on tooling source
+`eb362737ca4efc94919156f98f00845c05780e5c` in
+[run 39642938728](https://github.com/WonderingMage/Hearthtable/actions/runs/39642938728):
+32 launcher/runtime checks, a real Windows Codex 0.163 failure-then-commit test
+in a linked Dev worktree outside TEMP, and the full sandbox app workflow
+(233 baseline source/UI, 37 multiplayer, 154 compiled assertions plus matching
+update preparation and unchanged normal-save sentinel/source). The test keeps
+the `.git` pointer protected and verifies the main checkout's HEAD is unchanged.
+It uses Node evaluation for its builtin-only harness so Node 22 does not need
+to list private Dev/AppData ancestors just to load a test entry file.
+
+For this owner checkpoint, first commit only the reviewed sheet, UI tests and
+release highlights in normal PowerShell. Then fetch and merge origin/edition/lite
+with `git merge --no-edit` to retain the separate local app commits and updated
+tooling. A fast-forward is no longer possible across those two lines; do not
+reset or discard either. Pass the expanded free probe and matching candidate
+build before starting another manual cycle. This does not create a successful
+agent-cycle checkpoint or enable scheduling by itself.

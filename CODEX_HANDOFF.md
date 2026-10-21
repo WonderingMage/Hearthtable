@@ -18,8 +18,23 @@ denied common-directory write capability. The free prerequisite checks real meta
 using owned temporary files, without touching index/refs/source. Blocked cycle
 reports are read before checking for remaining edits, preserving the actual
 failure instead of replacing it with a generic dirty-worktree message. Native
-Windows linked-worktree commit validation is pending. Do not enable a schedule
-or rerun a paid cycle until this Git permission fix is proven locally.
+Windows validation passed on tooling source
+`eb362737ca4efc94919156f98f00845c05780e5c` in run `39642938728`:
+32 launcher/runtime checks, then a real Codex 0.163 linked-worktree test outside
+TEMP reproduced the old index.lock denial and staged/committed successfully
+using the corrected grants. Its `.git` pointer stayed protected and the main
+checkout's HEAD/source stayed unchanged. The same workflow passed actual sandbox
+Python/Godot/Git prerequisites, 233 base source/UI assertions, 37 multiplayer and
+154 compiled-Windows assertions plus matching update preparation and unchanged
+ordinary-save sentinel/source. The owner's local 250-assertion candidate is a
+later app change; do not confuse that with this cloud branch's 233 baseline.
+The owner must save that reviewed candidate in normal PowerShell, fetch and
+merge the tooling updates while preserving their local app commits, and pass
+the expanded free probe/build before another paid cycle. Their app commits
+diverge from origin/edition/lite: use a normal merge after committing preserved
+edits, never reset/clean/force a fast-forward. A successful automatic commit on
+their PC and schedule enable remain pending. No release or real model cycle
+was started by CI; no Windows ACLs need to be edited by the recovery commands.
 
 Current local-loop blocker (October 21): the owner passed the actual sandbox
 Python probe after the scoped RX repair, then Godot's no-autoload isolation
