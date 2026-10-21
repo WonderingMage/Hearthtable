@@ -45,6 +45,8 @@ export function preflight(loc) {
   if(!project.includes('config/edition="lite"')) throw new Error('Expected the Hearthtable Lite project.');
   const remote=git(loc.project,'remote','get-url','origin').replace(/\.git$/,'').replace(/\/$/,'');
   if(!['https://github.com/WonderingMage/Hearthtable','git@github.com:WonderingMage/Hearthtable'].includes(remote)) throw new Error('Expected the WonderingMage/Hearthtable origin.');
+  try {git(loc.project,'var','GIT_AUTHOR_IDENT');git(loc.project,'var','GIT_COMMITTER_IDENT');}
+  catch {throw new Error('Git needs a commit identity before agents can save their work. Configure a repository-local user.name and user.email, then retry doctor.');}
   return git(loc.project,'rev-parse','HEAD');
 }
 export function codexCommand(override) {

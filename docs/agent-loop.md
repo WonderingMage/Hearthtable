@@ -24,7 +24,7 @@ git -C "$env:USERPROFILE\Dev\Hearthtable-Autopilot" merge --ff-only origin/editi
 node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\agent-loop.mjs" doctor
 ```
 
-`doctor` only checks the branch, clean source, expected repository and Codex
+`doctor` only checks the branch, clean source, expected repository, Git commit identity and Codex
 installation/login. It makes no model calls and does not start a task. It does
 **not** prove Godot or testing/build tools are ready.
 

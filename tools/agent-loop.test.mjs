@@ -50,6 +50,10 @@ test('doctor validates only the dedicated branch and preserves existing edits',t
   f.git('switch','automation/lite-improvements');fs.writeFileSync(path.join(f.project,'existing.txt'),'precious');
   assert.notEqual(f.invoke('run').status,0);assert.equal(fs.readFileSync(path.join(f.project,'existing.txt'),'utf8'),'precious');assert.ok(!fs.existsSync(f.state));
 });
+test('missing Git identity stops before starting an agent',t=>{
+  const f=fixture(t);f.git('config','user.name','');f.git('config','user.email','');
+  const result=f.invoke('run');assert.notEqual(result.status,0);assert.match(result.stderr,/commit identity/);assert.ok(!fs.existsSync(f.state));
+});
 test('reports cannot be placed in source, and an unrelated origin is refused',t=>{
   const f=fixture(t);assert.throws(()=>location({...f.options,state:path.join(f.project,'reports')}));
   f.git('remote','set-url','origin','https://github.com/example/other.git');assert.throws(()=>preflight(location(f.options)),/origin/);
