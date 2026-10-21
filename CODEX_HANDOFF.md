@@ -1,6 +1,19 @@
 # Hearthtable Lite development handoff
 
-Latest owner checkpoint: their expanded Python/Godot probe passed on the real
+Latest owner checkpoint (October 21, 17:31 UTC): the real manual cycle was
+ACCEPTED. It restored Shield's missing 2014 reaction trigger in the full spell
+view, casting proposal and DM inbox, committed the fix and built matching local
+EXE/update artifacts. Its report is under the owner's loop state in
+`runs/2026-10-21T17-31-29-163Z-9590b488/report.json`. Nothing was published or
+installed. Those app commits are local to `automation/lite-improvements`, not
+this cloud checkout. The owner now requests a **10-minute** schedule; the
+launcher, first-start delay, native scheduler check and documentation use that
+cadence. Overlaps remain skipped and failures pause future model work. Enable
+has not been confirmed on their PC. Fetch and normally merge these tooling
+changes without discarding local app commits, then complete a manual cycle on
+the resulting clean revision before `enable` (readiness is commit-specific).
+
+Earlier owner checkpoint: their expanded Python/Godot probe passed on the real
 PC. The preserved spell-slot preview fix passed 237 native core/UI assertions
 and was committed locally as `564eba1cdccd712f468fc9e8e35fd3c66a861a2e` on
 `automation/lite-improvements`; that commit is not on this cloud branch. An

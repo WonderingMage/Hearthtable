@@ -194,11 +194,11 @@ test('a timed-out process is stopped and pauses future work',t=>{
 test('schedule requires one successful manual cycle before installation',t=>{
   const f=fixture(t);const r=f.invoke('enable');assert.notEqual(r.status,0);assert.match(r.stderr,process.platform==='win32'?/successful manual cycle/:/Windows-only/);
 });
-test('native Windows scheduler accepts a disabled 30-minute, limited-user task',{skip:process.platform!=='win32'},t=>{
+test('native Windows scheduler accepts a disabled 10-minute, limited-user task',{skip:process.platform!=='win32'},t=>{
   const f=fixture(t);const loc=location(f.options);
   const xml=taskXml(loc).replace('<Settings>','<Settings>').replace('<StartWhenAvailable>false</StartWhenAvailable><Enabled>true</Enabled>','<StartWhenAvailable>false</StartWhenAvailable><Enabled>false</Enabled>');
   const encoded=Buffer.from(xml,'utf8').toString('base64');const name='Hearthtable loop TEST '+loc.id;
-  const ps=`$ErrorActionPreference='Stop';$xml=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}'));$xml=$xml.Replace('@OWNER_SID@',[Security.Principal.WindowsIdentity]::GetCurrent().User.Value);try{Register-ScheduledTask -TaskName '${name}' -Xml $xml | Out-Null;$task=Get-ScheduledTask -TaskName '${name}';if($task.Settings.Enabled -or $task.Triggers[0].Repetition.Interval -ne 'PT30M' -or [string]$task.Settings.MultipleInstances -ne 'IgnoreNew' -or [string]$task.Principal.RunLevel -ne 'Limited'){throw 'Task settings incorrect'};Write-Output 'NATIVE_SCHEDULE_OK'}finally{Unregister-ScheduledTask -TaskName '${name}' -Confirm:$false -ErrorAction SilentlyContinue}`;
+  const ps=`$ErrorActionPreference='Stop';$xml=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}'));$xml=$xml.Replace('@OWNER_SID@',[Security.Principal.WindowsIdentity]::GetCurrent().User.Value);try{Register-ScheduledTask -TaskName '${name}' -Xml $xml | Out-Null;$task=Get-ScheduledTask -TaskName '${name}';if($task.Settings.Enabled -or $task.Triggers[0].Repetition.Interval -ne 'PT10M' -or [string]$task.Settings.MultipleInstances -ne 'IgnoreNew' -or [string]$task.Principal.RunLevel -ne 'Limited'){throw 'Task settings incorrect'};Write-Output 'NATIVE_SCHEDULE_OK'}finally{Unregister-ScheduledTask -TaskName '${name}' -Confirm:$false -ErrorAction SilentlyContinue}`;
   const out=command('powershell.exe',['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(ps,'utf16le').toString('base64')]);assert.match(out,/NATIVE_SCHEDULE_OK/);
 });
 test('native scheduled command launches Node with quoted paths and fake npm Codex',{skip:process.platform!=='win32'},t=>{

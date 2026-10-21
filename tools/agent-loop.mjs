@@ -184,13 +184,13 @@ export async function runCycle(options,loc,command) {
 }
 const xmlEscape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 const psQuote=value=>"'"+String(value).replace(/'/g,"''")+"'";
-export function taskXml(loc,launcher=script,node=process.execPath,when=new Date(Date.now()+30*60_000).toISOString().replace(/\.\d+Z$/,'Z')) {
+export function taskXml(loc,launcher=script,node=process.execPath,when=new Date(Date.now()+10*60_000).toISOString().replace(/\.\d+Z$/,'Z')) {
   const launch="$ErrorActionPreference='Stop'; & "+psQuote(node)+' '+psQuote(launcher)+' run --scheduled --project '+psQuote(loc.project)+' --state '+psQuote(loc.state)+'; exit $LASTEXITCODE';
   const argumentsText='-NoProfile -NonInteractive -WindowStyle Hidden -EncodedCommand '+Buffer.from(launch,'utf16le').toString('base64');
   return `<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
 <RegistrationInfo><Description>Opt-in Hearthtable three-agent development cycle; no automatic releases.</Description></RegistrationInfo>
-<Triggers><TimeTrigger><Repetition><Interval>PT30M</Interval><StopAtDurationEnd>false</StopAtDurationEnd></Repetition><StartBoundary>${xmlEscape(when)}</StartBoundary><Enabled>true</Enabled></TimeTrigger></Triggers>
+<Triggers><TimeTrigger><Repetition><Interval>PT10M</Interval><StopAtDurationEnd>false</StopAtDurationEnd></Repetition><StartBoundary>${xmlEscape(when)}</StartBoundary><Enabled>true</Enabled></TimeTrigger></Triggers>
 <Principals><Principal id="Owner"><UserId>@OWNER_SID@</UserId><LogonType>InteractiveToken</LogonType><RunLevel>LeastPrivilege</RunLevel></Principal></Principals>
 <Settings><MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy><DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries><StopIfGoingOnBatteries>false</StopIfGoingOnBatteries><StartWhenAvailable>false</StartWhenAvailable><Enabled>true</Enabled><WakeToRun>false</WakeToRun><ExecutionTimeLimit>PT50M</ExecutionTimeLimit></Settings>
 <Actions Context="Owner"><Exec><Command>${xmlEscape(path.join(process.env.SystemRoot || 'C:\\Windows','System32','WindowsPowerShell','v1.0','powershell.exe'))}</Command><Arguments>${xmlEscape(argumentsText)}</Arguments><WorkingDirectory>${xmlEscape(loc.project)}</WorkingDirectory></Exec></Actions></Task>`;
@@ -225,6 +225,6 @@ export async function main(args=process.argv.slice(2)) {
   const encoded=Buffer.from(taskXml(loc),'utf8').toString('base64');
   powershell(`$xml=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}'));$xml=$xml.Replace('@OWNER_SID@',[Security.Principal.WindowsIdentity]::GetCurrent().User.Value);Register-ScheduledTask -TaskName ${psQuote(loc.task)} -Xml $xml -Force | Out-Null`);
   fs.rmSync(path.join(loc.state,'PAUSED'),{force:true});
-  console.log('Enabled: '+loc.task+'\nRuns every 30 minutes while you are signed in and the PC is awake.\nTo pause: node tools/agent-loop.mjs pause');
+  console.log('Enabled: '+loc.task+'\nRuns every 10 minutes while you are signed in and the PC is awake.\nTo pause: node tools/agent-loop.mjs pause');
 }
 if(process.argv[1] && path.resolve(process.argv[1])===script) main().catch(error=>{console.error(error.message);process.exitCode=1;});

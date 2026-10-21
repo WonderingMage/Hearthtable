@@ -200,14 +200,16 @@ node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\agent-loop.mjs" enable
 ```
 
 The launcher requires a successful manual-cycle checkpoint matching the current
-clean commit. It registers a task for the current logged-in user, without stored
-passwords or elevated privileges. It starts at the next 30-minute interval and
-repeats every 30 minutes while you are signed in and the PC is awake. Missed
+clean commit. After merging tooling updates, run one manual cycle again before
+enabling: the previous checkpoint belongs to the previous commit. It registers
+a task for the current logged-in user, without stored
+passwords or elevated privileges. Its first start is 10 minutes after enabling,
+then it repeats every 10 minutes while you are signed in and the PC is awake. Missed
 runs are not queued. Overlaps are skipped. Each cycle has a 40-minute process
 timeout, so a longer run can skip the next scheduled start. Do not run tests or
 edit this same worktree in a separate session during a cycle.
 
-At 48 starts/day, three workers plus a coordinator can consume substantial Codex
+At up to 144 starts/day, three workers plus a coordinator can consume substantial Codex
 allowance. The tool uses your existing Codex model/account configuration, with
 no separate API key, paid service or forced model selection. Monitor usage.
 
@@ -238,7 +240,7 @@ review. No campaign/PDF/build data or reports are uploaded automatically.
 **fake Codex executable**. It makes no model/API calls, does not touch normal
 campaign data, and never activates a repeating agent loop. The native Windows
 case briefly registers a uniquely named **disabled** task, verifies its
-30-minute cadence/limited-user settings, then removes that test task. The
+10-minute cadence/limited-user settings, then removes that test task. The
 separate `Agent loop launcher checks` workflow runs these tests on Windows.
 Game/UI/build validation is separate from testing this launcher.
 
@@ -339,3 +341,10 @@ tooling. A fast-forward is no longer possible across those two lines; do not
 reset or discard either. Pass the expanded free probe and matching candidate
 build before starting another manual cycle. This does not create a successful
 agent-cycle checkpoint or enable scheduling by itself.
+
+The owner subsequently reported an ACCEPTED manual cycle at
+`2026-10-21T17-31-29-163Z-9590b488`: Shield's missing 2014 reaction trigger was
+restored across the full spell view, casting proposal and DM inbox, committed,
+and built into matching local EXE/update artifacts. Nothing was published or
+installed. The requested cadence is now 10 minutes; schedule activation on the
+owner's PC remains unconfirmed.
