@@ -31,7 +31,7 @@ jobs:
           node --test ./source/tools/agent-loop.test.mjs ./source/tools/lite-local.test.mjs 2>&1 | Tee-Object -FilePath $log
           $result=$LASTEXITCODE
           $text=Get-Content -Raw -LiteralPath $log
-          $escaped=$text.Substring([Math]::Max(0,$text.Length-14000)).Replace('%','%25').Replace("`r",'%0D').Replace("`n",'%0A')
+          $escaped=$text.Substring([Math]::Max(0,$text.Length-3500)).Replace('%','%25').Replace("`r",'%0D').Replace("`n",'%0A')
           if ($result -ne 0) { Write-Host "::error title=Agent loop tests::$escaped";throw 'Agent loop tests failed' }
           Write-Host "::notice title=Agent loop tests::$escaped"
       - name: Exercise the real pinned Codex sandbox without model calls
@@ -52,6 +52,6 @@ jobs:
             $result=$LASTEXITCODE
           }
           $text=Get-Content -Raw -LiteralPath $log
-          $escaped=$text.Substring([Math]::Max(0,$text.Length-14000)).Replace('%','%25').Replace("`r",'%0D').Replace("`n",'%0A')
+          $escaped=$text.Substring([Math]::Max(0,$text.Length-3500)).Replace('%','%25').Replace("`r",'%0D').Replace("`n",'%0A')
           if ($result -ne 0) { Write-Host "::error title=Real Codex sandbox::$escaped";throw 'Real Windows sandbox check failed' }
           Write-Host "::notice title=Real Codex sandbox::$escaped"
