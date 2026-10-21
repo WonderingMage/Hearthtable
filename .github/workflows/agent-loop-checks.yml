@@ -1,0 +1,34 @@
+name: Agent loop launcher checks
+on:
+  push:
+    branches: [edition/lite]
+    paths:
+      - 'tools/agent-loop.mjs'
+      - 'tools/agent-loop.test.mjs'
+      - 'tools/agent-loop/**'
+      - '.github/workflows/agent-loop-checks.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 8
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out exact source and test without any model calls
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          git -c credential.helper='!gh auth git-credential' clone --no-checkout "https://github.com/$env:GITHUB_REPOSITORY.git" source
+          if ($LASTEXITCODE -ne 0) { throw 'Clone failed' }
+          git -C source checkout --detach $env:GITHUB_SHA
+          if ($LASTEXITCODE -ne 0) { throw 'Checkout failed' }
+          $log=Join-Path $env:RUNNER_TEMP 'agent-loop-tests.txt'
+          node --test ./source/tools/agent-loop.test.mjs 2>&1 | Tee-Object -FilePath $log
+          $result=$LASTEXITCODE
+          $text=Get-Content -Raw -LiteralPath $log
+          $escaped=$text.Substring([Math]::Max(0,$text.Length-14000)).Replace('%','%25').Replace("`r",'%0D').Replace("`n",'%0A')
+          if ($result -ne 0) { Write-Host "::error title=Agent loop tests::$escaped";throw 'Agent loop tests failed' }
+          Write-Host "::notice title=Agent loop tests::$escaped"

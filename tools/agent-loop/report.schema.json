@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "summary", "revision", "role_reports", "tests", "tester_approved", "critic_approved", "next_step"],
+  "properties": {
+    "status": {"type": "string", "enum": ["accepted", "no_change", "blocked"]},
+    "summary": {"type": "string"},
+    "revision": {"type": "string"},
+    "role_reports": {
+      "type": "object", "additionalProperties": false,
+      "required": ["builder", "tester", "critic"],
+      "properties": {"builder": {"type": "string"}, "tester": {"type": "string"}, "critic": {"type": "string"}}
+    },
+    "tests": {"type": "array", "items": {"type": "string"}},
+    "tester_approved": {"type": "boolean"},
+    "critic_approved": {"type": "boolean"},
+    "next_step": {"type": "string"}
+  }
+}
