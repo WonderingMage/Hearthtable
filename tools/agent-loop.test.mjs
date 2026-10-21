@@ -5,7 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawn,spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {parseArgs,location,preflight,validateReport,taskXml} from './agent-loop.mjs';
+import {parseArgs,location,preflight,validateReport,taskXml,sessionConfig,probeRuntime,codexCommand} from './agent-loop.mjs';
+import {pythonCommand} from './python-runtime.mjs';
 const runner=fileURLToPath(new URL('./agent-loop.mjs',import.meta.url));
 function command(exe,args,options={}) {
   const r=spawnSync(exe,args,{encoding:'utf8',windowsHide:true,...options});
@@ -26,10 +27,14 @@ if(args.includes('--version')){console.log('codex-cli test-double');process.exit
 if(args[0]==='login'){process.exit(0);}
 const value=k=>args[args.indexOf(k)+1];const dir=value('-C');
 if(process.cwd()!==dir)throw Error('Agent process did not start in the project directory');
-const config=args[args.indexOf('-c')+1];
-if(!config.startsWith('shell_environment_policy.set.HEARTHTABLE_PYTHON='))throw Error('Python shell policy missing');
+const config=args.find(x=>x.startsWith('shell_environment_policy.set.HEARTHTABLE_PYTHON='));
+if(!config)throw Error('Python shell policy missing');
 const python=JSON.parse(config.slice(config.indexOf('=')+1));
 if(python!==process.env.HEARTHTABLE_PYTHON)throw Error('Agent and shell Python paths differ');
+if(args.includes('sandbox')){
+if(process.env.LOOP_TEST_MODE==='sandbox-fail'){console.error('synthetic sandbox Python visibility failure');process.exit(1);}
+const child=spawnSync(process.execPath,args.slice(args.indexOf('--')+2),{encoding:'utf8'});
+process.stdout.write(child.stdout || '');process.stderr.write(child.stderr || '');process.exit(child.status ?? 1);}
 fs.writeFileSync(value('--output-last-message')+'.startup.json',JSON.stringify({cwd:process.cwd(),python,config}));
 const git=(...a)=>{const r=spawnSync('git',['-C',dir,...a],{encoding:'utf8'});if(r.status)throw Error(r.stderr);return r.stdout.trim();};
 if(process.env.LOOP_TEST_MODE==='hang'){setInterval(()=>{},1000);}else{
@@ -45,7 +50,7 @@ console.log('mock cycle completed');console.error('mock stderr preserved');}
   const options={project,state,codex:mock};
   const invoke=(action,mode='',extra=[])=>spawnSync(process.execPath,[runner,action,'--project',project,'--state',state,'--codex',mock,...extra],{encoding:'utf8',windowsHide:true,timeout:20_000,env:{...process.env,LOOP_TEST_MODE:mode}});
   t.after(()=>fs.rmSync(base,{recursive:true,force:true}));
-  return {project,state,mock,git,invoke,options};
+  return {base,project,state,mock,git,invoke,options};
 }
 test('arguments reject unknown actions and unbounded runtime',()=>{
   assert.equal(parseArgs([]).action,'doctor');assert.throws(()=>parseArgs(['publish']));assert.throws(()=>parseArgs(['run','--timeout-ms','999999999']));
@@ -82,6 +87,29 @@ test('a broken Python configuration pauses before invoking any agent',t=>{
   assert.ok(fs.existsSync(path.join(f.state,'PAUSED')));assert.ok(!fs.existsSync(path.join(f.state,'ready.json')));
   for(const run of fs.readdirSync(path.join(f.state,'runs')))assert.ok(!fs.existsSync(path.join(f.state,'runs',run,'console.txt')));
   assert.equal(f.git('rev-parse','HEAD'),before);assert.equal(f.git('status','--porcelain'),'');
+});
+test('a probe leaves the loop paused and never invokes a model or creates readiness',t=>{
+  const f=fixture(t);assert.equal(f.invoke('pause').status,0);
+  const result=f.invoke('probe');assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/PROBE_PASSED/);
+  assert.ok(fs.existsSync(path.join(f.state,'PAUSED')));assert.ok(!fs.existsSync(path.join(f.state,'ready.json')));
+  const run=fs.readdirSync(path.join(f.state,'runs'))[0];
+  assert.equal(JSON.parse(fs.readFileSync(path.join(f.state,'runs',run,'prerequisite.json'))).passed,true);
+  assert.ok(!fs.existsSync(path.join(f.state,'runs',run,'console.txt')));
+});
+test('a sandbox prerequisite failure stops before all model work',t=>{
+  const f=fixture(t),result=f.invoke('run','sandbox-fail');assert.notEqual(result.status,0);
+  assert.match(result.stdout,/synthetic sandbox Python visibility failure/);assert.match(result.stderr,/before any model call/);
+  const run=fs.readdirSync(path.join(f.state,'runs'))[0];assert.ok(!fs.existsSync(path.join(f.state,'runs',run,'console.txt')));
+  assert.ok(fs.existsSync(path.join(f.state,'PAUSED')));assert.ok(!fs.existsSync(path.join(f.state,'ready.json')));
+});
+test('the permission profile grants Python read access and keeps the workspace sandbox',t=>{
+  const f=fixture(t),runtime=pythonCommand(),config=sessionConfig({project:f.project},runtime,f.state,path.join(f.base,'git-common'));
+  assert.equal(config.profile,'hearthtable_loop');
+  const profile=config.args.find(x=>x.startsWith('permissions.'));
+  assert.ok(profile.includes('extends=":workspace"'));
+  assert.ok(profile.includes(JSON.stringify(path.dirname(runtime.exe))+'="read"'));
+  assert.ok(!profile.includes(JSON.stringify(path.dirname(runtime.exe))+'="write"'));
+  assert.ok(!config.args.some(x=>x.includes('danger-full-access') || x.includes('bypass')));
 });
 test('accepted changes require actual new HEAD, evidence and approvals',t=>{
   const f=fixture(t);const before=f.git('rev-parse','HEAD');const r=f.invoke('run','accepted');assert.equal(r.status,0,r.stderr);const after=f.git('rev-parse','HEAD');assert.notEqual(after,before);
@@ -129,4 +157,17 @@ test('native scheduled command launches Node with quoted paths and fake npm Code
   const xml=taskXml(loc);const encoded=xml.match(/-EncodedCommand ([A-Za-z0-9+/=]+)/)[1];
   const output=command('powershell.exe',['-NoProfile','-NonInteractive','-EncodedCommand',encoded],{env:{...process.env,APPDATA:appdata,LOOP_TEST_MODE:''}});
   assert.match(output,/NO_CHANGE/);assert.equal(JSON.parse(fs.readFileSync(path.join(f.state,'latest.json'))).summary,'TEST DOUBLE ONLY');
+});
+test('real Windows Codex sandbox can start per-user Python without any model calls',{skip:process.platform!=='win32' || !process.env.HEARTHTABLE_REAL_CODEX,timeout:240000},async t=>{
+  const f=fixture(t),runtime=pythonCommand(),base=path.join(process.env.LOCALAPPDATA,'Programs','Python');
+  fs.mkdirSync(base,{recursive:true});const owned=fs.mkdtempSync(path.join(base,'HearthtableSandboxQA-')),install=path.join(owned,'Python313');
+  t.after(()=>fs.rmSync(owned,{recursive:true,force:true}));
+  // Copy only the installed interpreter/standard library into a per-user path
+  // on this disposable VM. No downloads, third-party packages or personal data.
+  fs.cpSync(path.dirname(runtime.exe),install,{recursive:true,filter:source=>!source.split(path.sep).some(part=>['site-packages','Scripts','__pycache__'].includes(part))});
+  const copied=pythonCommand(path.join(install,'python.exe'));
+  const run=path.join(f.base,'live sandbox reports');fs.mkdirSync(run);
+  await probeRuntime({project:f.project},codexCommand(process.env.HEARTHTABLE_REAL_CODEX),copied,run,f.git('rev-parse','--path-format=absolute','--git-common-dir'));
+  const result=JSON.parse(fs.readFileSync(path.join(run,'prerequisite.json')));
+  assert.equal(result.passed,true);assert.equal(result.runtime.exe,copied.exe);assert.equal(f.git('status','--porcelain'),'');
 });

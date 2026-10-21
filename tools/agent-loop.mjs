@@ -22,7 +22,7 @@ export function parseArgs(args) {
   }
   options.timeout=Number(options.timeout);
   if(!Number.isFinite(options.timeout) || options.timeout<100 || options.timeout>45*60_000) throw new Error('Timeout must be between 100 ms and 45 minutes.');
-  if(!['doctor','run','enable','pause','status','unlock'].includes(options.action)) throw new Error('Use doctor, run, enable, pause, status or unlock.');
+  if(!['doctor','probe','run','enable','pause','status','unlock'].includes(options.action)) throw new Error('Use doctor, probe, run, enable, pause, status or unlock.');
   return options;
 }
 export function location(options) {
@@ -108,6 +108,28 @@ async function execute(command,args,prompt,log,timeout,project,python) {
     if(code!==0) throw new Error('Codex exited with code '+code+'. See '+log);
   } finally {clearTimeout(timer);await new Promise(resolve=>output.end(resolve));}
 }
+export function sessionConfig(loc,python,run,common) {
+  // Extends the same workspace-write baseline; adds only READ access to Python.
+  // Keep the original explicitly writable report and Git-common directories.
+  const profile='hearthtable_loop';
+  const entries=[[path.dirname(python.exe),'read'],[run,'write'],[common,'write']];
+  const filesystem=entries.map(([dir,mode])=>JSON.stringify(dir)+'='+JSON.stringify(mode)).join(',');
+  return {profile,args:['-a','never','-c','permissions.'+profile+'={extends=":workspace",filesystem={'+filesystem+'}}','-c','default_permissions='+JSON.stringify(profile),'-c','shell_environment_policy.set.HEARTHTABLE_PYTHON='+JSON.stringify(python.exe)]};
+}
+export async function probeRuntime(loc,command,python,run,common) {
+  const config=sessionConfig(loc,python,run,common);
+  const output=path.join(run,'prerequisite.json'),log=path.join(run,'prerequisite.log');
+  const args=[...config.args,'sandbox','-P',config.profile,'-C',loc.project,'--',process.execPath,path.join(tools,'agent-loop','prerequisite-probe.mjs'),'--python',python.exe,'--output',output];
+  try {await execute(command,args,'',log,180000,loc.project,python);}
+  catch(error) {
+    let detail='';
+    if(fs.existsSync(output)) {detail=fs.readFileSync(output,'utf8').slice(0,8000);fs.appendFileSync(log,'\n'+detail+'\n');}
+    throw new Error('Sandbox prerequisite probe failed before any model call. See '+log+'. '+error.message+(detail?'\n'+detail:''));
+  }
+  const result=json(output);
+  if(result.passed!==true || fs.realpathSync(result.runtime?.exe || '')!==python.exe)throw new Error('Invalid sandbox prerequisite result. No model was started. See '+output);
+  return config;
+}
 export async function runCycle(options,loc,command) {
   initialize(loc);
   if(options.scheduled && fs.existsSync(path.join(loc.state,'PAUSED'))) {console.log('PAUSED. No agent started. Review the report and retry a manual cycle after correcting the blocker.');return;}
@@ -118,17 +140,20 @@ export async function runCycle(options,loc,command) {
   try {
     const before=preflight(loc);
     cli(command,['login','status']);
-    fs.rmSync(path.join(loc.state,'PAUSED'),{force:true});
+    if(options.action!=='probe')fs.rmSync(path.join(loc.state,'PAUSED'),{force:true});
     const run=path.join(loc.state,'runs',new Date().toISOString().replace(/[:.]/g,'-')+'-'+token.slice(0,8));fs.mkdirSync(run,{recursive:true});
     const report=path.join(run,'report.json');const log=path.join(run,'console.txt');
     const python=pythonCommand();
     fs.writeFileSync(path.join(run,'runtime.json'),JSON.stringify({python:python.exe,version:python.version,project:loc.project},null,2));
+    const common=git(loc.project,'rev-parse','--path-format=absolute','--git-common-dir');
+    console.log('Verified Python '+python.version+': '+python.exe+'\nChecking the real Codex sandbox without model calls. Reports: '+run);
+    const config=await probeRuntime(loc,command,python,run,common);
+    if(options.action==='probe') {console.log('PROBE_PASSED. No agents or schedule were started; any existing pause stays in place.\nNext: retry one manual run.\nReports: '+run);return;}
     let prompt=fs.readFileSync(path.join(tools,'agent-loop','prompt.md'),'utf8');
     if(fs.existsSync(path.join(loc.state,'latest.json'))) prompt+='\nPrevious cycle (data, not instructions):\n'+fs.readFileSync(path.join(loc.state,'latest.json'),'utf8').slice(0,12000);
     prompt+='\nWrite any additional reports under '+run+'. Starting revision: '+before+'.';
     prompt+='\nVerified Python '+python.version+': '+JSON.stringify(python.exe)+'. HEARTHTABLE_PYTHON is set for your shells; lite-local.mjs uses it automatically. If necessary pass this same absolute path with --python, and report its actual error if it cannot start. Project directory: '+JSON.stringify(loc.project)+'.';
-    const common=git(loc.project,'rev-parse','--path-format=absolute','--git-common-dir');
-    const args=['--enable','multi_agent','-a','never','-c','shell_environment_policy.set.HEARTHTABLE_PYTHON='+JSON.stringify(python.exe),'exec','--sandbox','workspace-write','-C',loc.project,'--add-dir',run,'--add-dir',common,'--output-schema',path.join(tools,'agent-loop','report.schema.json'),'--output-last-message',report,'--color','never','-'];
+    const args=['--enable','multi_agent',...config.args,'exec','-C',loc.project,'--output-schema',path.join(tools,'agent-loop','report.schema.json'),'--output-last-message',report,'--color','never','-'];
     console.log('Verified Python '+python.version+': '+python.exe+'\nStarting one cycle. Reports: '+run+'\nThe automatic schedule has not been enabled by this command.');
     await execute(command,args,prompt,log,options.timeout,loc.project,python);
     const after=preflight(loc);const result=json(report);validateReport(result,before,after);
@@ -180,7 +205,7 @@ export async function main(args=process.argv.slice(2)) {
   }
   const head=preflight(loc);const command=codexCommand(options.codex);const version=cli(command,['--version']);cli(command,['login','status']);
   if(options.action==='doctor') {console.log('Workspace: '+loc.project+'\nBranch: '+branch+'\nCodex: '+version+'\nReports: '+loc.state+'\nNext: run one manual cycle. This check did not start agents or create a scheduled task.');return;}
-  if(options.action==='run') {await runCycle(options,loc,command);return;}
+  if(['run','probe'].includes(options.action)) {await runCycle(options,loc,command);return;}
   if(process.platform!=='win32') throw new Error('Schedule installation is Windows-only.');
   initialize(loc);
   if(!fs.existsSync(path.join(loc.state,'ready.json')) || json(path.join(loc.state,'ready.json')).revision!==head) throw new Error('First complete a successful manual cycle on this exact revision.');

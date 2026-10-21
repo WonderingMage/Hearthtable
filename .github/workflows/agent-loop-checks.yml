@@ -15,7 +15,7 @@ permissions:
 jobs:
   windows:
     runs-on: windows-2022
-    timeout-minutes: 8
+    timeout-minutes: 15
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
@@ -34,3 +34,24 @@ jobs:
           $escaped=$text.Substring([Math]::Max(0,$text.Length-14000)).Replace('%','%25').Replace("`r",'%0D').Replace("`n",'%0A')
           if ($result -ne 0) { Write-Host "::error title=Agent loop tests::$escaped";throw 'Agent loop tests failed' }
           Write-Host "::notice title=Agent loop tests::$escaped"
+      - name: Exercise the real pinned Codex sandbox without model calls
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $package=Join-Path $env:RUNNER_TEMP 'codex-sandbox-qa'
+          npm.cmd install --prefix $package --ignore-scripts @openai/codex@0.163.0
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned Codex installation failed' }
+          $env:HEARTHTABLE_REAL_CODEX=Join-Path $package 'node_modules\@openai\codex\bin\codex.js'
+          $log=Join-Path $env:RUNNER_TEMP 'real-codex-sandbox.txt'
+          # Provision only this fresh hosted VM; never change the owner's
+          # security settings or enable an agent schedule from CI.
+          node $env:HEARTHTABLE_REAL_CODEX sandbox setup --elevated --current-user 2>&1 | Tee-Object -FilePath $log
+          $result=$LASTEXITCODE
+          if ($result -eq 0) {
+            node --test --test-name-pattern='real Windows Codex sandbox' ./source/tools/agent-loop.test.mjs 2>&1 | Tee-Object -FilePath $log -Append
+            $result=$LASTEXITCODE
+          }
+          $text=Get-Content -Raw -LiteralPath $log
+          $escaped=$text.Substring([Math]::Max(0,$text.Length-14000)).Replace('%','%25').Replace("`r",'%0D').Replace("`n",'%0A')
+          if ($result -ne 0) { Write-Host "::error title=Real Codex sandbox::$escaped";throw 'Real Windows sandbox check failed' }
+          Write-Host "::notice title=Real Codex sandbox::$escaped"
