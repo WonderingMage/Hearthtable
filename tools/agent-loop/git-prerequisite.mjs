@@ -12,9 +12,9 @@ function resolveGit(project,flag) {
 }
 export function gitPrerequisite(project) {
   const gitdir=resolveGit(project,'--git-dir'),common=resolveGit(project,'--git-common-dir');
-  const checked=[...new Set([gitdir,common,path.join(common,'objects')])];
+  const checked=[...new Set([gitdir,...['objects','refs','logs'].map(name=>path.join(common,name)).filter(dir=>fs.existsSync(dir))])];
   for(const directory of checked) {
-    const file=path.join(directory,'hearthtable-permission-probe-'+randomUUID()+'.tmp');
+    const file=path.join(directory,'.hearthtable-permission-probe-'+randomUUID()+'.tmp');
     let owned=false;
     try {const fd=fs.openSync(file,'wx');owned=true;fs.closeSync(fd);}
     catch(error) {throw Error('Git metadata is not writable in this sandbox: '+directory+' — '+error.message+'. No source, index, refs or commits were changed.');}

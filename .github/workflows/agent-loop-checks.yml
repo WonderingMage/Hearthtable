@@ -52,11 +52,15 @@ jobs:
           node $env:HEARTHTABLE_REAL_CODEX sandbox setup --elevated --current-user 2>&1 | Tee-Object -FilePath $log
           $result=$LASTEXITCODE
           if ($result -eq 0) {
+            node --test --test-name-pattern='real Windows Codex sandbox stages and commits' ./source/tools/agent-loop.test.mjs 2>&1 | Tee-Object -FilePath $log -Append
+            $result=$LASTEXITCODE
+          }
+          if ($result -eq 0) {
             node ./source/tools/lite-local.mjs setup 2>&1 | Tee-Object -FilePath $log -Append
             $result=$LASTEXITCODE
           }
           if ($result -eq 0) {
-            node --test --test-name-pattern='real Windows Codex sandbox' ./source/tools/agent-loop.test.mjs 2>&1 | Tee-Object -FilePath $log -Append
+            node --test --test-name-pattern='real Windows Codex sandbox validates' ./source/tools/agent-loop.test.mjs 2>&1 | Tee-Object -FilePath $log -Append
             $result=$LASTEXITCODE
           }
           $text=Get-Content -Raw -LiteralPath $log

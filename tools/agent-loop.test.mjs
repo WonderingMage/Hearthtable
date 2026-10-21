@@ -15,8 +15,8 @@ function command(exe,args,options={}) {
   if(r.error || r.status!==0) throw new Error(r.error?.message || r.stderr || r.stdout);
   return r.stdout.trim();
 }
-function fixture(t) {
-  const base=fs.mkdtempSync(path.join(os.tmpdir(),'hearthtable-loop-test-'));
+function fixture(t,parent=os.tmpdir()) {
+  const base=fs.mkdtempSync(path.join(parent,'hearthtable-loop-test-'));
   const project=path.join(base,"project with spaces & apostrophe's");fs.mkdirSync(project);
   const git=(...args)=>command('git',['-C',project,...args]);
   git('init','--initial-branch=automation/lite-improvements');git('config','user.email','fixture@example.invalid');git('config','user.name','Loop test');
@@ -118,7 +118,7 @@ test('a Godot prerequisite failure pauses before model usage',t=>{
   assert.equal(f.git('rev-parse','HEAD'),before);assert.equal(f.git('status','--porcelain'),'');
 });
 test('the permission profile grants Python read access and keeps the workspace sandbox',t=>{
-  const f=fixture(t),runtime=pythonCommand(),config=sessionConfig({project:f.project},runtime,f.state,path.join(f.base,'git-common'));
+  const f=fixture(t),runtime=pythonCommand(),config=sessionConfig({project:f.project},runtime,f.state,f.git('rev-parse','--path-format=absolute','--git-common-dir'));
   assert.equal(config.profile,'hearthtable_loop');
   const profile=config.args.find(x=>x.startsWith('permissions.'));
   assert.ok(profile.includes('extends=":workspace"'));
@@ -130,13 +130,14 @@ test('the permission profile grants Python read access and keeps the workspace s
 test('linked worktrees explicitly authorize their own Git admin directory',t=>{
   const f=fixture(t),linked=path.join(f.base,"linked worktree & quote's");
   f.git('worktree','add','-b','automation/permission-check',linked,'HEAD');
-  const common=command('git',['-C',linked,'rev-parse','--path-format=absolute','--git-common-dir']);
-  const gitdir=command('git',['-C',linked,'rev-parse','--path-format=absolute','--git-dir']);
+  const common=fs.realpathSync.native(command('git',['-C',linked,'rev-parse','--path-format=absolute','--git-common-dir']));
+  const gitdir=fs.realpathSync.native(command('git',['-C',linked,'rev-parse','--path-format=absolute','--git-dir']));
   assert.notEqual(gitdir,common);
   const config=sessionConfig({project:linked},pythonCommand(),f.state,common);
   const profile=config.args.find(x=>x.startsWith('permissions.'));
   assert.ok(profile.includes(JSON.stringify(gitdir)+'="write"'));
-  assert.ok(profile.includes(JSON.stringify(common)+'="write"'));
+  assert.ok(profile.includes(JSON.stringify(common)+'="read"'));
+  for(const name of ['objects','refs','logs'])assert.ok(profile.includes(JSON.stringify(path.join(common,name))+'="write"'));
   assert.ok(!profile.includes(JSON.stringify(path.join(linked,'.git'))+'="write"'),'The worktree pointer stays protected');
   // A normal checkout has the same gitdir/common path; duplicate TOML keys fail.
   const normal=sessionConfig({project:f.project},pythonCommand(),f.state,f.git('rev-parse','--path-format=absolute','--git-common-dir'));
@@ -152,7 +153,7 @@ test('the Git prerequisite leaves linked-worktree source, index, refs and metada
   const result=gitPrerequisite(linked);
   assert.equal(result.passed,true);assert.deepEqual(fs.readdirSync(metadata),before);
   assert.deepEqual(fs.readFileSync(path.join(metadata,'index')),index);assert.equal(f.git('rev-parse','HEAD'),head);
-  for(const directory of result.checked)assert.ok(!fs.readdirSync(directory).some(name=>name.startsWith('hearthtable-permission-probe-')));
+  for(const directory of result.checked)assert.ok(!fs.readdirSync(directory).some(name=>name.startsWith('.hearthtable-permission-probe-')));
   assert.equal(command('git',['-C',linked,'status','--porcelain']),'');
 });
 test('accepted changes require actual new HEAD, evidence and approvals',t=>{
@@ -252,7 +253,9 @@ test('real Windows Codex sandbox validates Python, Godot, source, UI, network an
   assert.equal(command('git',['-C',source,'status','--porcelain']),before);assert.equal(f.git('status','--porcelain'),'');
 });
 test('real Windows Codex sandbox stages and commits a linked-worktree change with its exact metadata grant',{skip:process.platform!=='win32' || !process.env.HEARTHTABLE_REAL_CODEX,timeout:300000},t=>{
-  const f=fixture(t),linked=path.join(f.base,"linked worktree & quote's");
+  // Match the owner's Dev worktree outside the baseline writable TEMP root.
+  const parent=path.join(process.env.USERPROFILE,'Dev');fs.mkdirSync(parent,{recursive:true});
+  const f=fixture(t,parent),linked=path.join(f.base,"linked worktree & quote's");
   f.git('worktree','add','-b','automation/git-permission-proof',linked,'HEAD');
   const mainHead=f.git('rev-parse','HEAD'),common=f.git('rev-parse','--path-format=absolute','--git-common-dir');
   const run=path.join(f.base,'git permission reports');fs.mkdirSync(run);
@@ -269,7 +272,9 @@ console.log('GIT_SANDBOX_COMMIT_OK '+git('rev-parse','HEAD'));
 `);
   const codex=codexCommand(process.env.HEARTHTABLE_REAL_CODEX);
   const invoke=args=>spawnSync(codex.exe,[...codex.prefix,...args,'sandbox','-P',config.profile,'-C',linked,'--',process.execPath,probe],{cwd:linked,encoding:'utf8',windowsHide:true,timeout:120000,maxBuffer:2000000});
-  const oldArgs=config.args.map(arg=>arg.startsWith('permissions.')?arg.replace(','+JSON.stringify(config.gitdir)+'="write"',''):arg);
+  const oldEntries=[[path.dirname(pythonCommand().exe),'read'],[config.toolchain,'read'],[run,'write'],[common,'write']];
+  const oldProfile='permissions.'+config.profile+'={extends=":workspace",filesystem={'+oldEntries.map(([dir,mode])=>JSON.stringify(dir)+'='+JSON.stringify(mode)).join(',')+'}}';
+  const oldArgs=config.args.map(arg=>arg.startsWith('permissions.')?oldProfile:arg);
   const denied=invoke(oldArgs);
   assert.notEqual(denied.status,0);assert.match((denied.stderr||'')+(denied.stdout||''),/index\.lock/);
   console.log('Reproduced linked-worktree index.lock denial with the old broader grant.');

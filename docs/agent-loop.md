@@ -98,8 +98,9 @@ It does not load a campaign or run the application/UI suites. The
 per-invocation `hearthtable_loop` permission profile extends Codex’s built-in
 `:workspace` profile (the workspace-write baseline). It grants read access to
 only the Python installation and pinned Godot toolchain folders; source, reports,
-the Git common directory and the current worktree's exact Git admin directory
-have write access. It does not grant Python-folder
+the current worktree's exact Git admin directory and shared Git objects/refs/logs
+have write access. The linked worktree's shared config/hooks and other worktrees'
+admin directories stay read-only. It does not grant Python-folder
 write access, disable the sandbox or change account-wide Codex configuration.
 The same profile is used for the probe and subsequent model cycle.
 The parent pins the existing Godot folder as `HEARTHTABLE_TOOLCHAIN` for the
@@ -133,13 +134,14 @@ folder, including whether the Python path is visible inside the sandbox. A
 failed probe stops before model usage; preserve its diagnostics.
 
 The Git check exclusively creates and removes randomly named temporary files
-in the current Git admin directory, common directory and object-store directory.
+in the current Git admin directory and shared objects/refs/logs directories.
 It does not touch the index, refs, commits or application source. A linked
 worktree has its own admin directory under the main checkout's `.git/worktrees`.
 Codex 0.163 protects that exact directory separately; granting only the broader
 common directory leaves `index.lock` creation denied. The launcher explicitly
-grants the current admin directory while keeping the worktree's `.git` pointer
-protected. A permission-denied `index.lock` message is not evidence of a stale
+grants the current admin directory and uses separate objects/refs/logs grants,
+without reusing the old broader common-directory capability. It keeps the
+worktree's `.git` pointer protected. A permission-denied `index.lock` message is not evidence of a stale
 lock: do not delete a lock or disable sandboxing as a repair.
 See Codex's pinned
 [worktree carveout handling](https://github.com/openai/codex/blob/rust-v0.163.0/codex-rs/protocol/src/permissions.rs#L1684).

@@ -117,8 +117,13 @@ export function sessionConfig(loc,python,run,common) {
   const toolchain=toolHome({});
   // Codex protects a linked worktree's resolved gitdir separately. A broader
   // common-dir grant does not override that exact default read-only carveout.
-  const gitdir=git(loc.project,'rev-parse','--path-format=absolute','--git-dir');
-  const entries=new Map([[path.dirname(python.exe),'read'],[toolchain,'read'],[run,'write'],[common,'write'],[gitdir,'write']]);
+  common=fs.realpathSync.native(common);
+  const gitdir=fs.realpathSync.native(git(loc.project,'rev-parse','--path-format=absolute','--git-dir'));
+  // Avoid reusing a broader common-directory write capability that an older
+  // worktree carveout denied. Commits need objects, refs, logs and this gitdir;
+  // shared config/hooks and other worktree admin directories remain read-only.
+  const metadata=[path.join(common,'objects'),path.join(common,'refs'),path.join(common,'logs')].filter(dir=>fs.existsSync(dir));
+  const entries=new Map([[path.dirname(python.exe),'read'],[toolchain,'read'],[run,'write'],[common,'read'],...metadata.map(dir=>[dir,'write']),[gitdir,'write']]);
   const filesystem=[...entries].map(([dir,mode])=>JSON.stringify(dir)+'='+JSON.stringify(mode)).join(',');
   return {profile,toolchain,gitdir,common,args:['-a','never','-c','permissions.'+profile+'={extends=":workspace",filesystem={'+filesystem+'}}','-c','default_permissions='+JSON.stringify(profile),'-c','shell_environment_policy.set.HEARTHTABLE_PYTHON='+JSON.stringify(python.exe),'-c','shell_environment_policy.set.HEARTHTABLE_TOOLCHAIN='+JSON.stringify(toolchain)]};
 }
