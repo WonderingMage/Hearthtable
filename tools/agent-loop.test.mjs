@@ -275,7 +275,10 @@ if(!protectedPointer)throw Error('The worktree Git pointer must remain protected
 console.log('GIT_SANDBOX_COMMIT_OK '+git('rev-parse','HEAD'));
 `);
   const codex=codexCommand(process.env.HEARTHTABLE_REAL_CODEX);
-  const invoke=args=>spawnSync(codex.exe,[...codex.prefix,...args,'sandbox','-P',config.profile,'-C',linked,'--',process.execPath,probe],{cwd:linked,encoding:'utf8',windowsHide:true,timeout:120000,maxBuffer:2000000});
+  // Evaluate the builtin-only harness directly. Node 22's main-module realpath
+  // walker otherwise tries to list private Dev/AppData ancestors before Git
+  // starts, regardless of the accessible script's exact directory grant.
+  const invoke=args=>spawnSync(codex.exe,[...codex.prefix,...args,'sandbox','-P',config.profile,'-C',linked,'--',process.execPath,'--input-type=module','-e',fs.readFileSync(probe,'utf8')],{cwd:linked,encoding:'utf8',windowsHide:true,timeout:120000,maxBuffer:2000000});
   const oldEntries=[[path.dirname(pythonCommand().exe),'read'],[config.toolchain,'read'],[run,'write'],[common,'write']];
   const oldProfile='permissions.'+config.profile+'={extends=":workspace",filesystem={'+oldEntries.map(([dir,mode])=>JSON.stringify(dir)+'='+JSON.stringify(mode)).join(',')+'}}';
   const oldArgs=config.args.map(arg=>arg.startsWith('permissions.')?oldProfile:arg);
