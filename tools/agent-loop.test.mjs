@@ -25,6 +25,12 @@ const args=process.argv.slice(2);
 if(args.includes('--version')){console.log('codex-cli test-double');process.exit(0);}
 if(args[0]==='login'){process.exit(0);}
 const value=k=>args[args.indexOf(k)+1];const dir=value('-C');
+if(process.cwd()!==dir)throw Error('Agent process did not start in the project directory');
+const config=args[args.indexOf('-c')+1];
+if(!config.startsWith('shell_environment_policy.set.HEARTHTABLE_PYTHON='))throw Error('Python shell policy missing');
+const python=JSON.parse(config.slice(config.indexOf('=')+1));
+if(python!==process.env.HEARTHTABLE_PYTHON)throw Error('Agent and shell Python paths differ');
+fs.writeFileSync(value('--output-last-message')+'.startup.json',JSON.stringify({cwd:process.cwd(),python,config}));
 const git=(...a)=>{const r=spawnSync('git',['-C',dir,...a],{encoding:'utf8'});if(r.status)throw Error(r.stderr);return r.stdout.trim();};
 if(process.env.LOOP_TEST_MODE==='hang'){setInterval(()=>{},1000);}else{
 if(process.env.LOOP_TEST_MODE==='dirty')fs.writeFileSync(dir+'/unfinished.txt','keep me');
@@ -64,6 +70,18 @@ test('a no-change cycle records state without calling a shell or changing source
   assert.equal(JSON.parse(fs.readFileSync(path.join(f.state,'ready.json'))).revision,before);
   assert.ok(!fs.existsSync(path.join(f.state,'running.json')));
   const run=fs.readdirSync(path.join(f.state,'runs'))[0];assert.match(fs.readFileSync(path.join(f.state,'runs',run,'console.txt'),'utf8'),/mock stderr preserved/);
+  const runtime=JSON.parse(fs.readFileSync(path.join(f.state,'runs',run,'runtime.json')));
+  const startup=JSON.parse(fs.readFileSync(path.join(f.state,'runs',run,'report.json.startup.json')));
+  assert.equal(startup.python,runtime.python);assert.equal(startup.cwd,fs.realpathSync(f.project));
+  assert.ok(path.isAbsolute(runtime.python));
+});
+test('a broken Python configuration pauses before invoking any agent',t=>{
+  const f=fixture(t),before=f.git('rev-parse','HEAD');
+  const r=spawnSync(process.execPath,[runner,'run','--project',f.project,'--state',f.state,'--codex',f.mock],{encoding:'utf8',windowsHide:true,timeout:20000,env:{...process.env,HEARTHTABLE_PYTHON:process.execPath}});
+  assert.notEqual(r.status,0);assert.match(r.stderr,/Configured Python could not be verified/);
+  assert.ok(fs.existsSync(path.join(f.state,'PAUSED')));assert.ok(!fs.existsSync(path.join(f.state,'ready.json')));
+  for(const run of fs.readdirSync(path.join(f.state,'runs')))assert.ok(!fs.existsSync(path.join(f.state,'runs',run,'console.txt')));
+  assert.equal(f.git('rev-parse','HEAD'),before);assert.equal(f.git('status','--porcelain'),'');
 });
 test('accepted changes require actual new HEAD, evidence and approvals',t=>{
   const f=fixture(t);const before=f.git('rev-parse','HEAD');const r=f.invoke('run','accepted');assert.equal(r.status,0,r.stderr);const after=f.git('rev-parse','HEAD');assert.notEqual(after,before);

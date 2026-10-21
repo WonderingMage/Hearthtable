@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
-import {options,checkedProject,processEnv,snapshot,outside,git} from './lite-local.mjs';
+import {options,checkedProject,processEnv,snapshot,outside,git,pythonCommand} from './lite-local.mjs';
 
 const config='[application]\nconfig/name="Hearthtable Lite"\nconfig/edition="lite"\n';
 function fixture(t) {
@@ -65,4 +65,28 @@ test('an absent engine fails before any snapshot, Godot process or test starts',
   const f=fixture(t),output=path.join(f.base,'must-not-exist');
   const result=spawnSync(process.execPath,[fileURLToPath(new URL('./lite-local.mjs',import.meta.url)),'test','--project',f.project,'--toolchain',path.join(f.base,'no-engine'),'--output',output],{encoding:'utf8',windowsHide:true});
   assert.notEqual(result.status,0);assert.match(result.stderr,/not set up/);assert.ok(!fs.existsSync(output));
+});
+test('the resolved Python works directly when PATH and launcher discovery are unavailable',()=>{
+  const runtime=pythonCommand(),env={...process.env,PATH:'',HEARTHTABLE_PYTHON:runtime.exe};
+  assert.ok(path.isAbsolute(runtime.exe));assert.deepEqual(runtime.prefix,[]);
+  const direct=pythonCommand(undefined,env);
+  assert.equal(direct.exe,runtime.exe);assert.equal(direct.version,runtime.version);
+  assert.deepEqual(pythonCommand(runtime.exe,{...env,HEARTHTABLE_PYTHON:'invalid'}),direct);
+});
+test('a broken configured interpreter reports its actual error without silently falling back',()=>{
+  const before={...process.env};
+  assert.throws(()=>pythonCommand(undefined,{...process.env,HEARTHTABLE_PYTHON:process.execPath}),error=>{
+    assert.match(error.message,/Configured Python could not be verified/);
+    assert.ok(error.message.includes(process.execPath));assert.match(error.message,/exit \d+/);return true;
+  });
+  assert.throws(()=>pythonCommand('relative-python.exe'),/absolute path/);
+  assert.deepEqual({...process.env},before);
+});
+test('Windows per-user Python is found without PATH or the registry-based launcher',{skip:process.platform!=='win32'},t=>{
+  const f=fixture(t),runtime=pythonCommand();
+  const appdata=path.join(f.base,"Python tools & quote's");
+  const base=path.join(appdata,'Programs','Python');fs.mkdirSync(base,{recursive:true});
+  fs.symlinkSync(path.dirname(runtime.exe),path.join(base,'Python313'),'junction');
+  const discovered=pythonCommand(undefined,{...process.env,LOCALAPPDATA:appdata,PATH:'',HEARTHTABLE_PYTHON:''});
+  assert.equal(discovered.exe,runtime.exe);assert.deepEqual(discovered.prefix,[]);
 });

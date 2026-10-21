@@ -4,6 +4,7 @@ on:
     branches: [edition/lite]
     paths:
       - 'tools/lite-local*'
+      - 'tools/python-runtime.mjs'
       - 'tools/test_lite_network.py'
       - '.github/workflows/local-godot-checks.yml'
   workflow_dispatch:

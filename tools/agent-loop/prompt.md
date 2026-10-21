@@ -4,6 +4,13 @@ Read AGENTS.md, CODEX_HANDOFF.md, docs/lite.md and tests/README.md. This task
 explicitly authorizes exactly three worker agents: Builder, Tester and Critic,
 managed by you as coordinator. If worker tools are unavailable, report blocked;
 do not silently substitute a single-agent run. Do not create further workers.
+After prerequisites pass, actually launch each worker and retain its agent ID
+with its findings. If blocked before launching workers, say they were not
+started; never invent worker findings or report your own review as independent.
+
+On Windows, use shell tools with login=false and an explicit project workdir.
+If invoking PowerShell yourself, use -NoProfile and Set-Location -LiteralPath
+with the supplied project path; a profile may otherwise reset the location.
 
 Before editing, Critic inspects the current program and recent Git history to
 identify concrete defects or usability problems. Tester checks whether the
@@ -49,7 +56,14 @@ restricted to fresh hosted VMs. Never use private campaigns/PDFs.
 
 Before edits, run `node tools/lite-local.mjs doctor`. Godot 4.5.1, matching export
 templates and Python 3.11+ must be ready. Do not install/download tools during a
-cycle; missing tools mean blocked with setup instructions. Run tests through
+cycle; missing tools mean blocked with setup instructions.
+The launcher passes a verified absolute interpreter as HEARTHTABLE_PYTHON.
+The helper uses it automatically, avoiding py.exe/WindowsApps lookup; use the
+same path with --python if an environment setting is absent. If it cannot run,
+retain the actual error and report a session/permission blocker rather than
+assuming the owner must reinstall Python. Never disable the sandbox.
+
+Run tests through
 `node tools/lite-local.mjs test --output <run-report-dir>/unique-test-name`.
 Use --suite lite/updates/pdf_import or --ui for rendered checks; network changes
 also require the `network` action (add --ui for rendered player controls).

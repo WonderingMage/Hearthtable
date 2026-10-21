@@ -8,6 +8,8 @@ import {spawn,spawnSync} from 'node:child_process';
 import {createHash,randomUUID} from 'node:crypto';
 import {Readable} from 'node:stream';
 import {pipeline} from 'node:stream/promises';
+import {pythonCommand} from './python-runtime.mjs';
+export {pythonCommand} from './python-runtime.mjs';
 
 const script=fileURLToPath(import.meta.url), root=path.dirname(path.dirname(script));
 const version='4.5.1', official='4.5.1.stable.official.f62fdbde1';
@@ -18,7 +20,7 @@ const bad=/(?:^|\n)(?:SCRIPT ERROR:|ERROR:|.*Parse Error:|.*FAIL )/;
 const summary=/\b\w+ (\d+) passed, (\d+) failed/g;
 export function options(args) {
   const o={action:args.shift() || 'doctor',project:root,ui:false,suite:null};
-  const keys={'--project':'project','--output':'output','--godot':'godot','--templates':'templates','--suite':'suite','--toolchain':'toolchain'};
+  const keys={'--project':'project','--output':'output','--godot':'godot','--templates':'templates','--suite':'suite','--toolchain':'toolchain','--python':'python'};
   while(args.length) {const key=args.shift();if(key==='--ui'){o.ui=true;continue;}if(!keys[key] || !args.length)throw Error('Unknown or incomplete option: '+key);o[keys[key]]=args.shift();}
   if(!['setup','doctor','test','network','build'].includes(o.action))throw Error('Use setup, doctor, test, network or build.');
   if(o.suite && ![...core,...ui].includes(o.suite))throw Error('Choose a supported Lite suite.');
@@ -143,21 +145,12 @@ function templatesAt(env,templates) {
   const target=path.join(base,process.platform==='win32'?'Godot':'godot','export_templates','4.5.1.stable');fs.mkdirSync(target,{recursive:true});
   for(const name of ['version.txt','windows_release_x86_64.exe','windows_release_x86_64_console.exe'])fs.copyFileSync(path.join(templates,name),path.join(target,name));
 }
-export function pythonCommand() {
-  const attempts=process.platform==='win32'?[{exe:'py.exe',prefix:['-3']},{exe:'python.exe',prefix:[]}]:[{exe:'python3',prefix:[]}];
-  for(const item of attempts) {
-    if(item.exe==='python.exe') {const paths=spawnSync('where.exe',['python.exe'],{encoding:'utf8',windowsHide:true});const exe=paths.stdout?.split(/\r?\n/).find(p=>p && !p.toLowerCase().includes('windowsapps'));if(!exe)continue;item.exe=exe;}
-    const result=spawnSync(item.exe,[...item.prefix,'-I','-c','import sys;print(sys.version_info.major,sys.version_info.minor)'],{encoding:'utf8',windowsHide:true,timeout:10000});
-    if(result.status===0 && /^3 (?:1[1-9]|[2-9]\d)\s*$/.test(result.stdout))return item;
-  }
-  throw Error('Python 3.11 or newer is needed for network/build tools. Install it from python.org, then retry.');
-}
 export async function main(args=process.argv.slice(2)) {
   const o=options([...args]);o.project=fs.realpathSync(o.project);checkedProject(fs.readFileSync(path.join(o.project,'project.godot'),'utf8'));
   if(fs.existsSync(path.join(o.project,'override.cfg')))throw Error('Review/remove project override.cfg before isolated testing.');
   if(o.action==='setup'){await setup(o);return;}
   const tool=await engine(o);
-  if(o.action==='doctor') {console.log('Godot: '+official+'\nEditor: '+tool.exe+'\nTemplates: '+(tool.templates || 'not configured'));try{const py=pythonCommand();console.log('Python: '+py.exe+' (ready)');}catch(error){console.log('Python: NOT READY — '+error.message);}console.log('Next: test. No game or agent was started.');return;}
+  if(o.action==='doctor') {console.log('Godot: '+official+'\nEditor: '+tool.exe+'\nTemplates: '+(tool.templates || 'not configured'));try{const py=pythonCommand(o.python);console.log('Python: '+py.exe+' ('+py.version+', ready)');}catch(error){console.log('Python: NOT READY — '+error.message);process.exitCode=1;}console.log('No game or agent was started.');return;}
   if(o.action==='build' && git(o.project,'status','--porcelain'))throw Error('Build requires a clean candidate commit, after testing and review.');
   const before=git(o.project,'rev-parse','HEAD');
   const output=path.resolve(o.output || path.join(process.env.LOCALAPPDATA || os.tmpdir(),'HearthtableCodexQA',new Date().toISOString().replace(/[:.]/g,'-')+'-'+randomUUID().slice(0,8)));
@@ -176,11 +169,11 @@ export async function main(args=process.argv.slice(2)) {
   }
   if(o.action==='test')for(const name of o.suite?[o.suite]:o.ui?[...core,...ui]:core)await suite(name);
   if(o.action==='network') {
-    const py=pythonCommand();const text=await run(py.exe,[...py.prefix,'-I',path.join(copy,'tools','test_lite_network.py'),'--engine',tool.exe,'--output',path.join(output,'network'),...(o.ui?['--ui']:[])],process.env,path.join(output,'network.log'),600000);
+    const py=pythonCommand(o.python);const text=await run(py.exe,[...py.prefix,'-I',path.join(copy,'tools','test_lite_network.py'),'--engine',tool.exe,'--output',path.join(output,'network'),...(o.ui?['--ui']:[])],process.env,path.join(output,'network.log'),600000);
     const matches=[...text.matchAll(summary)];if(!matches.length || matches.some(m=>Number(m[2])!==0))throw Error('Network verification did not pass.');results.network=Number(matches.at(-1)[1]);console.log('Network: '+results.network+' passed');
   }
   if(o.action==='build') {
-    const py=pythonCommand();templatesAt(imported.env,tool.templates);
+    const py=pythonCommand(o.python);templatesAt(imported.env,tool.templates);
     const program=path.join(output,'Hearthtable_Lite_Portable.exe'),pack=path.join(output,'Lite_Application.pck');
     await run(tool.exe,['--headless','--path',copy,'--export-release','Windows Desktop',program],imported.env,path.join(output,'export-windows.log'));
     await run(tool.exe,['--headless','--path',copy,'--export-pack','Windows Desktop',pack],imported.env,path.join(output,'export-pack.log'));

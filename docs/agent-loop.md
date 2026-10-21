@@ -52,9 +52,16 @@ verify no setup process is still running; report the path rather than deleting
 files blindly.
 
 Doctor also checks **Python 3.11+**, needed for real networking and packaging.
-If missing, install Python from [python.org](https://www.python.org/downloads/windows/)
-with the Python launcher, reopen PowerShell and retry Doctor. No pip packages
-are required. Then run the baseline:
+It prints the actual interpreter path/version. Discovery checks python.org's
+per-user installation directly, then PATH and the launcher, and verifies the
+resolved `python.exe` without its launcher. If Python works in normal PowerShell
+but fails in Codex, do not reinstall it: use the actual error to diagnose that
+session. `--python "C:\absolute\path\python.exe"` or the current terminal's
+`HEARTHTABLE_PYTHON` environment variable selects an explicit interpreter;
+an invalid explicit selection fails without silently switching versions.
+If Python is actually absent, install it from
+[python.org](https://www.python.org/downloads/windows/), reopen PowerShell and
+retry Doctor. No pip packages are required. Then run the baseline:
 
 ```powershell
 node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\lite-local.mjs" test
@@ -85,7 +92,15 @@ node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\agent-loop.mjs" run
 ```
 
 This consumes Codex allowance. The prompt requires all three worker agents and
-real validation before accepting code. Read the final summary/report. If the
+real validation before accepting code. Before any model call, the launcher
+verifies the actual Python interpreter and supplies its absolute path to Codex
+and its shell environment as `HEARTHTABLE_PYTHON`. It records this in the private
+run's `runtime.json`; the safe test/build helper rechecks that same interpreter.
+The agent process starts in the project directory; Windows shell commands must
+also avoid profiles that change directory. Runtime lookup failures pause the
+loop with their actual diagnostics, without using model allowance.
+
+Read the final summary/report. If the
 local Godot editor, safe validation, GUI access for a visual change or packaging
 tools are missing, the cycle must report BLOCKED before editing. A clean approved
 candidate is packaged with `lite-local.mjs build`: EXE plus compatible Settings
