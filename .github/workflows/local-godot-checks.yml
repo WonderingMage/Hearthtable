@@ -1,0 +1,57 @@
+name: Local Windows Godot workflow checks
+on:
+  push:
+    branches: [edition/lite]
+    paths:
+      - 'tools/lite-local*'
+      - 'tools/test_lite_network.py'
+      - '.github/workflows/local-godot-checks.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out exact source
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          git -c credential.helper='!gh auth git-credential' clone --no-checkout "https://github.com/$env:GITHUB_REPOSITORY.git" source
+          if ($LASTEXITCODE -ne 0) { throw 'Clone failed' }
+          git -C source checkout --detach $env:GITHUB_SHA
+          if ($LASTEXITCODE -ne 0) { throw 'Checkout failed' }
+      - name: Validate official setup, isolated source, networking and candidate build
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          function Check([string]$label,[scriptblock]$command) {
+            $log=Join-Path $env:RUNNER_TEMP ($label+'.log')
+            & $command 2>&1 | Tee-Object -FilePath $log
+            $code=$LASTEXITCODE
+            $text=Get-Content -Raw -LiteralPath $log
+            $escaped=$text.Substring([Math]::Max(0,$text.Length-14000)).Replace('%','%25').Replace("`r",'%0D').Replace("`n",'%0A')
+            if ($code -ne 0) { Write-Host "::error title=${label}::$escaped";throw "$label failed" }
+            Write-Host "::notice title=${label}::$escaped"
+          }
+          # Synthetic sentinel only on this disposable hosted VM. Never create
+          # or reset ordinary game data on the owner's desktop.
+          $realData=Join-Path $env:APPDATA 'Godot\app_userdata\Hearthtable Lite'
+          if (Test-Path -LiteralPath $realData) { throw 'VM already has Lite data; refusing to touch it' }
+          New-Item -ItemType Directory -Path $realData | Out-Null
+          $sentinel=Join-Path $realData 'campaign-save-sentinel.txt'
+          Set-Content -LiteralPath $sentinel -Value 'Synthetic sentinel; must remain unchanged'
+          $before=(Get-FileHash -Algorithm SHA256 -LiteralPath $sentinel).Hash
+          $toolchain=Join-Path $env:RUNNER_TEMP 'Godot tools & spaces'
+          Check 'helper-tests' { node --test ./source/tools/lite-local.test.mjs }
+          Check 'setup' { node ./source/tools/lite-local.mjs setup --toolchain $toolchain }
+          Check 'doctor' { node ./source/tools/lite-local.mjs doctor --toolchain $toolchain }
+          Check 'source' { node ./source/tools/lite-local.mjs test --toolchain $toolchain --output (Join-Path $env:RUNNER_TEMP 'source QA') }
+          Check 'network' { node ./source/tools/lite-local.mjs network --toolchain $toolchain --output (Join-Path $env:RUNNER_TEMP 'network QA') }
+          Check 'candidate' { node ./source/tools/lite-local.mjs build --toolchain $toolchain --output (Join-Path $env:RUNNER_TEMP 'candidate QA') }
+          if ((Get-FileHash -Algorithm SHA256 -LiteralPath $sentinel).Hash -ne $before -or @(Get-ChildItem -LiteralPath $realData -Force).Count -ne 1) { throw 'Normal user-data sentinel changed' }
+          if (git -C source status --porcelain) { throw 'Source checkout changed' }
+          Write-Host '::notice title=Isolation sentinel::Normal AppData campaign sentinel and source checkout unchanged. No agents, installer, publication or scheduled task was started.'

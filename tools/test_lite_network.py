@@ -11,11 +11,14 @@ def main():
     try:
         for name,flags in [('host',['--host']),('player',[]),('observer',['--observer'])]:
             base=a.output/name
-            for part in ['data','config','cache']:(base/part).mkdir(parents=True)
+            for part in ['data','config','cache','temp']:(base/part).mkdir(parents=True)
             env=dict(os.environ,XDG_DATA_HOME=str(base/'data'),XDG_CONFIG_HOME=str(base/'config'),XDG_CACHE_HOME=str(base/'cache'))
+            # Godot 4.5.1 Windows uses APPDATA, not XDG_DATA_HOME. Override only
+            # the child processes and prove the resulting path before World loads.
+            if os.name=='nt':env.update(APPDATA=str(base/'data'),LOCALAPPDATA=str(base/'cache'),TEMP=str(base/'temp'),TMP=str(base/'temp'))
             probe=base/'probe';probe.mkdir();(probe/'project.godot').write_text('[application]\nconfig/name="Hearthtable Lite"\n');(probe/'probe.gd').write_text('extends SceneTree\nfunc _initialize():\n\tprint("USER_PATH="+OS.get_user_data_dir())\n\tquit()\n')
             r=subprocess.run([str(a.engine),'--headless','--path',str(probe),'--script','res://probe.gd'],env=env,text=True,capture_output=True,check=True,timeout=20)
-            expected=(base/'data/godot/app_userdata/Hearthtable Lite').resolve();match=re.search(r'USER_PATH=(.+)',r.stdout)
+            expected=(base/'data'/('Godot' if os.name=='nt' else 'godot')/'app_userdata/Hearthtable Lite').resolve();match=re.search(r'USER_PATH=(.+)',r.stdout)
             if not match or Path(match[1].strip()).resolve()!=expected or BAD.search(r.stdout+r.stderr):raise RuntimeError('Cannot prove Lite user-data isolation')
             (base/'isolation.txt').write_text(str(expected))
             graphical=a.ui and name=='player';cmd=[str(a.engine),'--audio-driver','Dummy']+([] if graphical else ['--headless'])+['--path',str(ROOT)]

@@ -25,21 +25,37 @@ create PRs, tag, release, install updates, change Windows security settings,
 modify scheduled tasks, or edit these loop controls/instructions. Operate only
 on automation/lite-improvements. Leave other branches and checkouts alone.
 
-Prove disposable user-data isolation BEFORE campaign-resetting tests. A Windows
-worktree does NOT isolate Godot saves; XDG variables do NOT isolate native
-Windows. The existing native installer tests are restricted to fresh hosted
-VMs. Do not launch the normal game or reset its data as a testing shortcut.
-Check for an appropriate Godot 4.5.1 EDITOR and an approved isolated harness.
-If needed validation is unavailable, do not edit: report blocked with concrete
-setup instructions. Never claim a screenshot, unexecuted command or source
-inspection proves a runtime test passed. Never use private campaigns/PDFs.
+Prove disposable user-data isolation BEFORE campaign-resetting tests. Use the
+approved tools/lite-local.mjs helper; never run test scripts directly against
+the normal game. A worktree alone does NOT isolate saves. Native Windows
+requires child-only APPDATA/LOCALAPPDATA overrides, which the helper verifies
+with an autoload-free probe before loading World. Installer tests remain
+restricted to fresh hosted VMs. Never use private campaigns/PDFs.
+
+Before edits, run `node tools/lite-local.mjs doctor`. Godot 4.5.1, matching export
+templates and Python 3.11+ must be ready. Do not install/download tools during a
+cycle; missing tools mean blocked with setup instructions. Run tests through
+`node tools/lite-local.mjs test --output <run-report-dir>/unique-test-name`.
+Use --suite lite/updates/pdf_import or --ui for rendered checks; network changes
+also require the `network` action (add --ui for rendered player controls).
+All outputs must be new folders under this cycle's writable run-report directory.
+The helper snapshots tracked working files without modifying source; Builder
+must git add new source files before tests so the snapshot includes them.
+Serialize tests/builds across workers. Never claim a screenshot, an unexecuted
+command or source inspection proves a runtime test passed. If GUI access or
+needed validation is unavailable, report blocked before editing.
 
 After Builder's change, Tester runs relevant checks and Critic reviews the
 actual diff/results. Allow at most TWO revision rounds. Aim to finish in
 20 minutes; report a blocker if the task is too large. An accepted application
 change needs both independent approvals and actual passing test evidence.
-Follow AGENTS.md's compatible-update/highlights requirements; if packaging is
-unavailable, report that blocker and do not claim acceptance.
+Follow AGENTS.md's compatible-update/highlights requirements. After approvals,
+commit the candidate, then use `node tools/lite-local.mjs build --output
+<run-report-dir>/unique-build-name` to prepare the matching EXE and .hearthupdate
+from that clean commit. Windows compiled core checks must pass. These are local
+candidate artifacts, not a publication or permission to install an unpublished
+update. Record their paths/hashes in the report. Build failure means blocked,
+even if a candidate commit exists; preserve it and the diagnostics.
 
 Commit accepted changes only on automation/lite-improvements. Do not discard
 uncommitted work, reset, clean or force anything. If edits remain unresolved,

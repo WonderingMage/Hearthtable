@@ -2,6 +2,15 @@
 
 The active edition on this branch is Hearthtable Lite; use Godot 4.5.1 and disposable **Hearthtable Lite** user data. Full/classic automated-combat suites below describe the other edition and are not Lite acceptance criteria.
 
+For the owner's normal Windows desktop, use `node tools/lite-local.mjs setup`,
+then `doctor`, `test`, `network`, and `test --ui`, serially. See
+[the local workflow](../docs/agent-loop.md) for prerequisites. This helper copies
+tracked working source outside the checkout and proves child-only Windows
+APPDATA isolation before any destructive test. Existing installer tests still
+require a fresh hosted VM. XDG-only shell examples below are Linux examples.
+`build` requires a clean commit and prepares candidate EXE/update files with
+native compiled core checks; it does not publish or install them.
+
 - `lite.gd`: DM free placement, own-pawn exploration/combat movement, blocked ownership/door/legacy command routes, manual Fireball/initiative, private packets/rolls/requests, fogged image/geometry redaction, individual prop concealment/defaults, custom model validation, malformed records and save/load.
 - `updates.gd`: bounded/tamper-resistant Lite packages, fixed-release provenance, classic-package rejection, install/confirm/rollback and campaign preservation.
 - `pdf_import.gd`: real PDF parsing/fields, narrative sections, structured equipment, imported bonuses through Lite's actual private dice and serialization.

@@ -28,7 +28,50 @@ node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\agent-loop.mjs" doctor
 installation/login. It makes no model calls and does not start a task. It does
 **not** prove Godot or testing/build tools are ready.
 
-Then start **one manual cycle**:
+Set up local validation **before** spending Codex allowance on a cycle:
+
+```powershell
+node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\lite-local.mjs" setup
+node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\lite-local.mjs" doctor
+```
+
+Setup downloads the official pinned Godot **4.5.1** Windows editor and export
+templates (about **1.4 GB** total), verifies their official SHA-512 checksums and
+records extracted file hashes. They live outside the repository under
+`%LOCALAPPDATA%\HearthtableCodexTools`. It does not install the VTT, run tests,
+start agents, change Windows security policy or enable a schedule. An existing
+verified toolchain is reused. If a failed setup leaves a `.setup-lock`, first
+verify no setup process is still running; report the path rather than deleting
+files blindly.
+
+Doctor also checks **Python 3.11+**, needed for real networking and packaging.
+If missing, install Python from [python.org](https://www.python.org/downloads/windows/)
+with the Python launcher, reopen PowerShell and retry Doctor. No pip packages
+are required. Then run the baseline:
+
+```powershell
+node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\lite-local.mjs" test
+node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\lite-local.mjs" network
+node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\lite-local.mjs" test --ui
+```
+
+The headless baseline expects 154 core assertions; networking uses one real DM
+and two player processes (37 assertions). `--ui` includes the core and rendered
+suites and opens temporary QA windows. Run checks serially. First-run Windows
+firewall permission, physical GPU/audio and residential internet play still
+need the owner's observations; headless CI cannot prove them.
+
+The helper copies tracked **working** source into a fresh folder outside the
+checkout. Stage new code files first; untracked files are intentionally omitted.
+It refuses overrides/custom application identity and verifies the engine's
+resolved user-data path using a tiny project with no autoloads. Native Windows
+gets **child-only** APPDATA/LOCALAPPDATA/TEMP overrides; Linux gets disposable
+XDG locations. Your account settings and real campaign folders are unchanged.
+Ordinary results live under `%LOCALAPPDATA%\HearthtableCodexQA`; agents instead
+pass a new `--output` folder under their writable cycle report directory.
+Existing result folders are never overwritten. Keep these QA folders private.
+
+Once tools and baseline checks pass, start **one manual cycle**:
 
 ```powershell
 node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\agent-loop.mjs" run
@@ -36,12 +79,12 @@ node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\agent-loop.mjs" run
 
 This consumes Codex allowance. The prompt requires all three worker agents and
 real validation before accepting code. Read the final summary/report. If the
-local Godot 4.5.1 editor, isolated test harness or compatible-update build tools
-are missing, the cycle must report BLOCKED before editing. We must finish that
-local testing setup before unattended improvement can work. A worktree alone
-does not isolate Godot campaign saves; never run the destructive suites against
-ordinary Windows user data. The existing installer tests require a fresh hosted
-VM and cannot simply be used on a player's normal desktop.
+local Godot editor, safe validation, GUI access for a visual change or packaging
+tools are missing, the cycle must report BLOCKED before editing. A clean approved
+candidate is packaged with `lite-local.mjs build`: EXE plus compatible Settings
+update, source commit/hashes and native compiled core checks. It does not create
+an installer, tag, release or install that update into your game. Publication
+remains a separate requested release using the established installer pipeline.
 
 Correct any blocker and rerun the manual command. Existing edits are preserved;
 review them rather than using reset/clean. A manual retry clears a prior pause
