@@ -8,6 +8,10 @@ var blackout_button: Button
 var inbox_button: Button
 var player_dock: VBoxContainer
 var role_signature=""
+var notice_panel: PanelContainer
+var notice_text=""
+var notice_serial=0
+var current_modal_body: VBoxContainer
 # Gilded architecture surrounds quieter ink-and-bronze controls. This keeps the
 # board and portraits prominent without placing a decorative frame on every row.
 func make_theme():
@@ -39,6 +43,31 @@ func set_tool(name_tool: String):
 	for key in tool_buttons:
 		tool_buttons[key].add_theme_stylebox_override("normal",style(Color("3c4839") if key==name_tool else Color("182529"),GOLD if key==name_tool else Color("48504b"),3,8))
 func show_creator():file_picker("character")
+func modal(title: String,width: int=760,height: int=720) -> VBoxContainer:
+	current_modal_body=super.modal(title,width,height)
+	current_modal_body.get_parent().custom_minimum_size.y=0
+	if not notice_text.is_empty():present_notice()
+	return current_modal_body
+func toast(text: String):
+	notice_text=text;notice_serial+=1;var serial=notice_serial
+	present_notice()
+	get_tree().create_timer(6).timeout.connect(func():
+		if serial!=notice_serial:return
+		notice_text=""
+		if is_instance_valid(notice_panel):notice_panel.queue_free())
+func present_notice():
+	if is_instance_valid(notice_panel):
+		if notice_panel.get_parent()!=null:notice_panel.get_parent().remove_child(notice_panel)
+		notice_panel.queue_free()
+	notice_panel=PanelContainer.new();notice_panel.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	notice_panel.add_theme_stylebox_override("panel",style(Color("26352f"),Color("b59a63"),4,12))
+	if is_instance_valid(modal_overlay) and is_instance_valid(current_modal_body):
+		# An inline notice reserves space instead of covering confirmation buttons.
+		var frame=current_modal_body.get_parent().get_parent();frame.add_child(notice_panel);frame.move_child(notice_panel,1)
+	else:
+		notice_panel.z_index=150;add_child(notice_panel)
+		notice_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT);notice_panel.position=Vector2(size.x-585,size.y-90);notice_panel.size=Vector2(560,58)
+	var caption=paragraph(notice_panel,notice_text,INK,13);caption.mouse_filter=Control.MOUSE_FILTER_IGNORE
 func _ready():
 	settings.load("user://display.cfg");ui_scale=clampf(float(settings.get_value("display","ui_scale",1)),.8,1.25);get_tree().root.content_scale_factor=ui_scale
 	make_theme();loadouts=World.read_json("res://assets/loadouts.json",{})

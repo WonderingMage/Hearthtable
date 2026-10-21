@@ -14,7 +14,7 @@ func run():
 	var w=root.get_node("World");var version=""
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--version="):version=arg.trim_prefix("--version=")
-	check(str(ProjectSettings.get_setting("application/config/version"))==version,"The published Windows EXE runs the expected app version")
+	check(str(ProjectSettings.get_setting("application/config/version"))==version,"The Windows EXE runs the expected app version")
 	print("RUNTIME world="+w.get_script().resource_path+" rules="+w.lite.get_script().resource_path)
 	w.message.connect(func(value):messages.append(value))
 	w.command("new_campaign",{"title":"Native Windows import check","heroes":false})
