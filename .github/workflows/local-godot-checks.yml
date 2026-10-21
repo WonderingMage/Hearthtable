@@ -6,6 +6,8 @@ on:
       - 'tools/lite-local*'
       - 'tools/python-runtime.mjs'
       - 'tools/test_lite_network.py'
+      - 'tools/godot-log*'
+      - 'tools/godot_log.py'
       - '.github/workflows/local-godot-checks.yml'
   workflow_dispatch:
 permissions:

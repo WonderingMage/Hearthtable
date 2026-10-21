@@ -62,6 +62,12 @@ The helper uses it automatically, avoiding py.exe/WindowsApps lookup; use the
 same path with --python if an environment setting is absent. If it cannot run,
 retain the actual error and report a session/permission blocker rather than
 assuming the owner must reinstall Python. Never disable the sandbox.
+The launcher also probes pinned Godot startup/isolation before model usage.
+The helper retains a Windows ROOT-store diagnostic but accepts it only when
+the same official 4.5.1 process proves its bundled trusted CA fallback loaded.
+This does not disable TLS checks. Use the helper's result and isolation report;
+do not treat that verified fallback alone as a blocker or broaden its exception.
+Missing fallback proof and all other engine/test errors remain failures.
 
 Run tests through
 `node tools/lite-local.mjs test --output <run-report-dir>/unique-test-name`.

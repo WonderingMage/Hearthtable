@@ -1,5 +1,19 @@
 # Hearthtable Lite development handoff
 
+Current local-loop blocker (October 21): the owner passed the actual sandbox
+Python probe after the scoped RX repair, then Godot's no-autoload isolation
+probe resolved the correct disposable save path but logged `Failed to read the
+root certificate store` at Windows engine line 2548. Pinned Godot 4.5.1 falls
+back to its bundled CA set when ROOT is unavailable. The QA helpers now request
+verbose evidence and classify only that exact official-engine diagnostic as
+recoverable when the same process confirms the bundled certificates loaded.
+Raw diagnostics remain in logs; all other errors, failed TLS parsing, exit
+codes, assertion summaries and path checks remain enforced. Python and Godot
+startup/isolation are both checked by `agent-loop.mjs probe` before model usage.
+No certificate-store permissions, TLS validation, gameplay or app version changed.
+Native sandbox validation of this fix is pending; do not call it proven on the
+owner's PC, start a schedule or publish a release. See `docs/agent-loop.md`.
+
 This branch is **Hearthtable Lite 1.0.2 in development** (`edition/lite`; latest published prerelease remains `lite-v1.0.1`), Godot 4.5.1, protocol 11, schema 1. Read `docs/lite.md` and `assets/help/lite.txt` for the active product contract. The user explicitly requested this separate DM-led edition; classic Hearthtable remains on `main` with its existing releases.
 
 

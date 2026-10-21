@@ -6,8 +6,37 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
 import {options,checkedProject,processEnv,snapshot,outside,git,pythonCommand} from './lite-local.mjs';
+import {godotLog} from './godot-log.mjs';
 
 const config='[application]\nconfig/name="Hearthtable Lite"\nconfig/edition="lite"\n';
+test('only the pinned Windows store diagnostic with proven builtin CA fallback is recoverable',()=>{
+  const banner='Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org\n';
+  const store='ERROR: Failed to read the root certificate store.\n   at: get_system_ca_certificates (platform/windows/os_windows.cpp:2548)\n';
+  const loaded='Loaded builtin CA certificates\n';
+  const good=banner+store+loaded+'LITE_RESULT 94 passed, 0 failed\n';
+  const cases=[
+    [good,'win32',false,true], [good.replaceAll('\n','\r\n'),'win32',false,true],
+    [banner+loaded,'win32',false,false],
+    [good,'linux',true,false], [good.replace(loaded,''),'win32',true,false],
+    [good.replace('4.5.1','4.5.2'),'win32',true,false],
+    [good.replace(':2548',':2549'),'win32',true,false],
+    [good.replace('get_system_ca_certificates','unrelated_function'),'win32',true,false],
+    [good+store,'win32',true,false], [good+loaded,'win32',true,false],
+    [good+'ERROR: Certificate parsing failed.\n','win32',true,true],
+    [good+'SCRIPT ERROR: Broken spell description\n','win32',true,true],
+    [good+'Parse Error: Invalid code\n','win32',true,true],
+    [good+'FAIL authority check\n','win32',true,true],
+    [good+'ERROR: Unable to send packet on channel 0, max channels: 0\n','win32',true,true],
+    [store,'win32',true,false]
+  ];
+  const expected=cases.map(([, ,failed,builtinFallback])=>({failed,builtinFallback}));
+  assert.deepEqual(cases.map(([log,platform])=>godotLog(log,platform)),expected);
+  // The -I Python network runner must make exactly the same decisions.
+  const py=pythonCommand(),module=fileURLToPath(new URL('./godot_log.py',import.meta.url));
+  const code='import importlib.util,json,sys;s=importlib.util.spec_from_file_location("policy",sys.argv[1]);m=importlib.util.module_from_spec(s);s.loader.exec_module(m);print(json.dumps([m.godot_log(log,platform) for log,platform,*_ in json.load(sys.stdin)]))';
+  const result=spawnSync(py.exe,['-I','-c',code,module],{encoding:'utf8',input:JSON.stringify(cases),windowsHide:true});
+  assert.equal(result.status,0,result.stderr);assert.deepEqual(JSON.parse(result.stdout),expected);
+});
 function fixture(t) {
   const base=fs.mkdtempSync(path.join(os.tmpdir(),'hearthtable-local-test-'));
   const project=path.join(base,"source & quote's");fs.mkdirSync(project);

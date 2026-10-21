@@ -9,6 +9,7 @@ import {createHash,randomUUID} from 'node:crypto';
 import {Readable} from 'node:stream';
 import {pipeline} from 'node:stream/promises';
 import {pythonCommand} from './python-runtime.mjs';
+import {godotLog} from './godot-log.mjs';
 export {pythonCommand} from './python-runtime.mjs';
 
 const script=fileURLToPath(import.meta.url), root=path.dirname(path.dirname(script));
@@ -106,26 +107,27 @@ export function processEnv(base) {
   for(const dir of ['data','config','cache','temp'])fs.mkdirSync(path.join(base,dir),{recursive:true});
   return {...process.env,APPDATA:path.join(base,'data'),LOCALAPPDATA:path.join(base,'cache'),TEMP:path.join(base,'temp'),TMP:path.join(base,'temp'),XDG_DATA_HOME:path.join(base,'data'),XDG_CONFIG_HOME:path.join(base,'config'),XDG_CACHE_HOME:path.join(base,'cache')};
 }
-async function run(exe,args,env,log,timeout=300000) {
+async function run(exe,args,env,log,timeout=300000,godot=false) {
   const stream=fs.createWriteStream(log,{flags:'wx'});let text='';
   const child=spawn(exe,args,{env,windowsHide:true,stdio:['ignore','pipe','pipe']});let timedOut=false;
   const timer=setTimeout(()=>{if(child.exitCode!==null || child.signalCode!==null || !child.pid)return;timedOut=true;if(process.platform==='win32')spawnSync('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});else child.kill('SIGTERM');},timeout);
   for(const input of [child.stdout,child.stderr])input.on('data',chunk=>{stream.write(chunk);text+=chunk.toString();if(text.length>16000000)text=text.slice(-16000000);});
-  try {const code=await new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',resolve);});if(timedOut || code!==0 || bad.test(text))throw Error('Godot failed'+(timedOut?' (timeout)':'')+'; inspect '+log+'\n'+text.slice(-1800));return text;}
+  try {const code=await new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',resolve);});const assessment=godot?godotLog(text):{failed:bad.test(text)};if(timedOut || code!==0 || assessment.failed)throw Error('Validation failed'+(timedOut?' (timeout)':'')+'; inspect '+log+'\n'+text.slice(-1800));if(assessment.builtinFallback)console.log('Godot verified bundled CA fallback; original certificate-store diagnostic retained in '+log);return text;}
   finally {clearTimeout(timer);await new Promise(resolve=>stream.end(resolve));}
 }
+function runGodot(exe,args,env,log,timeout=300000) {return run(exe,['--verbose',...args],env,log,timeout,true);}
 export async function isolated(base,exe,editor=true,releaseProbe=null) {
   const env=processEnv(base),probe=path.join(base,'probe');fs.mkdirSync(probe);
   fs.writeFileSync(path.join(probe,'project.godot'),'[application]\nconfig/name="Hearthtable Lite"\n');
   fs.writeFileSync(path.join(probe,'probe.gd'),'extends SceneTree\nfunc _initialize():\n\tprint("SAFE_PROBE="+JSON.stringify({"path":OS.get_user_data_dir(),"editor":OS.has_feature("editor"),"version":Engine.get_version_info()}))\n\tquit()\n');
   const args=releaseProbe?['--headless','--script',path.join(probe,'probe.gd')]:['--headless','--path',probe,'--script','res://probe.gd'];
-  const text=await run(releaseProbe || exe,args,env,path.join(base,'probe.log'),30000);
+  const text=await runGodot(releaseProbe || exe,args,env,path.join(base,'probe.log'),30000);
   const match=text.match(/SAFE_PROBE=(.+)/);const actual=match && JSON.parse(match[1]);
   const expected=path.resolve(base,'data',process.platform==='win32'?'Godot':'godot','app_userdata','Hearthtable Lite');
   const normalize=value=>process.platform==='win32'?path.resolve(value).toLowerCase():path.resolve(value);
   const info=actual?.version;
   if(!actual || normalize(actual.path)!==normalize(expected) || actual.editor!==editor || info?.major!==4 || info.minor!==5 || info.patch!==1 || info.status!=='stable' || info.build!=='official' || !info.hash.startsWith('f62fdbde1'))throw Error('Cannot prove disposable Godot user-data isolation. No campaign test was started.');
-  fs.writeFileSync(path.join(base,'isolation.json'),JSON.stringify({actual,expected},null,2));return {env,probe,expected};
+  fs.writeFileSync(path.join(base,'isolation.json'),JSON.stringify({actual,expected,builtinFallback:godotLog(text).builtinFallback},null,2));return {env,probe,expected};
 }
 export function snapshot(project,output) {
   const copy=path.join(output,'project');fs.mkdirSync(copy);
@@ -159,12 +161,12 @@ export async function main(args=process.argv.slice(2)) {
   if(fs.existsSync(output))throw Error('Choose a new output folder; existing results are never overwritten.');
   fs.mkdirSync(output,{recursive:true});console.log('Results: '+output);
   const copy=snapshot(o.project,output);const imported=await isolated(path.join(output,'import'),tool.exe);
-  await run(tool.exe,['--headless','--path',copy,'--editor','--import'],imported.env,path.join(output,'import.log'));
+  await runGodot(tool.exe,['--headless','--path',copy,'--editor','--import'],imported.env,path.join(output,'import.log'));
   const results={};
   async function suite(name,exe=tool.exe,probe=null) {
     const iso=await isolated(path.join(output,name+(probe?'-compiled':'')),tool.exe,!probe,probe);
     const graphical=ui.includes(name);
-    const text=await run(exe,['--audio-driver','Dummy',...(!graphical?['--headless']:[]),'--path',copy,'--script',path.join(copy,'tests',name+'.gd'),'--','--qa'],iso.env,path.join(output,name+(probe?'-compiled':'')+'.log'),graphical?600000:180000);
+    const text=await runGodot(exe,['--audio-driver','Dummy',...(!graphical?['--headless']:[]),'--path',copy,'--script',path.join(copy,'tests',name+'.gd'),'--','--qa'],iso.env,path.join(output,name+(probe?'-compiled':'')+'.log'),graphical?600000:180000);
     const matches=[...text.matchAll(summary)];if(!matches.length || matches.some(m=>Number(m[1])===0 || Number(m[2])!==0))throw Error('Missing/failed assertion summary: '+name);
     const passed=matches.reduce((sum,m)=>sum+Number(m[1]),0);results[name+(probe?'-compiled':'')]=passed;console.log(name+(probe?' (native compiled)':'')+': '+passed+' passed');
   }
@@ -176,8 +178,8 @@ export async function main(args=process.argv.slice(2)) {
   if(o.action==='build') {
     const py=pythonCommand(o.python);templatesAt(imported.env,tool.templates);
     const program=path.join(output,'Hearthtable_Lite_Portable.exe'),pack=path.join(output,'Lite_Application.pck');
-    await run(tool.exe,['--headless','--path',copy,'--export-release','Windows Desktop',program],imported.env,path.join(output,'export-windows.log'));
-    await run(tool.exe,['--headless','--path',copy,'--export-pack','Windows Desktop',pack],imported.env,path.join(output,'export-pack.log'));
+    await runGodot(tool.exe,['--headless','--path',copy,'--export-release','Windows Desktop',program],imported.env,path.join(output,'export-windows.log'));
+    await runGodot(tool.exe,['--headless','--path',copy,'--export-pack','Windows Desktop',pack],imported.env,path.join(output,'export-pack.log'));
     const product=/config\/version="([^"]+)"/.exec(fs.readFileSync(path.join(copy,'project.godot'),'utf8'))[1];
     const protocol=Number(/const PROTOCOL\s*=\s*(\d+)/.exec(fs.readFileSync(path.join(copy,'scripts','world.gd'),'utf8'))[1]);
     const update=path.join(output,'Hearthtable-Lite-'+product+'.hearthupdate');
@@ -186,9 +188,9 @@ export async function main(args=process.argv.slice(2)) {
     // before loading World from the candidate EXE on native Windows.
     if(process.platform==='win32') {
       const tiny=imported.probe;fs.copyFileSync(path.join(copy,'export_presets.cfg'),path.join(tiny,'export_presets.cfg'));
-      await run(tool.exe,['--headless','--path',tiny,'--editor','--import'],imported.env,path.join(output,'probe-import.log'));
+      await runGodot(tool.exe,['--headless','--path',tiny,'--editor','--import'],imported.env,path.join(output,'probe-import.log'));
       const probeExe=path.join(output,'Isolation_Probe.exe');
-      await run(tool.exe,['--headless','--path',tiny,'--export-release','Windows Desktop',probeExe],imported.env,path.join(output,'probe-export.log'));
+      await runGodot(tool.exe,['--headless','--path',tiny,'--export-release','Windows Desktop',probeExe],imported.env,path.join(output,'probe-export.log'));
       for(const name of core)await suite(name,program,probeExe);
     }
     if(git(o.project,'status','--porcelain') || git(o.project,'rev-parse','HEAD')!==before)throw Error('Source changed during build. Do not distribute these candidate artifacts.');

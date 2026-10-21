@@ -127,7 +127,7 @@ export async function probeRuntime(loc,command,python,run,common) {
     throw new Error('Sandbox prerequisite probe failed before any model call. See '+log+'. '+error.message+(detail?'\n'+detail:''));
   }
   const result=json(output);
-  if(result.passed!==true || fs.realpathSync.native(result.runtime?.exe || '')!==python.exe)throw new Error('Invalid sandbox prerequisite result. No model was started. See '+output);
+  if(result.passed!==true || !result.godot?.actual || fs.realpathSync.native(result.runtime?.exe || '')!==python.exe)throw new Error('Invalid sandbox prerequisite result. No model was started. See '+output);
   return config;
 }
 export async function runCycle(options,loc,command) {

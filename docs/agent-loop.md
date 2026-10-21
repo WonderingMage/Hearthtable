@@ -85,13 +85,16 @@ Ordinary results live under `%LOCALAPPDATA%\HearthtableCodexQA`; agents instead
 pass a new `--output` folder under their writable cycle report directory.
 Existing result folders are never overwritten. Keep these QA folders private.
 
-Before spending model allowance, check Python inside the **actual Codex sandbox**:
+Before spending model allowance, check Python and Godot inside the **actual Codex sandbox**:
 
 ```powershell
 node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\agent-loop.mjs" probe
 ```
 
 This uses Codex’s command sandbox, without starting a model or any worker. The
+probe verifies the pinned Godot editor and starts only a tiny project without
+game autoloads to prove its disposable save path and certificate initialization.
+It does not load a campaign or run the application/UI suites. The
 per-invocation `hearthtable_loop` permission profile extends Codex’s built-in
 `:workspace` profile (the workspace-write baseline). It grants read access to
 only the verified Python installation folder; source, reports and the Git common
@@ -125,6 +128,21 @@ are retained as private `prerequisite.json` / `prerequisite.log` in the run
 folder, including whether the Python path is visible inside the sandbox. A
 failed probe stops before model usage; preserve its diagnostics.
 
+Godot 4.5.1 can print `Failed to read the root certificate store` under the
+Windows sandbox account even though it then loads its bundled trusted CA set.
+The helpers now request verbose startup evidence and accept only that exact
+pinned-engine diagnostic, with its exact source location, when the same process
+also confirms `Loaded builtin CA certificates`. The original diagnostic stays
+in the private log and the isolation report records the fallback. Missing
+fallback proof, a different engine/source location, repeated failures, TLS
+certificate parsing failures and every other engine/test error still block the
+run. Exit codes, assertion summaries and save-path checks remain mandatory.
+This follows Godot's existing fallback; it does not disable certificate checks,
+change trusted certificates or grant access to Windows certificate stores.
+See the pinned engine's
+[Windows ROOT lookup](https://github.com/godotengine/godot/blob/4.5.1-stable/platform/windows/os_windows.cpp#L2546)
+and [bundled CA fallback](https://github.com/godotengine/godot/blob/4.5.1-stable/modules/mbedtls/crypto_mbedtls.cpp#L353).
+
 Once tools and baseline checks pass, start **one manual cycle**:
 
 ```powershell
@@ -135,7 +153,7 @@ This consumes Codex allowance. The prompt requires all three worker agents and
 real validation before accepting code. Before any model call, the launcher
 verifies the actual Python interpreter and supplies its absolute path to Codex
 and its shell environment as `HEARTHTABLE_PYTHON`, then runs the actual sandbox
-probe before launching the coordinator. It records the interpreter in the private
+Python/Godot probe before launching the coordinator. It records the interpreter in the private
 run's `runtime.json`; the safe test/build helper rechecks that same interpreter.
 The agent process starts in the project directory; Windows shell commands must
 also avoid profiles that change directory. Runtime lookup failures pause the

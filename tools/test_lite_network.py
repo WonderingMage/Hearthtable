@@ -3,7 +3,11 @@
 import argparse,os,re,subprocess,time
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-BAD=re.compile(r'(?m)^(?:SCRIPT ERROR:|ERROR:|.*Parse Error:|.*FAIL )')
+# -I deliberately removes the script directory from sys.path. Load this local,
+# tracked helper explicitly rather than depending on packages or PYTHONPATH.
+import importlib.util
+spec=importlib.util.spec_from_file_location('godot_log',ROOT/'tools/godot_log.py')
+policy=importlib.util.module_from_spec(spec);spec.loader.exec_module(policy)
 SUMMARY=re.compile(r'LITE_NETWORK_PHASE (\d+) passed, (\d+) failed')
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--engine',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--pack',type=Path);p.add_argument('--ui',action='store_true');a=p.parse_args();a.output=a.output.resolve();a.output.mkdir(parents=True,exist_ok=False)
@@ -17,11 +21,12 @@ def main():
             # the child processes and prove the resulting path before World loads.
             if os.name=='nt':env.update(APPDATA=str(base/'data'),LOCALAPPDATA=str(base/'cache'),TEMP=str(base/'temp'),TMP=str(base/'temp'))
             probe=base/'probe';probe.mkdir();(probe/'project.godot').write_text('[application]\nconfig/name="Hearthtable Lite"\n');(probe/'probe.gd').write_text('extends SceneTree\nfunc _initialize():\n\tprint("USER_PATH="+OS.get_user_data_dir())\n\tquit()\n')
-            r=subprocess.run([str(a.engine),'--headless','--path',str(probe),'--script','res://probe.gd'],env=env,text=True,capture_output=True,check=True,timeout=20)
+            r=subprocess.run([str(a.engine),'--verbose','--headless','--path',str(probe),'--script','res://probe.gd'],env=env,text=True,capture_output=True,check=True,timeout=20)
+            (base/'probe.log').write_text(r.stdout+r.stderr)
             expected=(base/'data'/('Godot' if os.name=='nt' else 'godot')/'app_userdata/Hearthtable Lite').resolve();match=re.search(r'USER_PATH=(.+)',r.stdout)
-            if not match or Path(match[1].strip()).resolve()!=expected or BAD.search(r.stdout+r.stderr):raise RuntimeError('Cannot prove Lite user-data isolation')
+            if not match or Path(match[1].strip()).resolve()!=expected or policy.godot_log(r.stdout+r.stderr)['failed']:raise RuntimeError(f'Cannot prove Lite user-data isolation; inspect {base/"probe.log"}')
             (base/'isolation.txt').write_text(str(expected))
-            graphical=a.ui and name=='player';cmd=[str(a.engine),'--audio-driver','Dummy']+([] if graphical else ['--headless'])+['--path',str(ROOT)]
+            graphical=a.ui and name=='player';cmd=[str(a.engine),'--verbose','--audio-driver','Dummy']+([] if graphical else ['--headless'])+['--path',str(ROOT)]
             if a.pack:cmd+=['--main-pack',str(a.pack.resolve())]
             cmd+=['--script',str(ROOT/'tests/lite_network.gd'),'--']+flags+(['--ui','--qa'] if graphical else [])
             handle=(a.output/f'{name}.log').open('w');handles.append(handle);processes.append((name,subprocess.Popen(cmd,env=env,stdout=handle,stderr=subprocess.STDOUT)))
@@ -32,7 +37,9 @@ def main():
                     time.sleep(.05)
         for name,process in processes:
             status=process.wait(timeout=240);log=(a.output/f'{name}.log').read_text();summary=SUMMARY.search(log)
-            if status or BAD.search(log) or not summary or int(summary[1])==0 or int(summary[2]):raise RuntimeError(f'{name} failed; inspect {a.output/name}.log')
+            assessment=policy.godot_log(log)
+            if status or assessment['failed'] or not summary or int(summary[1])==0 or int(summary[2]):raise RuntimeError(f'{name} failed; inspect {a.output/name}.log')
+            if assessment['builtinFallback']:print(f'{name}: verified bundled CA fallback; raw diagnostic retained in log',flush=True)
             total+=int(summary[1]);print(f'{name}: {summary[1]} assertions',flush=True)
         print(f'LITE_NETWORK_RESULT {total} passed, 0 failed',flush=True)
     finally:
