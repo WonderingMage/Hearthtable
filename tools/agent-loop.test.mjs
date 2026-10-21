@@ -166,6 +166,10 @@ test('real Windows Codex sandbox can start per-user Python without any model cal
   // on this disposable VM. No downloads, third-party packages or personal data.
   fs.cpSync(path.dirname(runtime.exe),install,{recursive:true,filter:source=>!source.split(path.sep).some(part=>['site-packages','Scripts','__pycache__'].includes(part))});
   const copied=pythonCommand(path.join(install,'python.exe'));
+  // The user's failure was reproduced with this per-user install invisible
+  // inside the real sandbox. Apply only read/execute access to this disposable
+  // tool installation, using Codex's own Windows group; never grant writes.
+  command('icacls.exe',[install,'/grant','CodexSandboxUsers:(OI)(CI)(RX)','/T']);
   const run=path.join(f.base,'live sandbox reports');fs.mkdirSync(run);
   await probeRuntime({project:f.project},codexCommand(process.env.HEARTHTABLE_REAL_CODEX),copied,run,f.git('rev-parse','--path-format=absolute','--git-common-dir'));
   const result=JSON.parse(fs.readFileSync(path.join(run,'prerequisite.json')));
