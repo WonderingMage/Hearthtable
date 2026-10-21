@@ -12,8 +12,23 @@ Select at most ONE well-supported improvement. Builder alone edits application
 source; Tester and Critic are independent and do not change application files.
 Coordinate tests so fixed network ports and test data are never shared at once.
 
-Prefer reproducible bugs, PDF import reliability, readable DM/player screens,
-keyboard/accessibility and clear interactions. Use actual rendered before/after
+The owner's explicit goal is to improve the VTT itself. Prioritize missing,
+incomplete or inaccessible spell descriptions and useful fixes to existing
+functions. Audit assets/spells.json (desc and higher_level) and trace the actual
+sheet's Read full spell view, casting proposal and DM inbox. Check casting time,
+range, components/material costs, duration, concentration/ritual, effects,
+saves/attacks and higher-slot effects where applicable against the existing
+2014 reference sources. A populated JSON field alone does not prove the player
+or DM can read it. Optional fields and spells without upcasting are not defects.
+Preserve imported/custom spell text; do not invent rules or substitute 2024/BG3
+rules. Improve reference information and proposals while keeping resolution
+and resource spending under the DM's control.
+
+Also inspect broken/incomplete controls, awkward existing workflows, PDF import
+reliability, readable DM/player screens, keyboard/accessibility and clear
+interactions. Tie function improvements to concrete player/DM benefit and test
+the affected interaction; avoid refactoring just to create activity. Each cycle
+still selects at most ONE supported improvement. Use actual rendered before/after
 screens for visual changes when possible. Do not invent features or churn the
 design merely to make a change. A well-supported no_change result is valid.
 

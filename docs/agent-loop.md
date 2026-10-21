@@ -13,6 +13,13 @@ revision rounds, then stops. No-change is valid. Commits stay on
 role/action limits are agent instructions; the launcher's branch/status/report
 checks add safeguards, not a guarantee against every possible agent mistake.
 
+The owner prioritizes improvements to the actual VTT: missing, incomplete or
+inaccessible spell descriptions and useful fixes to existing functions. Workers
+trace spell data through the player sheet, casting proposal and DM inbox,
+preserve the 2014 reference and imported/homebrew text, and verify the affected
+interaction. Optional spell fields are not automatically omissions. The DM
+continues to decide outcomes. Each cycle still tackles one supported change.
+
 ## Continue setup in PowerShell
 
 After creating the source copy and `Hearthtable-Autopilot` worktree, fetch these
@@ -159,7 +166,9 @@ and verified the normal AppData campaign sentinel and source checkout stayed
 unchanged. No installer, release, model cycle or active schedule was created.
 The launcher also passed all 13 Windows checks on that source in
 [run 39561758352](https://github.com/WonderingMage/Hearthtable/actions/runs/39561758352).
-The owner's local GUI baseline and first real cycle are still pending.
+The owner subsequently reported successful local Windows checks: 233 core/UI
+assertions, 37 real network assertions and a separate 154-core-assertion run.
+The first real cycle and enabling the local schedule remain pending confirmation.
 
 One separate Linux network run on that source logged `Unable to send packet on
 channel 0, max channels: 0` when both guests left together. Although all 37
