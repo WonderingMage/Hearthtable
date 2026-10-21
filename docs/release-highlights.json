@@ -1,9 +1,8 @@
 [
-  "Remove individual circle/cone/square spell areas with the board eraser or Areas manager; clear all areas and restore deletions with undo. Players cannot remove DM templates.",
-  "Fix the throne-map import: local DM scene imports accept embedded images larger than the remote-command cap while keeping scene/asset validation and player command limits.",
-  "Guided seven-step hero creation with persistent Back/Next controls, contextual instructions, validation and final review; imported sheets follow the same flow.",
-  "Dropdown choices for ancestry/subrace, class/subclass, background, alignment, weapons, armor, equipment and the class/level-filtered spell library; imported and DM-approved custom choices are preserved.",
-  "Standard-array swapping, validated 27-point buy, displayed ancestry bonuses, optional basic starting HP/AC/attack totals, structured gear and live miniature customization.",
-  "Imported final scores, skill/save overrides, equipment and custom spell selections stay intact unless explicitly edited; changing imported identity labels never replaces the mechanical sheet.",
-  "Avoid snapshot sends to closed ENet channels when multiple guests disconnect together; session cleanup returns their heroes to the DM."
+  "Bundled maps are imported by a small catalog ID; the throne map image is loaded locally instead of being placed in the Add to scene library command.",
+  "New desktop composition: framed company roster, health bars and selection states, readable ink-and-bronze controls, a two-row DM navigator, larger scene heading and illustrated action cards.",
+  "Replace the new-character wizard with a PDF review popup: live miniature preview, final stats, all saves/skills, equipped/attuned items, known/prepared spells and slot pools, story and cosmetic customization.",
+  "Imported totals and custom choices are retained, cancellation changes nothing, edits reset confirmation, and player imports still require DM approval.",
+  "Windows downloads now use a ZIP with an installer, desktop/Start Menu shortcuts and versioned editable source under Program Files (x86). Campaigns and verified updates remain in AppData and survive uninstall.",
+  "Optional trusted Authenticode signing for the app, setup and uninstaller; signing credentials are supplied outside the repository. Unsigned builds continue to show publisher warnings until a trusted signing identity is configured."
 ]

@@ -24,7 +24,7 @@ const ACTIONS={
 	"Reaction":"Use a reaction only for a specified trigger. It refreshes at the start of your next turn.",
 	"Improvise":"Describe your intention. The DM decides whether it is possible and what roll, time or resources it needs."
 }
-const HOST_PASS=["lighting","build_edit","build_scene","elevation","tile","room_visibility","door","fog","fog_all","remove_actor","hidden","journal","template","clear_templates","new_campaign","campaign_name","scene_name","image","import_image","resize","grid_settings","new_scene","guide","lobby_start","lobby_return","review_hero","import_scene","duplicate_scene","delete_scene","feature_set","spell_settings","spell_useset","custom_spell","inspiration","end_concentration"]
+const HOST_PASS=["lighting","build_edit","build_scene","elevation","tile","room_visibility","door","fog","fog_all","remove_actor","hidden","journal","template","clear_templates","new_campaign","campaign_name","scene_name","image","import_image","resize","grid_settings","new_scene","guide","lobby_start","lobby_return","review_hero","import_scene","import_prepared_scene","duplicate_scene","delete_scene","feature_set","spell_settings","spell_useset","custom_spell","inspiration","end_concentration"]
 const PERSONAL_PASS=["customize_mini","sheet_notes","inventory_item","coins","learn_spell","prepare_spell","forget_spell","lobby_ready","submit_hero"]
 var w
 var image_cache={}

@@ -8,10 +8,41 @@ var blackout_button: Button
 var inbox_button: Button
 var player_dock: VBoxContainer
 var role_signature=""
+# Gilded architecture surrounds quieter ink-and-bronze controls. This keeps the
+# board and portraits prominent without placing a decorative frame on every row.
+func make_theme():
+	super.make_theme()
+	theme.default_font_size=14
+	for kind in ["Button","OptionButton","MenuButton"]:
+		for pair in [["normal","182529","48504b"],["hover","2b3c3d","bb9760"],["pressed","35433b","e1c184"],["disabled","141d20","303b3c"]]:
+			theme.set_stylebox(pair[0],kind,style(Color(pair[1]),Color(pair[2]),3,9))
+	for kind in ["LineEdit","TextEdit"]:
+		theme.set_stylebox("normal",kind,style(Color("0b171c"),Color("4e554c"),3,9))
+		theme.set_stylebox("focus",kind,style(Color("13252b"),GOLD,3,9))
+	theme.set_stylebox("panel","TabContainer",style(Color("101d22"),Color("4c5148"),4,12))
+	for kind in ["tab_selected","tab_unselected","tab_hovered"]:
+		theme.set_stylebox(kind,"TabContainer",style(Color("304038") if kind=="tab_selected" else Color("17272b"),Color("b39158") if kind=="tab_selected" else Color("404d48"),3,10))
+	theme.set_constant("separation","VBoxContainer",10)
+func button(parent: Node,text: String,action: Callable,tip: String="",accent: bool=false) -> Button:
+	var b=super.button(parent,text,action,tip,false)
+	if accent:
+		b.add_theme_stylebox_override("normal",style(Color("3a4436"),Color("bba16a"),3,10));b.add_theme_color_override("font_color",Color("ffedbc"))
+	return b
+func panel(parent: Node) -> VBoxContainer:
+	var frame=PanelContainer.new();frame.add_theme_stylebox_override("panel",style(Color("142328"),Color("46524b"),4,12));parent.add_child(frame)
+	var content=col(frame);return content
+func heading(parent: Node,text: String):
+	var line=HSeparator.new();line.modulate=Color("7b6b49");parent.add_child(line)
+	parent.add_child(label(text,12,GOLD,true))
+func set_tool(name_tool: String):
+	super.set_tool(name_tool)
+	for key in tool_buttons:
+		tool_buttons[key].add_theme_stylebox_override("normal",style(Color("3c4839") if key==name_tool else Color("182529"),GOLD if key==name_tool else Color("48504b"),3,8))
+func show_creator():file_picker("character")
 func _ready():
 	settings.load("user://display.cfg");ui_scale=clampf(float(settings.get_value("display","ui_scale",1)),.8,1.25);get_tree().root.content_scale_factor=ui_scale
 	make_theme();loadouts=World.read_json("res://assets/loadouts.json",{})
-	creator=preload("res://scripts/character_creator.gd").new(self,World)
+	creator=preload("res://scripts/character_review.gd").new(self,World)
 	character_ui=preload("res://scripts/lite_sheet.gd").new(self,World)
 	update_ui=preload("res://scripts/update_ui.gd").new(self)
 	build_ui();build_editor=preload("res://scripts/build_ui.gd").new(self,World);build_editor.create(center_column)
@@ -41,35 +72,36 @@ func build_ui():
 	var bg=TextureRect.new();bg.texture=preload("res://assets/ui/screen.svg");bg.texture_repeat=CanvasItem.TEXTURE_REPEAT_ENABLED;bg.stretch_mode=TextureRect.STRETCH_TILE;bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);bg.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(bg)
 	var margin=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for edge in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,12)
-	add_child(margin);var all=col(margin);all.add_theme_constant_override("separation",8)
-	var banner=PanelContainer.new();banner.add_theme_stylebox_override("panel",gilded("chapter",8));all.add_child(banner);var header=row(banner)
-	header.add_child(label("HEARTHTABLE LITE",23,GOLD,true));campaign_label=label("",14,INK);expand(campaign_label);header.add_child(campaign_label)
+	add_child(margin);var all=col(margin);all.add_theme_constant_override("separation",10)
+	var banner=PanelContainer.new();banner.add_theme_stylebox_override("panel",gilded("chapter",14));all.add_child(banner);var header=row(banner)
+	picture(header,preload("res://assets/icon.svg"),38);var brand=col(header);expand(brand);brand.add_theme_constant_override("separation",1)
+	brand.add_child(label("H E A R T H T A B L E   L I T E",21,GOLD,true));campaign_label=label("",12,INK);brand.add_child(campaign_label)
 	button(header,"Guide",show_learn);button(header,"Settings",func():update_ui.settings());button(header,"Session",show_session)
 	sheet_button=button(header,"Expand character sheet · C",open_owned_sheet,"The complete sheet opens over the board",true)
 	dm_controls.append(button(header,"Save",func():if World.save_campaign()==OK:toast("Campaign saved.")))
-	var scenes=row(all);scenes_list=row(scenes);expand(scenes_list)
+	var scenes=row(all);var scene_scroll=ScrollContainer.new();expand(scene_scroll);scene_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO;scene_scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scenes.add_child(scene_scroll);scenes_list=row(scene_scroll)
 	dm_controls.append(button(scenes,"Scenes…",show_scene_library));dm_controls.append(button(scenes,"Campaign…",campaign_menu))
 	var main=row(all);main.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	party_panel=PanelContainer.new();party_panel.custom_minimum_size.x=225;main.add_child(party_panel);var party=col(party_panel);heading(party,"DM'S PIECES")
+	party_panel=PanelContainer.new();party_panel.custom_minimum_size.x=210;main.add_child(party_panel);var party=col(party_panel);paragraph(party,"THE COMPANY",GOLD,18);paragraph(party,"Heroes & scene creatures",MUTED,12)
 	var scroll=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;party.add_child(scroll);roster=col(scroll);expand(roster)
-	button(party,"+ Create hero",show_creator);button(party,"Import hero PDF…",func():file_picker("character"));button(party,"+ Custom creature…",func():creature_editor({}),"Build a sheet or import a data-only .hearthcreature",true)
+	button(party,"Import character PDF…",func():file_picker("character"),"Preview the miniature and review the complete imported sheet",true);button(party,"+ Custom creature…",func():creature_editor({}),"Build a sheet or import a data-only .hearthcreature",true)
 	button(party,"SRD creatures…",func():side_tab="Library";library_kind="Monsters";refresh_side())
 	center_column=col(main);expand(center_column)
-	var top=row(center_column);scene_title=label("",18,GOLD,true);expand(scene_title);top.add_child(scene_title)
+	var top=row(center_column);var scene_identity=col(top);expand(scene_identity);scene_identity.add_theme_constant_override("separation",0);scene_identity.add_child(label("ACTIVE TABLE",10,MUTED));scene_title=label("",22,GOLD,true);scene_identity.add_child(scene_title)
 	preview_button=button(top,"Preview player view",toggle_preview)
 	var tools=row(center_column);var tool_scroll=ScrollContainer.new();tool_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO;tool_scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;expand(tool_scroll);tools.add_child(tool_scroll);var rail=row(tool_scroll)
 	for name_tool in ["Select","Measure","Reveal","Conceal","Circle","Cone","Square","Erase area"]:
 		var item=button(rail,name_tool,func():set_tool(name_tool));tool_buttons[name_tool]=item
 	dm_controls.append(button(rail,"Areas…",show_area_templates,"Remove one spell area or clear every area on this scene"))
 	button(rail,"Fit",func():board.fit_map());dm_controls.append(button(rail,"Build · F2",func():build_editor.toggle()));dm_controls.append(button(rail,"Grid…",show_map_settings))
-	board=LITE_MAP.new();board.custom_minimum_size=Vector2(360,300);board.size_flags_vertical=Control.SIZE_EXPAND_FILL;expand(board);center_column.add_child(board)
+	board=LITE_MAP.new();board.custom_minimum_size=Vector2(360,260);board.size_flags_vertical=Control.SIZE_EXPAND_FILL;expand(board);center_column.add_child(board)
 	board.token_selected.connect(func(id):select_actor(id));board.map_hint.connect(func(value):hint.text=value);board.scene_synchronized.connect(refresh)
 	hint=label("Drag any piece · Distance shown while dragging · Shift-drag rotates · Right-drag pans · Wheel zooms",11,MUTED);hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;center_column.add_child(hint)
-	controls_panel=PanelContainer.new();controls_panel.custom_minimum_size.x=350;main.add_child(controls_panel);var controls=col(controls_panel)
+	controls_panel=PanelContainer.new();controls_panel.custom_minimum_size.x=310;main.add_child(controls_panel);var controls=col(controls_panel);paragraph(controls,"THE DIRECTOR’S DESK",GOLD,18);paragraph(controls,"Private controls · Dungeon Master",MUTED,11)
 	blackout_button=button(controls,"Reveal board to players",func():World.command("lite_blackout",{"enabled":not World.lite.blackout()}),"Obscure or reveal the entire board, while character sheets remain usable",true);dm_controls.append(blackout_button)
-	var tab_scroll=ScrollContainer.new();tab_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO;tab_scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;tab_scroll.custom_minimum_size.y=43;controls.add_child(tab_scroll);var tabs=row(tab_scroll)
+	var tabs=GridContainer.new();tabs.columns=3;controls.add_child(tabs)
 	for tab in ["Inbox","Initiative","Visibility","Sheet","Journal","Library"]:
-		var item=button(tabs,tab,func():side_tab=tab;refresh_side());tab_buttons[tab]=item
+		var item=button(tabs,tab,func():side_tab=tab;refresh_side());expand(item);tab_buttons[tab]=item
 	var side_scroll=ScrollContainer.new();side_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;side_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;controls.add_child(side_scroll);sidebar_scroll=side_scroll;side=col(side_scroll);expand(side);player_dock=side
 	var footer=panel(all);var dice=row(footer);dice.add_child(label("DICE",12,GOLD))
 	for sides in [4,6,8,10,12,20,100]:button(dice,"d"+str(sides),func():dice_input.text="1d"+str(sides);roll_dice())
@@ -100,7 +132,9 @@ func refresh_now():
 	if World.client:hint.text="Drag your own piece to move · Shift-drag rotates · Right-drag pans · Only the DM opens doors"
 	for control in dm_controls:control.visible=not World.client;control.disabled=World.client
 	party_panel.visible=not World.client
-	for control in tab_buttons.values():control.get_parent().get_parent().visible=not World.client
+	for control in tab_buttons.values():control.get_parent().visible=not World.client
+	for child in controls_panel.get_child(0).get_children():
+		if child is Label:child.visible=not World.client
 	for name_tool in tool_buttons:tool_buttons[name_tool].visible=not World.client or name_tool in ["Select","Measure"]
 	preview_button.visible=not World.client;preview_button.text="Return to DM view" if World.preview else "Preview player view"
 	blackout_button.text="Reveal board to players" if World.lite.blackout() else "BLACK OUT player board"
@@ -112,7 +146,7 @@ func refresh_side():
 	if not World.client and side_tab=="Journal" and is_instance_valid(live_journal_dm) and (live_journal_dm.has_focus() or (is_instance_valid(live_journal_public) and live_journal_public.has_focus())):return
 	clear(side);live_journal_dm=null;live_journal_public=null
 	if World.client:show_player_dock();return
-	for key in tab_buttons:tab_buttons[key].add_theme_stylebox_override("normal",gilded("primary" if key==side_tab else "ribbon",5))
+	for key in tab_buttons:tab_buttons[key].add_theme_stylebox_override("normal",style(Color("3a4436") if key==side_tab else Color("182529"),GOLD if key==side_tab else Color("48504b"),3,7))
 	match side_tab:
 		"Inbox":show_inbox()
 		"Initiative":show_initiative()
@@ -126,9 +160,12 @@ func refresh_roster():
 		heading(roster,"HEROES" if hero else "SCENE CREATURES")
 		for a in World.data.actors:
 			if a.hero!=hero or (not a.hero and a.scene!=World.data.scene):continue
-			var card=panel(roster);var h=row(card)
+			var card=panel(roster)
+			if a.id==World.selected:card.get_parent().add_theme_stylebox_override("panel",style(Color("25362f"),GOLD,4,10))
+			var h=row(card)
 			if a.hero:CHRONICLE.portrait_frame(self,h,a,44)
-			var info=col(h);expand(info);var select=button(info,a.name,func():select_actor(a.id));select.alignment=HORIZONTAL_ALIGNMENT_LEFT;select.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;select.custom_minimum_size.x=100
+			var info=col(h);expand(info);var select=button(info,a.name,func():select_actor(a.id));select.tooltip_text=a.name;select.alignment=HORIZONTAL_ALIGNMENT_LEFT;select.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;select.custom_minimum_size.x=100
+			var health=ProgressBar.new();health.min_value=0;health.max_value=maxi(1,a.max_hp);health.value=a.hp;health.show_percentage=false;health.custom_minimum_size.y=4;info.add_child(health)
 			info.add_child(label(str(a.hp)+" / "+str(a.max_hp)+" HP · AC "+str(a.ac)+( " · CONCEALED" if a.get("hidden",false) else ""),11,MUTED))
 func select_actor(id: String):
 	World.selected=id
@@ -142,7 +179,7 @@ func owned_hero() -> Dictionary:
 	return {}
 func open_owned_sheet():
 	var a=owned_hero()
-	if a.is_empty():show_text("Character sheet","Ask the DM to assign a hero in Session, or create/import your character there for the DM to review.");return
+	if a.is_empty():show_text("Character sheet","Ask the DM to assign a hero in Session, or import your character PDF for the DM to review.");return
 	character_ui.full_sheet(a.id)
 func show_player_dock():
 	heading(side,"YOUR CHARACTER")

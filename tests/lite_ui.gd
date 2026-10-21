@@ -35,7 +35,7 @@ func run():
 	check(button(app.modal_overlay,"Roll Perception")!=null and button(app.modal_overlay,"Roll death save")!=null,"Full overview includes skill and death-save roll controls")
 	shot("lite_sheet_overview");var hero=w.actor(app.character_ui.sheet_actor)
 	app.character_ui.full_sheet(hero.id,"Actions");await frames();check(button(app.modal_overlay,"Propose Grapple…")!=null and button(app.modal_overlay,"Propose Ready…")!=null and button(app.modal_overlay,"Propose Opportunity attack…")!=null,"Actions sheet includes contests, Ready and reactions as DM proposals")
-	app.close_modal();app.show_creator();await frames();check(is_instance_valid(app.creator.preview_figure),"The reviewed creator and live miniature customization remain available");app.close_modal()
+	app.close_modal();app.creator.customize(hero.id);await frames();check(is_instance_valid(app.creator.preview_figure),"Live miniature customization remains available without a character creator");app.close_modal()
 	app.import_creature("res://assets/creatures/ember_warden.hearthcreature");await frames();var enemy=w.actor(w.selected)
 	check(enemy.name=="Ember Warden" and enemy.get("hidden",false) and enemy.ac==17,"Data-only custom creature import creates an editable concealed stat block")
 	check(app.board.actors.has(enemy.id) and app.board.actors[enemy.id].get_node("Figure").get_child_count()==9,"Imported recipe builds the actual custom miniature geometry")
@@ -65,12 +65,13 @@ func run():
 	w.client=false;w.data=dm_data;root.size=Vector2i(1600,1000);app.refresh();await frames()
 	button(app,"Settings").pressed.emit();await frames();check(button(app.modal_overlay,"Import application update…")!=null,"Lite keeps Settings-based code updates");app.close_modal()
 
+	var test_version=str(ProjectSettings.get_setting("application/config/version"))
 	var U=load("res://scripts/application_update.gd");var payload=FileAccess.open("user://ui-update-code.gd",FileAccess.WRITE);payload.store_string("extends RefCounted\nfunc value():return 9\n");payload.close()
 	var pack=PCKPacker.new();pack.pck_start("user://ui-update.pck");pack.add_file("res://synthetic_lite_update.gd","user://ui-update-code.gd");pack.flush()
-	var bytes=FileAccess.get_file_as_bytes("user://ui-update.pck");var manifest={"format":1,"application":"Hearthtable Lite","version":"1.0.1","minimum_base":"1.0.0","engine":"4.5.1","boot_api":1,"protocol":11,"schema":1,"commit":"a".repeat(40),"pack_size":bytes.size(),"sha256":FileAccess.get_sha256("user://ui-update.pck"),"changes":["Synthetic Lite Settings validation"]}
+	var bytes=FileAccess.get_file_as_bytes("user://ui-update.pck");var manifest={"format":1,"application":"Hearthtable Lite","version":test_version,"minimum_base":"1.0.0","engine":"4.5.1","boot_api":1,"protocol":11,"schema":1,"commit":"a".repeat(40),"pack_size":bytes.size(),"sha256":FileAccess.get_sha256("user://ui-update.pck"),"changes":["Synthetic Lite Settings validation"]}
 	var encoded=JSON.stringify(manifest).to_utf8_buffer();payload=FileAccess.open("user://ui.hearthupdate",FileAccess.WRITE);payload.store_buffer(U.MAGIC.to_ascii_buffer());payload.store_32(encoded.size());payload.store_buffer(encoded);payload.store_buffer(bytes);payload.close()
 	app.update_ui.review("user://ui.hearthupdate");app.update_ui.request.cancel_request();await frames();check(app.update_ui.install_button.disabled,"Lite code install stays disabled before official release verification")
-	var inspected=app.update_ui.inspected;var metadata={"draft":false,"tag_name":"lite-v1.0.1","assets":[{"name":U.asset_name("1.0.1"),"state":"uploaded","digest":"sha256:"+inspected.digest}]};app.update_ui.received(HTTPRequest.RESULT_SUCCESS,200,PackedStringArray(),JSON.stringify(metadata).to_utf8_buffer());await frames()
+	var inspected=app.update_ui.inspected;var metadata={"draft":false,"tag_name":"lite-v"+test_version,"assets":[{"name":U.asset_name(test_version),"state":"uploaded","digest":"sha256:"+inspected.digest}]};app.update_ui.received(HTTPRequest.RESULT_SUCCESS,200,PackedStringArray(),JSON.stringify(metadata).to_utf8_buffer());await frames()
 	check(not app.update_ui.install_button.disabled,"The Settings installer accepts a verified Lite release package")
 	w.host_session("lite-update-ui",24739,true);app.update_ui.install_button.pressed.emit();await frames();check(U.read_state().active.is_empty(),"Lite refuses code installation during a live hosted session");w.disconnect_session()
 	app.update_ui.install_button.pressed.emit();await frames();var state=U.read_state();check(state.pending and FileAccess.file_exists(str(state.active.backup)) and w.valid_campaign(U.read_json(str(state.active.backup))),"Actual Lite install saves a complete DM backup and stages a restartable update")

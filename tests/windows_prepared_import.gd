@@ -24,7 +24,7 @@ func run():
 		var payload={"package":w.read_json("res://assets/scenes/sanctum_crown.json",{})}
 		check(JSON.stringify(payload).length()>1500000,"Use the real full throne image in "+mode)
 		print("REQUEST client="+str(w.client)+" length="+str(JSON.stringify(payload).length())+" mode="+mode)
-		w.command("import_scene",payload)
+		w.command("import_prepared_scene",{"map":"sanctum_crown"}) if OS.get_cmdline_user_args().has("--bundled") else w.command("import_scene",payload)
 		check(w.data.scenes.size()==before+1 and w.data.scenes[-1].height==46,"Native Windows imports the full throne scene in "+mode)
 		check(not messages.any(func(value):return value.to_lower().contains("too large")),"No command-size rejection in "+mode)
 		for value in messages:print("MESSAGE "+str(value))

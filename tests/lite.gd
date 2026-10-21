@@ -123,4 +123,11 @@ func run():
 	check(w.data.scenes[-1].image==throne.scene.image and w.valid_campaign(w.data),"The throne image and validated scene content are preserved")
 	var invalid=throne.duplicate(true);invalid.scene.width=999
 	cmd("import_scene",{"package":invalid});check(w.data.scenes.size()==scenes+1,"Large local map imports still require valid scene dimensions")
+	var scene_count=w.data.scenes.size()
+	cmd("import_prepared_scene",{"map":"sanctum_crown"},42);check(w.data.scenes.size()==scene_count,"Remote players cannot invoke the bundled-map import")
+	for id in ["res://assets/scenes/sanctum_crown.json","../sanctum_crown",{},12]:cmd("import_prepared_scene",{"map":id})
+	check(w.data.scenes.size()==scene_count,"Prepared-map catalog rejects arbitrary paths and malformed IDs")
+	check(JSON.stringify({"map":"sanctum_crown"}).length()<100,"The throne UI command fits in a tiny catalog request")
+	cmd("import_prepared_scene",{"map":"sanctum_crown"});check(w.data.scenes.size()==scene_count+1 and w.data.scenes[-1].image==throne.scene.image,"Bundled throne import loads its original image locally")
+	w.undo();check(w.data.scenes.size()==scene_count,"Bundled import participates in ordinary scene undo")
 	print("LITE_RESULT "+str(passed)+" passed, "+str(failed)+" failed");quit(1 if failed else 0)

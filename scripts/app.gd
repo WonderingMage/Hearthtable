@@ -105,7 +105,7 @@ func _ready():
 	get_tree().root.content_scale_factor=ui_scale
 	character_ui=preload("res://scripts/character_ui.gd").new(self,World)
 	make_theme();loadouts=World.read_json("res://assets/loadouts.json",{})
-	creator=preload("res://scripts/character_creator.gd").new(self,World)
+	creator=preload("res://scripts/character_review.gd").new(self,World)
 	update_ui=preload("res://scripts/update_ui.gd").new(self)
 	build_ui();battle_ui=preload("res://scripts/battle_ui.gd").new(self,World);battle_ui.create(board.get_parent().get_parent().get_parent().get_parent());build_editor=preload("res://scripts/build_ui.gd").new(self,World);build_editor.create(board.get_parent().get_parent().get_parent().get_parent());zones_ui=preload("res://scripts/battle_zones_ui.gd").new(self,World);board.zones_controller=zones_ui;dice_overlay=preload("res://scripts/combat_overlay.gd").new();dice_overlay.setup(self,World);board.add_child(dice_overlay);var downloads=preload("res://scripts/scene_download_ui.gd").new();downloads.setup(self,World);board.add_child(downloads);ui_built=true
 	board.viewport.msaa_3d=int(settings.get_value("display","msaa",2));board.render_scale=float(settings.get_value("display","render_scale",1.0))
@@ -838,7 +838,6 @@ func show_session():
 		if World.client:
 			var self_id=multiplayer.get_unique_id();var myself=World.session.players.get(self_id,{})
 			button(body,"Not ready" if myself.get("ready",false) else "I’m ready",func():World.command("lobby_ready",{"ready":not myself.get("ready",false)}),"Tell the DM you are ready",true)
-			button(body,"Create my character…",show_creator,"Build a hero and submit the reviewed sheet to the DM")
 			button(body,"Import my Beyond character PDF…",func():file_picker("character"),"Review your sheet, then send it to the DM for acceptance")
 			paragraph(body,"Once the DM starts the table, select your hero and open Spellbook to cast. Your actions and sheet resources are resolved by the host.")
 			if World.session.phase=="table":button(body,"Return to my character",close_modal,"",true)
@@ -1148,4 +1147,4 @@ func show_prepared_maps():
 	paragraph(body,"Both supplied maps have calibrated 5-foot squares, editable collision and elevation, reusable 3D asset packs and scene lighting. Add one to this campaign, then Activate it in the scene library.",INK,15)
 	for entry in [["ember_rift","Ember Rift · Volcanic pass","32 × 32 squares · lava channels, crags, a basalt crossing and warm night lighting"],["sanctum_crown","Sanctum of the Crown · Throne hall","32 × 46 squares · gothic windows, columns, raised throne dais and a double entrance gate"]]:
 		var p=panel(body);p.add_child(label(entry[1],21,GOLD,true));paragraph(p,entry[2])
-		button(p,"Add to scene library",func():World.command("import_scene",{"package":World.read_json("res://assets/scenes/"+entry[0]+".json",{})});show_scene_library(),"Imports the map and its reusable asset designs",true)
+		button(p,"Add to scene library",func():World.command("import_prepared_scene",{"map":entry[0]});show_scene_library(),"Imports the map and its reusable asset designs",true)

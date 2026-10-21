@@ -872,7 +872,7 @@ func receive_ping(cell: Vector2):
 	ping_cell=cell;ping_time=2.5;BUILD.invalidate();changed.emit()
 
 func session_command(kind: String,p: Dictionary,peer: int) -> bool:
-	if kind not in ["lobby_ready","lobby_start","lobby_return","submit_hero","review_hero","import_scene","duplicate_scene","delete_scene"]:return false
+	if kind not in ["lobby_ready","lobby_start","lobby_return","submit_hero","review_hero","import_scene","import_prepared_scene","duplicate_scene","delete_scene"]:return false
 	match kind:
 		"lobby_ready":
 			if session.players.has(peer):session.players[peer].ready=bool(p.get("ready",true))
@@ -893,6 +893,13 @@ func session_command(kind: String,p: Dictionary,peer: int) -> bool:
 					var unit=session.requests[owner];unit.owner=owner
 					apply_command("add_actor",{"actor":unit},1);log_line("DM accepted "+unit.name+" for "+str(peers.get(owner,{}).get("name","Player"))+".",[unit.id])
 				session.requests.erase(owner)
+		"import_prepared_scene":
+			if peer!=1:return true
+			var id=p.get("map","")
+			if not id is String or not SCENE_FILES.PREPARED.has(id):message.emit("Choose one of the included prepared maps.");return true
+			# Only the small catalog ID crosses the command boundary. Load the
+			# embedded PNG locally, then use the ordinary scene validator/importer.
+			return session_command("import_scene",{"package":read_json(SCENE_FILES.PREPARED[id],{})},1)
 		"import_scene":
 			if peer!=1:return true
 			var result=SCENE_FILES.import_package(self,p.get("package",{}))

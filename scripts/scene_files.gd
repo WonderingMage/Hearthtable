@@ -1,5 +1,6 @@
 extends RefCounted
 const FORMAT="hearthtable.scene"
+const PREPARED={"ember_rift":"res://assets/scenes/ember_rift.json","sanctum_crown":"res://assets/scenes/sanctum_crown.json"}
 static func package_scene(w: Node,id: String) -> Dictionary:
 	for scene in w.data.scenes:
 		if scene.id==id:

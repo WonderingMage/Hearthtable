@@ -6,12 +6,14 @@ The active edition on this branch is Hearthtable Lite; use Godot 4.5.1 and dispo
 - `updates.gd`: bounded/tamper-resistant Lite packages, fixed-release provenance, classic-package rejection, install/confirm/rollback and campaign preservation.
 - `pdf_import.gd`: real PDF parsing/fields, narrative sections, structured equipment, imported bonuses through Lite's actual private dice and serialization.
 - `lite_ui.gd`: rendered DM/player desktops, direct drag with distance, minimum windows, sheet pages, custom model import/export, player blackout, and Settings verification/install/offline gate/backup.
-- `lite_creation_ui.gd`: complete guided creation, standard-array/point-buy validation, catalog gear/spells, imported custom choices/final totals, cancellation, minimum-window layout, actual area eraser/undo/clear-all and the real throne-map import button.
-- `pdf_import_ui.gd`: reviewed creator, actual import/edit/undo/cancel and persistent imported bonuses.
+- `character_review_ui.gd`: PDF popup with live miniature, full sheet sections, imported custom choices/final totals, equipped/attuned and prepared choices, confirmation/cancellation, cosmetic-only saving, minimum layout, actual area eraser/undo/clear-all and the real throne-map button.
+- `pdf_import_ui.gd`: PDF review, actual import/edit/undo/cancel and persistent imported bonuses.
 - `tools/test_lite_network.py --engine /path/Godot --output /new/qa [--pack /path/export.exe] [--ui]`: actual DM and two distinct players on UDP 24731, with a rendered primary player when requested. Checks private data, independent owned sheets, roll prompts, blocked bypass attempts and explicit DM Fireball decisions. Do not run fixed-port suites concurrently.
 - `lite_portable.gd` and `tools/test_updates.py`: self-contained private Lite campaigns and actual compiled World replacement/restart/portable transfer/rollback. Release builder runs exported resources and both portable routes.
 
 Run the listed Godot test scripts with proven disposable Lite user data and an OpenGL display for graphical suites. The release builder and tracked network runner perform their own isolation probes. Cloud helper locations are environment-specific. Linux exported Windows resource tests are not native Windows tests.
+
+`tools/test_installer.ps1` runs only on a fresh GitHub-hosted Windows VM. It checks the installed payload/source, desktop/Start Menu shortcuts, native installed throne-map imports in offline/lobby/table modes and uninstall/AppData preservation. It refuses existing app/data directories. The separate published-1.0.1 probe passed 12 native headless assertions; that does not establish hardware GUI behavior or reproduce every user environment.
 
 ## Historical classic suites
 

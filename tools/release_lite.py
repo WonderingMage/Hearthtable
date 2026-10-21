@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build/test a clean Lite tag; publish its single Windows EXE only on --publish."""
+"""Build/test clean Lite source for the Windows installer stage. Publication is a separate Windows job."""
 import argparse,json,os,re,subprocess,sys,tempfile
 from pathlib import Path
 from release import install,digest,ERROR
@@ -8,14 +8,15 @@ ROOT=Path(__file__).resolve().parents[1]
 SUMMARY=re.compile(r'\w+ (\d+) passed, (\d+) failed')
 SUITES=['lite','updates','pdf_import']
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--tag',required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--toolchain',type=Path);p.add_argument('--publish',action='store_true');p.add_argument('--repo');a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);mode=p.add_mutually_exclusive_group(required=True);mode.add_argument('--tag');mode.add_argument('--validation',action='store_true');p.add_argument('--output',type=Path,required=True);p.add_argument('--toolchain',type=Path);p.add_argument('--publish',action='store_true');p.add_argument('--repo');a=p.parse_args()
     if sys.platform!='linux':raise RuntimeError('Linux builder only: XDG isolation does not protect native Windows saves.')
-    if not re.fullmatch(r'lite-v\d+\.\d+\.\d+',a.tag):raise RuntimeError('Expected a unique lite-vMAJOR.MINOR.PATCH tag')
+    if a.publish:raise RuntimeError('Publish the tested installer ZIP through the Windows stage of release.yml, not a raw EXE')
+    if a.tag and not re.fullmatch(r'lite-v\d+\.\d+\.\d+',a.tag):raise RuntimeError('Expected a unique lite-vMAJOR.MINOR.PATCH tag')
     project=(ROOT/'project.godot').read_text();version=re.search(r'config/version="([^"]+)"',project)[1]
-    if a.tag!='lite-v'+version or 'config/edition="lite"' not in project or 'config/name="Hearthtable Lite"' not in project:raise RuntimeError('Tag and Lite product identity must match the project')
+    if (a.tag and a.tag!='lite-v'+version) or 'config/edition="lite"' not in project or 'config/name="Hearthtable Lite"' not in project:raise RuntimeError('Tag and Lite product identity must match the project')
     def git(*args):return subprocess.check_output(['git',*args],cwd=ROOT,text=True).strip()
     commit=git('rev-parse','HEAD')
-    if commit!=git('rev-parse',a.tag+'^{commit}') or git('status','--porcelain'):raise RuntimeError('Build from the exact clean tagged source')
+    if (a.tag and commit!=git('rev-parse',a.tag+'^{commit}')) or git('status','--porcelain'):raise RuntimeError('Build from the exact clean tagged source')
     output=a.output.resolve();output.mkdir(parents=True,exist_ok=False);toolchain=(a.toolchain or Path(tempfile.mkdtemp(prefix='hearthtable-lite-godot-'))).resolve();engine=install(toolchain);results={}
     def environment(label):
         base=output/'qa'/label
@@ -49,47 +50,28 @@ def main():
         invoke(label+'-portable-restore',verify,True)
     invoke('compiled-update-cycle',[sys.executable,str(ROOT/'tools/test_updates.py'),'--engine',str(engine),'--program',str(linux),'--templates',str(toolchain/'data/godot/export_templates'),'--output',str(output/'qa/compiled-update')],True)
     if git('status','--porcelain'):raise RuntimeError('The build changed tracked/untracked source; commit missing resources before release')
-    manifest={'edition':'lite','product':'Hearthtable Lite','version':version,'tag':a.tag,'commit':commit,'dirty':False,'engine':'4.5.1','protocol':protocol,'filename':windows.name,'sha256':digest(windows),'update':{'filename':update.name,'sha256':digest(update),'pack_sha256':update_manifest['sha256']},'assertions':results}
+    source=output/'Hearthtable-Lite-Source.zip'
+    subprocess.run(['git','archive','--format=zip','--output',str(source),commit],cwd=ROOT,check=True)
+    manifest={'validation':a.validation,'source_sha256':digest(source),'edition':'lite','product':'Hearthtable Lite','version':version,'tag':a.tag,'commit':commit,'dirty':False,'engine':'4.5.1','protocol':protocol,'filename':windows.name,'sha256':digest(windows),'update':{'filename':update.name,'sha256':digest(update),'pack_sha256':update_manifest['sha256']},'assertions':results}
     (output/'build-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n');(output/'SHA256SUMS.txt').write_text(digest(windows)+'  '+windows.name+'\n'+digest(update)+'  '+update.name+'\n')
     notes=f'''# Hearthtable Lite {version} — DM-led virtual tabletop
 
-Download **{windows.name}** and run it directly. This is one Windows executable with the engine, resources, maps and notices embedded. No installer, ZIP or Godot installation is required. This separate Lite edition uses its own saves and protocol {protocol}; keep classic Hearthtable and its campaigns available separately.
+Download **Hearthtable-Lite-{version}-Windows.zip**, extract it and run the included setup program. It installs the app and versioned editable source in **Program Files (x86)\\Hearthtable Lite**, with desktop and Start Menu shortcuts. Accept Windows' administrator prompt. Campaigns, verified Settings updates and backups stay in AppData and survive uninstall. The application is unsigned. This separate Lite edition uses its own saves and protocol {protocol}.
 
 * Rotatable isometric VTT for both roles. The DM freely places pieces, with live distance measurement, edits enemy AC/HP/abilities, imports data-only custom creatures and controls individual objects. Players move their own pawns without a distance cap outside combat; DM-started combat enforces their turn and cumulative allowance. Only the DM controls doors.
-* Expandable player sheet over the board: abilities, saves, all 18 skills, passive senses, health/defenses, Hit Dice/death saves, attacks/actions/reactions, spells/slots/preparation/full references, equipment/coins/attunement, features, description, notes and extras. Filled character PDFs use the reviewed creator and customizable miniature flow.
+* Expandable player sheet over the board: abilities, saves, all 18 skills, passive senses, health/defenses, Hit Dice/death saves, attacks/actions/reactions, spells/slots/preparation/full references, equipment/coins/attunement, features, description, notes and extras. Filled character PDFs open a full-sheet review popup with live miniature preview, equipment/attunement and spell preparation checks.
 * Private DM dice, whole-board blackout, manual fog, concealed objects/creatures and a DM-owned initiative order. Hidden records and enemy health/AC/initiative are withheld from player snapshots; fogged map pixels/geometry are removed before transfer.
 * Players send rolls and intentions. Fireball and other spell proposals show 2014 rule text, damage dice, save/DC, range, area, components and duration. The DM explicitly chooses hit/save outcomes, targets, full/half damage or healing, conditions, amounts and resource spending. Attacks, spells, saves and encounters do not resolve automatically; player movement budgets are enforced only during DM-started combat.
 
 Includes 2014 SRD 5.1 references and editable homebrew notes/custom spells. It is an independent sheet, without D&D Beyond accounts, paid-book content, its full character progression engine or a complete class/feat database. See Guide for coverage and manual adjudication.
 
-For future compatible Lite updates, import **{update.name}** through **Settings → Import application update**. The importer verifies this repository's published Lite release digest, backs up the campaign, retains rollback and restarts. Classic Hearthtable update files are not interchangeable; download the Lite EXE once to establish this foundation. Portable DM campaign copies embed active updates and private campaign data; keep those copies private.
+For future compatible Lite updates, import **{update.name}** through **Settings → Import application update**. The importer verifies this repository's published Lite release digest, backs up the campaign, retains rollback and restarts. Classic Hearthtable update files are not interchangeable; install the Lite app once to establish this foundation. Portable DM campaign copies embed active updates and private campaign data; keep those copies private.
 
 Built from clean commit `{commit}` with official checksum-verified Godot 4.5.1. This run passed **{sum(results.values())} assertions**, including exported Windows resources, a real DM/two-player UDP session, Windows/Linux portable campaign creation/restoration, and compiled-code installation/restart/portable transfer/rollback. Separate graphical checks are recorded below when performed.
 
-Native Windows launch, hardware GPU/audio and external residential internet play remain untested; this is a prerelease. Only the plain player program and official update are attached, alongside optional checksums and the build manifest. QA campaigns and logs are not player assets.
+The Windows packaging stage validates installation, desktop/Start Menu shortcuts, installed-source files, native headless throne-map imports and uninstall/save preservation before publication. Hardware GPU/audio and external residential internet play remain untested; this is a prerelease. The primary download is the installer ZIP; the matching Settings update is also available separately. QA campaigns and logs are excluded.
 
 EXE SHA-256: `{digest(windows)}`.
 '''
     (output/'RELEASE_NOTES.md').write_text(notes);print('Verified Lite artifacts:',windows,update,flush=True)
-    if not a.publish:return
-    if not a.repo or not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+',a.repo):raise RuntimeError('--repo owner/name is required')
-    def gh(*args):subprocess.run(['gh',*args,'--repo',a.repo],check=True,text=True)
-    releases=json.loads(subprocess.check_output(['gh','api',f'repos/{a.repo}/releases?per_page=100'],text=True));existing=next((r for r in releases if r['tag_name']==a.tag),None);allowed={windows.name,update.name,'SHA256SUMS.txt','build-manifest.json'}
-    if existing and not existing['draft']:raise RuntimeError('Never overwrite a published release')
-    if existing and any(asset['name'] not in allowed for asset in existing['assets']):raise RuntimeError('Unexpected draft assets; inspect before continuing')
-    if existing:gh('release','edit',a.tag,'--prerelease','--notes-file',str(output/'RELEASE_NOTES.md'))
-    else:gh('release','create',a.tag,'--verify-tag','--draft','--prerelease','--title',f'Hearthtable Lite {version} — DM-led VTT prerelease','--notes-file',str(output/'RELEASE_NOTES.md'))
-    gh('release','upload',a.tag,*[str(output/name) for name in sorted(allowed)],'--clobber')
-    download=output/'download-check';download.mkdir();gh('release','download',a.tag,'--dir',str(download))
-    for name in allowed:
-        if digest(download/name)!=digest(output/name):raise RuntimeError('Downloaded release asset checksum mismatch; leave draft unpublished')
-    # The tag lookup can return 404 for an unpublished draft. Listing releases
-    # with this authenticated connection includes the draft and its asset digests.
-    drafts=json.loads(subprocess.check_output(['gh','api',f'repos/{a.repo}/releases?per_page=100'],text=True))
-    matches=[release for release in drafts if release['tag_name']==a.tag]
-    if len(matches)!=1 or not matches[0]['draft']:raise RuntimeError('Expected exactly one unpublished draft; leave assets unpublished')
-    remote=matches[0]
-    for asset in remote['assets']:
-        if asset['name'] in allowed and asset.get('digest')!='sha256:'+digest(output/asset['name']):raise RuntimeError('GitHub digest unavailable or incorrect; leave draft unpublished')
-    gh('release','edit',a.tag,'--draft=false','--prerelease');gh('release','view',a.tag,'--json','url,isDraft,isPrerelease')
 if __name__=='__main__':main()

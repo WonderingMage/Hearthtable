@@ -87,8 +87,9 @@ func actions_page(parent: Node,a: Dictionary):
 		var profile=profiles[i];var card=u.panel(parent);var h=u.row(card);u.picture(h,u.ICONS.texture("weapons",profile.name),40);u.paragraph(h,profile.label+" · "+u.R.signed_n(int(profile.bonus))+" to hit · "+str(profile.damage)+" · "+u.C.summary(profile),u.GOLD,15)
 		var buttons=u.row(card);u.button(buttons,"Roll attack",func():roll(a,{"type":"attack","index":i}));u.button(buttons,"Roll damage (proposal)",func():roll(a,{"type":"damage","index":i}));u.button(buttons,"Propose attack…",func():intent(a,{"kind":"attack","index":i},str(profile.label)),"",true)
 	u.heading(parent,"2014 ACTIONS, BONUS ACTIONS & REACTIONS")
+	var action_grid=GridContainer.new();action_grid.columns=2;parent.add_child(action_grid)
 	for name in LITE.ACTIONS:
-		var card=u.panel(parent);u.paragraph(card,name,u.GOLD,17);u.paragraph(card,LITE.ACTIONS[name],u.INK,14);u.button(card,"Propose "+name+"…",func():intent(a,{"kind":"action","action":name},name))
+		var card=u.panel(action_grid);u.expand(card.get_parent());var title=u.row(card);u.picture(title,u.ICONS.action(name),44);u.paragraph(title,name,u.GOLD,17);u.paragraph(card,LITE.ACTIONS[name],u.INK,14);u.button(card,"Propose "+name+"…",func():intent(a,{"kind":"action","action":name},name))
 	u.heading(parent,"CUSTOM / HOMEBREW ACTIONS");u.paragraph(parent,str(a.get("custom_actions","Record additional attacks, off-hand options, class actions and homebrew here.")),u.INK,14)
 	u.button(parent,"Edit custom action notes",func():edit_text(a,["custom_actions"],"Custom actions"));u.button(parent,"Describe another intention…",func():intent(a,{"kind":"manual"},"Improvise"))
 func spells_page(parent: Node,a: Dictionary):

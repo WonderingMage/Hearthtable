@@ -1,26 +1,26 @@
-name: Portable release
-
+name: Windows release
 on:
   push:
     tags: ['v*', 'lite-v*']
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing version tag to release
+        description: Version tag (or proposed Lite tag for validation)
         required: true
         type: string
       windows_probe:
         description: Only test the published Windows EXE (does not publish)
         type: boolean
         default: false
-
+      build_only:
+        description: Validate current branch and installer ZIP without tagging or publishing
+        type: boolean
+        default: false
 permissions:
   contents: write
-
 concurrency:
-  group: portable-release-${{ inputs.tag || github.ref_name }}
+  group: windows-release-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
-
 jobs:
   release:
     if: inputs.windows_probe != true
@@ -29,37 +29,104 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+      BUILD_ONLY: ${{ inputs.build_only || false }}
     steps:
-      - name: Check out the exact requested tag
+      - name: Check out clean source
         shell: bash
         run: |
           set -euo pipefail
           [[ "$RELEASE_TAG" =~ ^(lite-)?v[0-9]+\.[0-9]+\.[0-9]+$ ]]
           git -c credential.helper='!gh auth git-credential' clone --no-checkout "https://github.com/${GITHUB_REPOSITORY}.git" source
-          git -C source checkout --detach "refs/tags/$RELEASE_TAG"
+          if [[ "$BUILD_ONLY" == true ]]; then
+            [[ "$RELEASE_TAG" == lite-v* ]]
+            git -C source checkout --detach "$GITHUB_SHA"
+          else
+            git -C source checkout --detach "refs/tags/$RELEASE_TAG"
+          fi
           test -z "$(git -C source status --porcelain)"
-      - name: Build, test, and publish the portable prerelease
+      - name: Build and validate application payloads
         shell: bash
         run: |
           set -euo pipefail
           cd source
+          RELEASE_LOG="$RUNNER_TEMP/release.log"
           if [[ "$RELEASE_TAG" == lite-v* ]]; then
+            if [[ "$BUILD_ONLY" == true ]]; then
+              BUILD_ARGS=(--validation)
+            else
+              BUILD_ARGS=(--tag "$RELEASE_TAG")
+            fi
             RELEASE_BUILDER=tools/release_lite.py
           else
             RELEASE_BUILDER=tools/release.py
+            BUILD_ARGS=(--tag "$RELEASE_TAG" --publish --repo "$GITHUB_REPOSITORY")
           fi
-          RELEASE_LOG="$RUNNER_TEMP/portable-release.log"
-          if python3 "$RELEASE_BUILDER" --tag "$RELEASE_TAG" --output "$RUNNER_TEMP/portable-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" --publish --repo "$GITHUB_REPOSITORY" 2>&1 | tee "$RELEASE_LOG"; then
+          if python3 "$RELEASE_BUILDER" "${BUILD_ARGS[@]}" --output "$RUNNER_TEMP/release-payload" 2>&1 | tee "$RELEASE_LOG"; then
             exit 0
           fi
           python3 - "$RELEASE_LOG" <<'PYLOG'
           from pathlib import Path
           import sys
           text=Path(sys.argv[1]).read_text()[-12000:]
-          text=text.replace('%','%25').replace('\r','%0D').replace('\n','%0A')
-          print('::error title=Portable release diagnostic::'+text)
+          print('::error title=Release diagnostic::'+text.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))
           PYLOG
           exit 1
+      - name: Transfer clean Lite payload to Windows
+        if: startsWith(env.RELEASE_TAG, 'lite-v')
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: lite-installer-payload
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/release-payload/Hearthtable_Lite_Portable.exe
+            ${{ runner.temp }}/release-payload/Hearthtable-Lite-*.hearthupdate
+            ${{ runner.temp }}/release-payload/Hearthtable-Lite-Source.zip
+            ${{ runner.temp }}/release-payload/build-manifest.json
+            ${{ runner.temp }}/release-payload/RELEASE_NOTES.md
+  installer:
+    needs: release
+    if: startsWith(inputs.tag || github.ref_name, 'lite-v') && inputs.windows_probe != true
+    runs-on: windows-2022
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - name: Fetch installer payload
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: lite-installer-payload
+          path: payload
+      - name: Compile and test installer on native Windows
+        env:
+          HEARTHTABLE_WINDOWS_PFX_BASE64: ${{ secrets.WINDOWS_SIGNING_PFX_BASE64 }}
+          HEARTHTABLE_WINDOWS_PFX_PASSWORD: ${{ secrets.WINDOWS_SIGNING_PFX_PASSWORD }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $manifest=Get-Content -Raw ./payload/build-manifest.json | ConvertFrom-Json
+          git -c credential.helper='!gh auth git-credential' clone --no-checkout "https://github.com/$env:GITHUB_REPOSITORY.git" source
+          if ($LASTEXITCODE -ne 0) { throw 'Clone failed' }
+          git -C source checkout --detach $manifest.commit
+          if ($LASTEXITCODE -ne 0) { throw 'Checkout failed' }
+          & ./source/tools/package_installer.ps1 -Build ./payload -Validate
+      - name: Retain reviewable installer ZIP and update
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: Hearthtable-Lite-Windows
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            payload/Hearthtable-Lite-*-Windows.zip
+            payload/Hearthtable-Lite-*.hearthupdate
+            payload/build-manifest.json
+            payload/SHA256SUMS.txt
+      - name: Publish requested tagged release
+        if: inputs.build_only != true
+        shell: pwsh
+        run: |
+          & ./source/tools/publish_lite_installer.ps1 -Build ./payload -Tag $env:RELEASE_TAG -Repository $env:GITHUB_REPOSITORY
   windows-probe:
     if: inputs.windows_probe == true
     runs-on: windows-2022

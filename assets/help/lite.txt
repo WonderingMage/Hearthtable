@@ -1,4 +1,4 @@
-HEARTHTABLE LITE 1.0.1 · THE DM'S TABLE
+HEARTHTABLE LITE 1.0.2 · THE DM'S TABLE
 
 Lite is a separate, DM-led virtual tabletop for original 2014 fifth edition. The DM decides outcomes and homebrew exceptions. Players move their own pawns on the shared board and use their character sheet for rolls and intentions.
 
@@ -10,14 +10,12 @@ Use Build / F2 to place objects, walls and terrain, or Scenes to import a map / 
 SPELL AREAS
 Drag Circle, Cone or Square to mark an area. Choose Erase area and click the area to remove it; where areas overlap, the newest one is removed first. Areas… lists every spell area with an individual Remove control and Clear all spell areas. Ctrl+Z restores a removed area. Players cannot erase the DM’s areas. These are visual guides; the DM still resolves effects.
 
-CREATE YOUR HERO
-Create hero opens seven guided steps: Identity, Attributes, Skills, Equipment, Magic, Miniature and Review. Back/Next buttons stay visible; the numbered step buttons let you revisit a section. Required identity choices and point-buy errors take you back to the relevant choice before submission.
+IMPORT & REVIEW YOUR HERO
+Use Import character PDF to open a filled D&D Beyond Export to PDF character sheet. The popup immediately shows a live miniature beside your sheet. There is no new-character creation wizard. Scanned/flattened PDFs cannot supply editable form fields.
 
-Choose class, ancestry/subrace, subclass (when available), background and alignment from lists. New class choices replace the draft’s starting sheet, so choose class before later customization. The included ancestry/subclass options follow the 2014 SRD; imported and DM-approved names remain available. Name, description and story are free text; missing choices can be added through Add a DM-approved choice.
+Review Sheet (identity, final abilities, vitals, attacks), Training (all saves and skills), Equipment (quantity, equipped, attuned, coins), Spells (known/prepared spells, slots and casting totals), Story (features, proficiencies, defenses and notes), and Miniature. The preview uses the same cosmetic model as the board. Imported totals are retained rather than recalculated from class or ancestry; unknown imported choices remain selectable.
 
-Standard array is recommended: choosing an assigned score swaps it with the other ability, so each is used once. Point buy gives 27 points with the 2014 costs. Ancestry bonuses are displayed separately. Manual / imported scores are final and never receive ancestry bonuses twice. New heroes can use calculated basic HP/AC/attack; imported heroes keep their printed totals unless you explicitly enable calculation. Review higher-level features, proficiency, armor restrictions, subclass benefits and exceptions with your DM.
-
-Select skill training, weapons, armor, equipment and spells from the lists. Suggested training combines class/background choices for review; choose replacements for overlaps with your DM. Spells default to your class and available spell levels; other-class or exceptional choices need DM approval. Gear has quantity/equipped/attuned records; a pack is recorded as one item until you review its contents/weight. Customize the live miniature, then review and confirm the complete sheet. Imports use this same flow without replacing their scores, bonuses, custom choices, equipment or spell selections. Cancel leaves the campaign untouched.
+PDFs can omit equipped/attuned and spell-preparation flags. Confirm these explicitly. Add missing catalog equipment or SRD spells using the dropdowns. Your DM confirms homebrew, multiclass, progression and equipment effects. Approval stays available at the bottom; changing a field clears your confirmation. Cancel discards the draft. Players submit their reviewed sheet for DM acceptance.
 
 BLACKOUT AND FOG
 BLACK OUT player board hides the whole tabletop while leaving each player's character sheet usable. Revealing the board preserves individual hidden creatures, concealed objects and fog. Reveal / Conceal paints a 3-by-3-square fog brush; Visibility can cover or clear the whole map. Player preview shows the obscured view without changing your own authoritative data.
@@ -25,7 +23,7 @@ BLACK OUT player board hides the whole tabletop while leaving each player's char
 Enemy HP, AC, abilities, private notes, initiative totals and initiative order are withheld from player snapshots. Hidden actors and concealed props are removed. Fogged geometry and imported map pixels are removed/masked before transfer. Blackout transfers an empty placeholder scene and owned sheets. Information already shown to someone cannot be taken back from their memory or previously downloaded copies.
 
 SESSION
-Open Session, choose a UDP port and passphrase, and host. Friends need the same Hearthtable Lite build. Assign their heroes or review their submitted character / filled D&D Beyond PDF. Players may create a hero, review all imported values, customize the miniature and submit it for DM acceptance. Starting the table allows player intentions. LAN/internet routing uses the existing manual UDP port-forwarding / trusted virtual-LAN workflow; there is no relay or D&D Beyond account login.
+Open Session, choose a UDP port and passphrase, and host. Friends need the same Hearthtable Lite build. Assign their heroes or review their submitted character / filled D&D Beyond PDF. Players import their hero PDF, review all values, customize the miniature and submit it for DM acceptance. Starting the table allows player intentions. LAN/internet routing uses the existing manual UDP port-forwarding / trusted virtual-LAN workflow; there is no relay or D&D Beyond account login.
 
 PLAYERS: EXPAND YOUR SHEET
 Click Expand character sheet (or C). Overview contains final abilities, saves, all 18 skills, passive senses, HP/temp HP, AC, speed, proficiency, initiative modifier, inspiration, defenses, conditions, exhaustion, Hit Dice and death-save records. Actions contains weapon rolls and the 2014 action references, including grapple, shove, Help, Dodge, Hide, Ready, Search, objects, bonus actions and reactions.
@@ -47,6 +45,6 @@ Use + Custom creature to write a stat block, or import a .hearthcreature. To ask
 SAVES, PORTABLE COPIES AND UPDATES
 Lite uses its own Hearthtable Lite user-data directory and protocol 11. The original Hearthtable remains a separate edition. To bring an old campaign into Lite, export its JSON and import it through Campaign; keep the original backup. Portable campaign copies contain private DM notes, hidden scenes and the active installed application code, so keep those copies private.
 
-Download Hearthtable_Lite_Portable.exe once. Later compatible Lite code/assets updates use Settings → Import application update with Hearthtable-Lite-VERSION.hearthupdate from the lite-vVERSION release. Settings verifies the published release digest, saves a campaign backup and retains rollback before restarting. Classic Hearthtable and Lite updates are not interchangeable. Engine/updater-foundation changes may require a new EXE.
+Extract Hearthtable-Lite-VERSION-Windows.zip and run its installer. It creates desktop/Start Menu shortcuts and installs the app and versioned source in Program Files (x86). Campaigns and updates stay in AppData and survive uninstall. Later compatible Lite code/assets updates use Settings → Import application update with Hearthtable-Lite-VERSION.hearthupdate from the lite-vVERSION release. Settings verifies the published release digest, saves a campaign backup and retains rollback before restarting. Classic Hearthtable and Lite updates are not interchangeable. Engine/updater-foundation changes may require a new EXE.
 
-Build validation uses Godot 4.5.1 on Linux, rendered software OpenGL, exported Windows resources, and actual local DM/two-player UDP sessions. Native Windows, audio, real GPU hardware and external residential internet play require separate testing; this release remains a prerelease. Existing source and in-app notices retain SRD, engine, font and model attribution.
+Build validation uses Godot 4.5.1 on Linux, rendered software OpenGL, exported Windows resources, and actual local DM/two-player UDP sessions. Native Windows installer/headless checks run separately on a disposable hosted VM. Audio, real GPU hardware and external residential internet play require separate testing; this release remains a prerelease. Existing source and in-app notices retain SRD, engine, font and model attribution.
