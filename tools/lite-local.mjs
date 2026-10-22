@@ -112,7 +112,7 @@ async function run(exe,args,env,log,timeout=300000,godot=false) {
   const child=spawn(exe,args,{env,windowsHide:true,stdio:['ignore','pipe','pipe']});let timedOut=false;
   const timer=setTimeout(()=>{if(child.exitCode!==null || child.signalCode!==null || !child.pid)return;timedOut=true;if(process.platform==='win32')spawnSync('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});else child.kill('SIGTERM');},timeout);
   for(const input of [child.stdout,child.stderr])input.on('data',chunk=>{stream.write(chunk);text+=chunk.toString();if(text.length>16000000)text=text.slice(-16000000);});
-  try {const code=await new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',resolve);});const assessment=godot?godotLog(text):{failed:bad.test(text)};if(timedOut || code!==0 || assessment.failed)throw Error('Validation failed'+(timedOut?' (timeout)':'')+'; inspect '+log+'\n'+text.slice(-1800));if(assessment.builtinFallback)console.log('Godot verified bundled CA fallback; original certificate-store diagnostic retained in '+log);return text;}
+  try {const code=await new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',resolve);});const assessment=godot?godotLog(text):{failed:bad.test(text)};if(timedOut || code!==0 || assessment.failed)throw Error('Validation failed'+(timedOut?' (timeout)':'')+'; inspect '+log+'\n'+text.slice(godot?-1800:-6000));if(assessment.builtinFallback)console.log('Godot verified bundled CA fallback; original certificate-store diagnostic retained in '+log);return text;}
   finally {clearTimeout(timer);await new Promise(resolve=>stream.end(resolve));}
 }
 function runGodot(exe,args,env,log,timeout=300000) {return run(exe,['--verbose',...args],env,log,timeout,true);}

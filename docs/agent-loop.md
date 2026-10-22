@@ -26,11 +26,16 @@ continues to decide outcomes. Each cycle still tackles one supported change.
 
 After creating the source copy and `Hearthtable-Autopilot` worktree, fetch these
 launcher files into that worktree (stop and report an error instead of forcing):
+For an existing loop, first pause future starts and wait for `status` to show
+`Lock present: false`. Preserve/review uncommitted changes before merging.
+The owner's accepted app commits may diverge from the tooling branch; a normal
+merge preserves both histories.
 
 ```powershell
-git -C "$env:USERPROFILE\Dev\Hearthtable-Autopilot" fetch origin
-git -C "$env:USERPROFILE\Dev\Hearthtable-Autopilot" merge --ff-only origin/edition/lite
-node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\agent-loop.mjs" doctor
+$repo="$env:USERPROFILE\Dev\Hearthtable-Autopilot";
+git -C $repo fetch origin;
+if ($LASTEXITCODE -eq 0) { git -C $repo merge --no-edit origin/edition/lite };
+if ($LASTEXITCODE -eq 0) { node "$repo\tools\agent-loop.mjs" doctor };
 ```
 
 `doctor` only checks the branch, clean source, expected repository, Git commit identity and Codex
