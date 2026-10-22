@@ -77,6 +77,7 @@ func player(observer: bool):
 	var name="Bea" if observer else "Ada";var id="bea_hero" if observer else "ada_hero";var prefix="O" if observer else "P"
 	check(w.join_session("127.0.0.1","lite-network",24731,name)==OK,"Guest connects with the Lite protocol")
 	if not await wait_for(func():return w.client and marker("BLACKOUT_READY") and w.can_control(w.actor(id)),"initial private sheet"):return
+	check(w.multiplayer.get_peers().size()==1 and w.multiplayer.get_peers()[0]==1,"Lite guests connect only to the DM without direct player-to-player relay")
 	check(w.data.scene=="obscured" and w.actor("visible_foe").is_empty() and w.data.scenes[0].image.is_empty(),"Actual UDP blackout sends no board pieces or private map")
 	check(w.actor(id).notes==("BEA_PRIVATE_SHEET" if observer else "ADA_PRIVATE_SHEET") and w.data.actors.size()==1,"Each guest receives their complete owned sheet during blackout")
 	check(not JSON.stringify(w.data).contains("SECRET_"),"Blackout packets contain no enemy, object, journal or DM dice secrets")

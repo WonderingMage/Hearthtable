@@ -1,5 +1,16 @@
 # Hearthtable Lite development handoff
 
+Release-checkpoint validation exposed the known intermittent ENet zero-channel
+send error even with the existing application-level sync guard. Pinned Godot
+4.5.1 `SceneMultiplayer::_del_peer` sends built-in peer-relay announcements
+before the game's disconnect callback and can target a second departing guest.
+Lite hosts now disable that unused SceneMultiplayer server relay; all gameplay
+already travels through the DM. The real two-player test checks that each guest
+has only the DM as a transport peer while retaining the existing ownership,
+privacy, movement, spell-decision and concurrent-departure checks. This is not
+a diagnosis of the owner's separate native memory-access popup. Network errors
+remain fatal; improved role diagnostics retain all peer errors and exit codes.
+
 The owner now explicitly authorizes an automatic new installer release after
 every **five accepted improvements**. `tools/agent-loop/releases.mjs` keeps a
 private durable counter (new accepted cycles only; failed/no-change cycles do

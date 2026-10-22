@@ -1,4 +1,5 @@
 [
+  "Multiplayer sessions handle two players leaving together without the previous network shutdown error. Player rolls, movement, private sheets and decisions continue to pass through the DM.",
   "Bundled maps are imported by a small catalog ID; the throne map image is loaded locally instead of being placed in the Add to scene library command.",
   "New desktop composition: framed company roster, health bars and selection states, readable ink-and-bronze controls, a two-row DM navigator, larger scene heading and illustrated action cards.",
   "Replace the new-character wizard with a PDF review popup: live miniature preview, final stats, all saves/skills, equipped/attuned items, known/prepared spells and slot pools, story and cosmetic customization.",

@@ -47,6 +47,12 @@ function fixture(t) {
   const output=path.join(base,'results');fs.mkdirSync(output);
   return {base,project,output};
 }
+test('a multiplayer failure retains every role error and the native exit code',()=>{
+  const py=pythonCommand(),module=fileURLToPath(new URL('./test_lite_network.py',import.meta.url));
+  const code='import importlib.util,pathlib,sys,tempfile;s=importlib.util.spec_from_file_location("network",sys.argv[1]);m=importlib.util.module_from_spec(s);s.loader.exec_module(m)\nwith tempfile.TemporaryDirectory() as folder:\n p=pathlib.Path(folder);(p/"host.log").write_text("FAIL Timeout waiting for player\\n");(p/"player.log").write_text("SCRIPT ERROR: Synthetic peer failure\\n at: sample.gd:4\\n"+"verbose cleanup\\n"*100);(p/"observer.log").write_text("Waiting for DM decision\\n");print(m.role_diagnostics(p,{"host":1,"player":3221225477,"observer":None}))';
+  const result=spawnSync(py.exe,['-I','-c',code,module],{encoding:'utf8',windowsHide:true});
+  assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/Timeout waiting for player/);assert.match(result.stdout,/Synthetic peer failure/);assert.match(result.stdout,/sample.gd:4/);assert.match(result.stdout,/0xC0000005/);assert.match(result.stdout,/observer: running/);
+});
 test('the local helper has no release/install/scheduling action',()=>{
   assert.equal(options([]).action,'doctor');
   for(const action of ['publish','install','enable'])assert.throws(()=>options([action]));

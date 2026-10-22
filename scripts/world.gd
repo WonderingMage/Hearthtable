@@ -749,6 +749,10 @@ func reset_starter():
 
 func host_session(password: String,port: int=24680,lobby: bool=false) -> Error:
 	disconnect_session()
+	# Lite routes all player commands and snapshots through the DM. Godot's
+	# unused peer-to-peer relay can announce one departing guest to another
+	# whose ENet channels have already closed in the same network poll.
+	if lite_enabled and multiplayer is SceneMultiplayer:multiplayer.server_relay=false
 	var peer=ENetMultiplayerPeer.new()
 	var error=peer.create_server(clampi(port,1024,65535),8)
 	if error!=OK:return error
