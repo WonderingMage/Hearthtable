@@ -1,5 +1,22 @@
 # Hearthtable Lite development handoff
 
+Verified implementation source `c21fdde4b54efac3522e381584431ebdbe81bd53`:
+Windows launcher run `39699389271` passed 46 unit/integration checks, the real
+Codex sandbox Git commit/prerequisite/app checks, and the real version-bumped
+release checkpoint (233 source/rendered, 43 rendered multiplayer, 154 native
+compiled assertions with matching EXE/update). All release API/tag-push operations
+in the checkpoint test are doubles; no real model cycle or release was started.
+Normal Windows workflow `39699389277` passed too. Installer validation run
+`39699451875` passed Linux payload/update/portable checks and native Windows
+setup/source/shortcuts/uninstall checks, retaining `Hearthtable-Lite-Windows`
+artifact `12392810602` with publication explicitly skipped. This is the cloud
+1.0.2 candidate including the relay fix, not the owner's newer local app commits.
+The preceding controller tests correctly blocked on the ENet error before the
+fix. Linux rendered regression confirmed the old topology fails both new guest
+checks and the corrected session passes 43. Owner crash diagnostics and local
+GitHub CLI sign-in remain separate pending inputs; the latest public Lite
+release remains `lite-v1.0.1`.
+
 Release-checkpoint validation exposed the known intermittent ENet zero-channel
 send error even with the existing application-level sync guard. Pinned Godot
 4.5.1 `SceneMultiplayer::_del_peer` sends built-in peer-relay announcements

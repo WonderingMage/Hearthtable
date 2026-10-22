@@ -320,7 +320,7 @@ write access to this repository. This is a manual account login, not a request
 for credentials in chat; it is separate from `codex login`:
 
 ```powershell
-gh auth login --hostname github.com --git-protocol https --web --scopes repo,workflow
+gh auth login --hostname github.com --git-protocol https --web --scopes "repo,workflow"
 ```
 
 The launcher uses these existing credentials per command without changing
@@ -358,6 +358,15 @@ download digests, native installer evidence and exact source transitions without
 publishing. A separate opt-in hosted Windows test runs real local rendered,
 network and versioned EXE/update validation, with those remote operations still
 replaced. It does not create a real tag/release on GitHub or start model agents.
+
+Implementation source `c21fdde4b54efac3522e381584431ebdbe81bd53` passed the
+[Windows controller checks](https://github.com/WonderingMage/Hearthtable/actions/runs/39699389271):
+46 ordinary checks plus real sandbox validation and a version-bumped release
+checkpoint with 233 rendered/source, 43 rendered multiplayer and 154 compiled
+assertions. Remote publishing operations remained test doubles. The separate
+[installer build](https://github.com/WonderingMage/Hearthtable/actions/runs/39699451875)
+also passed with publication skipped. These validate the implementation, not
+the owner's GitHub CLI login or their separate native memory-access crash.
 
 The launcher at commit `9393717dd75f100c2f77bbc13f205de502a53729` passed
 all **13 native Windows checks** in [run 39556168335](https://github.com/WonderingMage/Hearthtable/actions/runs/39556168335).
