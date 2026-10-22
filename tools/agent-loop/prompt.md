@@ -20,6 +20,9 @@ from observed metadata rather than inventing model verification.
 On Windows, use shell tools with login=false and an explicit project workdir.
 If invoking PowerShell yourself, use -NoProfile and Set-Location -LiteralPath
 with the supplied project path; a profile may otherwise reset the location.
+For ripgrep file filters, use `rg -n 'pattern' scripts -g '*.gd'`; Windows does
+not expand `scripts/*.gd` as a shell wildcard. A search error is distinct from
+a native Godot crash and must not be reported as its cause without evidence.
 
 Before editing, Critic inspects the current program and recent Git history to
 identify missing campaign capabilities, concrete defects or usability problems.
@@ -140,6 +143,12 @@ from that clean commit. Windows compiled core checks must pass. These are local
 candidate artifacts, not a publication or permission to install an unpublished
 update. Record their paths/hashes in the report. Build failure means blocked,
 even if a candidate commit exists; preserve it and the diagnostics.
+The owner authorizes an installer release every five accepted improvements.
+The parent launcher counts successful cycles and runs local full UI/network/build
+validation plus the existing GitHub release pipeline at that checkpoint. This
+does not authorize workers to push/tag/publish or change the counter. Failed
+and no-change cycles do not count. Known unresolved native crashes are blockers;
+never replace a crashed check with source inspection or suppress its diagnostics.
 
 Commit accepted changes only on automation/lite-improvements. Do not discard
 uncommitted work, reset, clean or force anything. If edits remain unresolved,

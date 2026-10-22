@@ -1,6 +1,11 @@
 # Lite releases
 
-The owner authorizes public releases in `WonderingMage/Hearthtable`, but each publication still requires a request. A coding task prepares the next update/artifacts; it does not automatically publish. Never change an existing published tag or asset.
+The owner authorizes public releases in `WonderingMage/Hearthtable`. The local
+improvement loop now has standing authorization to publish a new installer
+release after every **five accepted improvements**, following its local and
+GitHub validation gates. See [the loop release checkpoint](agent-loop.md#release-after-five-accepted-improvements).
+Other coding tasks prepare updates/artifacts and publish only on request.
+Never change an existing published tag or asset.
 
 Future Lite downloads are **installer ZIPs**, replacing the single plain EXE as the primary asset. See [Windows installation and signing](windows-installation.md) for paths, source, tests and publisher limitations. Settings-compatible `.hearthupdate` files remain separate release assets so existing fixed-origin digest verification continues to work.
 

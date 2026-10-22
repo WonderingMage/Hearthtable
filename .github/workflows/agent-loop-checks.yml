@@ -32,7 +32,7 @@ jobs:
           git -C source checkout --detach $env:GITHUB_SHA
           if ($LASTEXITCODE -ne 0) { throw 'Checkout failed' }
           $log=Join-Path $env:RUNNER_TEMP 'agent-loop-tests.txt'
-          node --test ./source/tools/agent-loop.test.mjs ./source/tools/lite-local.test.mjs 2>&1 | Tee-Object -FilePath $log
+          node --test ./source/tools/agent-loop.test.mjs ./source/tools/agent-loop/releases.test.mjs ./source/tools/lite-local.test.mjs 2>&1 | Tee-Object -FilePath $log
           $result=$LASTEXITCODE
           $text=Get-Content -Raw -LiteralPath $log
           $escaped=$text.Substring([Math]::Max(0,$text.Length-3500)).Replace('%','%25').Replace("`r",'%0D').Replace("`n",'%0A')
@@ -61,6 +61,13 @@ jobs:
           }
           if ($result -eq 0) {
             node --test --test-name-pattern='real Windows Codex sandbox validates' ./source/tools/agent-loop.test.mjs 2>&1 | Tee-Object -FilePath $log -Append
+            $result=$LASTEXITCODE
+          }
+          if ($result -eq 0) {
+            # Real local app/GUI/network/EXE checks; every GitHub operation is
+            # a test double. This does not push tags or publish anything.
+            $env:HEARTHTABLE_RELEASE_VALIDATION='1'
+            node --test --test-name-pattern='native release checkpoint validates' ./source/tools/agent-loop/releases.test.mjs 2>&1 | Tee-Object -FilePath $log -Append
             $result=$LASTEXITCODE
           }
           $text=Get-Content -Raw -LiteralPath $log

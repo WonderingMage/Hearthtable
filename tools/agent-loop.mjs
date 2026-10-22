@@ -8,6 +8,7 @@ import {createHash, randomUUID} from 'node:crypto';
 import {spawn, spawnSync} from 'node:child_process';
 import {pythonCommand} from './python-runtime.mjs';
 import {toolHome} from './lite-local.mjs';
+import {advanceRelease,recordAccepted,releaseProgress,releaseStatus,releaseEvery} from './agent-loop/releases.mjs';
 
 const script = fileURLToPath(import.meta.url);
 const tools = path.dirname(script);
@@ -24,7 +25,7 @@ export function parseArgs(args) {
   }
   options.timeout=Number(options.timeout);
   if(!Number.isFinite(options.timeout) || options.timeout<100 || options.timeout>45*60_000) throw new Error('Timeout must be between 100 ms and 45 minutes.');
-  if(!['doctor','probe','run','enable','pause','status','unlock'].includes(options.action)) throw new Error('Use doctor, probe, run, enable, pause, status or unlock.');
+  if(!['doctor','probe','run','release','enable','pause','status','unlock'].includes(options.action)) throw new Error('Use doctor, probe, run, release, enable, pause, status or unlock.');
   return options;
 }
 export function location(options) {
@@ -151,7 +152,18 @@ export async function runCycle(options,loc,command) {
   const token=randomUUID();fs.writeFileSync(fd,JSON.stringify({pid:process.pid,token,started:new Date().toISOString()}));
   try {
     const before=preflight(loc);
-    cli(command,['login','status']);
+    if(options.action!=='probe') {
+      const progress=releaseProgress(loc),due=progress.pending.length>=releaseEvery || progress.batch;
+      if(options.action==='release' || due) {
+        if(options.codex)throw Error('Release checkpoints cannot use a --codex override.');
+        if(due)fs.rmSync(path.join(loc.state,'PAUSED'),{force:true});
+        const result=await advanceRelease(loc);console.log(result.message);
+        if(result.status==='published')fs.writeFileSync(path.join(loc.state,'ready.json'),JSON.stringify({revision:result.revision,when:new Date().toISOString(),report:result.report},null,2));
+        return;
+      }
+    }
+    command ||= codexCommand(options.codex);
+    cli(command,['--version']);cli(command,['login','status']);
     if(options.action!=='probe')fs.rmSync(path.join(loc.state,'PAUSED'),{force:true});
     const run=path.join(loc.state,'runs',new Date().toISOString().replace(/[:.]/g,'-')+'-'+token.slice(0,8));fs.mkdirSync(run,{recursive:true});
     const report=path.join(run,'report.json');const log=path.join(run,'console.txt');
@@ -172,7 +184,10 @@ export async function runCycle(options,loc,command) {
     preflight(loc);
     fs.copyFileSync(report,path.join(loc.state,'latest.json'));
     fs.writeFileSync(path.join(loc.state,'ready.json'),JSON.stringify({revision:after,when:new Date().toISOString(),report},null,2));
+    recordAccepted(loc,result,report);
     console.log('\n'+result.status.toUpperCase()+': '+result.summary+'\nNext: '+result.next_step+'\nReport: '+report);
+    console.log(releaseStatus(loc));
+    if(releaseProgress(loc).pending.length>=releaseEvery)console.log('RELEASE_DUE: the next run validates and publishes this five-improvement batch without starting more agents.');
   } catch(error) {
     fs.rmSync(path.join(loc.state,'ready.json'),{force:true});
     fs.writeFileSync(path.join(loc.state,'PAUSED'),error.message);
@@ -190,7 +205,7 @@ export function taskXml(loc,launcher=script,node=process.execPath,when=new Date(
   const argumentsText='-NoProfile -NonInteractive -WindowStyle Hidden -EncodedCommand '+Buffer.from(launch,'utf16le').toString('base64');
   return `<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
-<RegistrationInfo><Description>Opt-in Hearthtable three-agent development cycle; no automatic releases.</Description></RegistrationInfo>
+<RegistrationInfo><Description>Opt-in Hearthtable development; verified installer release every five accepted improvements.</Description></RegistrationInfo>
 <Triggers><TimeTrigger><Repetition><Interval>PT10M</Interval><StopAtDurationEnd>false</StopAtDurationEnd></Repetition><StartBoundary>${xmlEscape(when)}</StartBoundary><Enabled>true</Enabled></TimeTrigger></Triggers>
 <Principals><Principal id="Owner"><UserId>@OWNER_SID@</UserId><LogonType>InteractiveToken</LogonType><RunLevel>LeastPrivilege</RunLevel></Principal></Principals>
 <Settings><MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy><DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries><StopIfGoingOnBatteries>false</StopIfGoingOnBatteries><StartWhenAvailable>false</StartWhenAvailable><Enabled>true</Enabled><WakeToRun>false</WakeToRun><ExecutionTimeLimit>PT50M</ExecutionTimeLimit></Settings>
@@ -212,13 +227,14 @@ export async function main(args=process.argv.slice(2)) {
       if(alive) throw new Error('The recorded process still exists. Leave its lock in place.');
       fs.unlinkSync(path.join(loc.state,'running.json'));
     }
-    console.log('Reports: '+loc.state+'\nPaused: '+fs.existsSync(path.join(loc.state,'PAUSED'))+'\nLock present: '+fs.existsSync(path.join(loc.state,'running.json'))+'\nTask: '+loc.task);
+    console.log('Reports: '+loc.state+'\nPaused: '+fs.existsSync(path.join(loc.state,'PAUSED'))+'\nLock present: '+fs.existsSync(path.join(loc.state,'running.json'))+'\nTask: '+loc.task+'\n'+releaseStatus(loc));
     if(fs.existsSync(path.join(loc.state,'latest.json'))) console.log(fs.readFileSync(path.join(loc.state,'latest.json'),'utf8'));
     return;
   }
-  const head=preflight(loc);const command=codexCommand(options.codex);const version=cli(command,['--version']);cli(command,['login','status']);
-  if(options.action==='doctor') {console.log('Workspace: '+loc.project+'\nBranch: '+branch+'\nCodex: '+version+'\nCoordinator and worker model: '+loopModel+'\nReports: '+loc.state+'\nNext: run one manual cycle. This check did not start agents or create a scheduled task.');return;}
-  if(['run','probe'].includes(options.action)) {await runCycle(options,loc,command);return;}
+  const head=preflight(loc);
+  if(['run','probe','release'].includes(options.action)) {await runCycle(options,loc,null);return;}
+  const command=codexCommand(options.codex);const version=cli(command,['--version']);cli(command,['login','status']);
+  if(options.action==='doctor') {const gh=spawnSync('gh',['--version'],{encoding:'utf8',windowsHide:true,timeout:5000});console.log('Workspace: '+loc.project+'\nBranch: '+branch+'\nCodex: '+version+'\nCoordinator and worker model: '+loopModel+'\nReports: '+loc.state+'\n'+releaseStatus(loc)+'\nGitHub release CLI: '+(!gh.error && gh.status===0?'installed; login/write access checked at the release checkpoint':'needed before the first release; install GitHub.cli and run gh auth login')+'\nNext: run one manual cycle. This check did not start agents or create a scheduled task.');return;}
   if(process.platform!=='win32') throw new Error('Schedule installation is Windows-only.');
   initialize(loc);
   if(!fs.existsSync(path.join(loc.state,'ready.json')) || json(path.join(loc.state,'ready.json')).revision!==head) throw new Error('First complete a successful manual cycle on this exact revision.');

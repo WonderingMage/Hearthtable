@@ -8,8 +8,10 @@ PowerShell `.ps1` execution-policy problems. It never changes that policy.
 The coordinator explicitly delegates to Builder, Tester and Critic. Builder
 alone edits app source. Tester validates independently; Critic reviews the
 actual result. Each cycle selects at most one supported improvement, allows two
-revision rounds, then stops. No-change is valid. Commits stay on
-`automation/lite-improvements`; pushing/merging/releases remain manual. These
+revision rounds, then stops. No-change is valid. Application commits stay on
+`automation/lite-improvements`. The owner authorizes a verified installer release
+after every five accepted improvements; the launcher handles that checkpoint
+outside the worker sandbox. Workers never push, tag or publish. These
 role/action limits are agent instructions; the launcher's branch/status/report
 checks add safeguards, not a guarantee against every possible agent mistake.
 
@@ -198,8 +200,9 @@ local Godot editor, safe validation, GUI access for a visual change or packaging
 tools are missing, the cycle must report BLOCKED before editing. A clean approved
 candidate is packaged with `lite-local.mjs build`: EXE plus compatible Settings
 update, source commit/hashes and native compiled core checks. It does not create
-an installer, tag, release or install that update into your game. Publication
-remains a separate requested release using the established installer pipeline.
+an installer, tag, release or install that update into your game during the
+worker cycle. The parent launcher handles the authorized five-improvement
+release checkpoint using the established installer pipeline.
 
 Correct any blocker and rerun the manual command. Existing edits are preserved;
 review them rather than using reset/clean. A manual retry clears a prior pause
@@ -248,17 +251,108 @@ report, with a latest report and checkpoint. Failures, invalid reports or
 unfinished work pause subsequent scheduled model calls. A paused task still
 performs lightweight preflight checks; it does not launch model work. Abrupt
 shutdown can leave a lock, which intentionally blocks further cycles pending
-review. No campaign/PDF/build data or reports are uploaded automatically.
+review. Publication uploads only tested player assets and tracked source;
+private campaigns, PDFs and QA reports stay local.
+
+## Release after five accepted improvements
+
+The owner explicitly authorizes publication after every **five accepted**
+improvements. Failed/blocked/no-change cycles do not count. Counting starts with
+accepted cycles run by this updated launcher; historical reports are not
+retroactively counted. Earlier unreleased app changes still enter the first
+release because its source includes them. `status` prints the current count.
+The private `release-progress.json` survives restarts and deduplicates commits.
+
+After the fifth accepted cycle, the **next run** is a release checkpoint rather
+than another model cycle. It:
+
+1. Verifies GitHub CLI authentication/write access and a clean, unchanged
+   development source. Creates an external detached worktree for the release
+   metadata, leaving existing development commits and private data intact.
+2. Selects the next unused Lite patch version (initially 1.0.2 if still unused),
+   updates runtime/guide version metadata, records the five commit IDs in
+   `docs/release-batches.json` and prepares release-specific highlights. Existing
+   tags and published assets are never replaced.
+3. Runs the safe full rendered suites, rendered DM/two-player network suite and
+   native candidate build against that exact clean commit. Any crash/error stops
+   before a release tag is pushed. Logs and failed candidates remain available.
+4. Pushes **only the new Lite tag**, transferring its source history, and lets
+   `release.yml` rebuild/test the application, portable/update lifecycle and
+   native Windows installer before publishing the installer ZIP, matching
+   `.hearthupdate`, checksums and build manifest. Development branches are not
+   automatically merged into `main` or `edition/lite`.
+5. On subsequent scheduled runs, checks the matching workflow/release without
+   starting more improvement agents. Downloads the four published assets and
+   verifies their GitHub digests, payload checksums, exact source/version and
+   required native installer/test evidence before consuming the five entries.
+   If a finished workflow retained a fully verified draft because its token
+   could not publish, the owner-authenticated CLI can finish that publication.
+6. Advances the clean local development branch to the verified release metadata
+   commit with `--ff-only`, records the public URL, then resumes improvements on
+   later runs. Independent local edits halt this transition for review.
+
+This makes the release source publicly available through its tag. It never
+installs the new app/update on the owner's PC. Releases retain prerelease status
+and the existing signing limitations. Publication errors pause the loop; the
+counter resets only after verified publication, never on a tag push or queued
+workflow. Overlap protection applies to release checks too.
+
+The **Codex app Review button is not required**. GitHub CLI and Actions handle
+this path. The website can also inspect runs and retained drafts:
+
+- [Release pipeline](https://github.com/WonderingMage/Hearthtable/actions/workflows/release.yml)
+- [Releases and drafts](https://github.com/WonderingMage/Hearthtable/releases)
+
+Before the first release checkpoint, install GitHub CLI on the owner's PC if
+`gh --version` is unavailable:
+
+```powershell
+winget install --id GitHub.cli --exact
+```
+
+Open a new PowerShell window and sign in through the browser as an account with
+write access to this repository. This is a manual account login, not a request
+for credentials in chat; it is separate from `codex login`:
+
+```powershell
+gh auth login --hostname github.com --git-protocol https --web --scopes repo,workflow
+```
+
+The launcher uses these existing credentials per command without changing
+global Git configuration or passing credentials to workers. The free `doctor`
+reports whether the CLI is installed without contacting GitHub. Authentication
+and write access are checked at the checkpoint. Missing release login does not
+block the first four improvement cycles. It does block publication.
+
+Retry/check a due batch without starting any agents:
+
+```powershell
+node "$env:USERPROFILE\Dev\Hearthtable-Autopilot\tools\agent-loop.mjs" release
+```
+
+A queued workflow is checked again by the schedule. After a paused failure,
+correct its actual cause and run `release` manually; diagnostic state, source
+commits and existing tags must be preserved. A failed Actions run can be rerun
+on the website for the same immutable source. If repairing the app requires a
+different source commit, retain the batch/report for review rather than moving
+its tag or editing the counter. Do not merge tooling updates or run a second
+editor/test session while an existing cycle/checkpoint holds `running.json`.
 
 ## Launcher verification
 
-`node --test tools/agent-loop.test.mjs` uses temporary Git repositories and a
+`node --test tools/agent-loop.test.mjs tools/agent-loop/releases.test.mjs` uses temporary Git repositories and a
 **fake Codex executable**. It makes no model/API calls, does not touch normal
 campaign data, and never activates a repeating agent loop. The native Windows
 case briefly registers a uniquely named **disabled** task, verifies its
 10-minute cadence/limited-user settings, then removes that test task. The
 separate `Agent loop launcher checks` workflow runs these tests on Windows.
 Game/UI/build validation is separate from testing this launcher.
+Release tests replace **every** GitHub/API/tag-push operation with a test double.
+They check counting, resumable queues, failures, immutable tags, draft completion,
+download digests, native installer evidence and exact source transitions without
+publishing. A separate opt-in hosted Windows test runs real local rendered,
+network and versioned EXE/update validation, with those remote operations still
+replaced. It does not create a real tag/release on GitHub or start model agents.
 
 The launcher at commit `9393717dd75f100c2f77bbc13f205de502a53729` passed
 all **13 native Windows checks** in [run 39556168335](https://github.com/WonderingMage/Hearthtable/actions/runs/39556168335).

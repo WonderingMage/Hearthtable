@@ -9,6 +9,7 @@ import {parseArgs,location,preflight,validateReport,taskXml,sessionConfig,probeR
 import {pythonCommand} from './python-runtime.mjs';
 import {toolHome} from './lite-local.mjs';
 import {gitPrerequisite} from './agent-loop/git-prerequisite.mjs';
+import {releaseProgress} from './agent-loop/releases.mjs';
 const runner=fileURLToPath(new URL('./agent-loop.mjs',import.meta.url));
 function command(exe,args,options={}) {
   const r=spawnSync(exe,args,{encoding:'utf8',windowsHide:true,...options});
@@ -167,6 +168,14 @@ test('accepted changes require actual new HEAD, evidence and approvals',t=>{
   assert.throws(()=>validateReport({...report,tester_approved:false},before,after),/approvals/);
   assert.throws(()=>validateReport({...report,tests:[]},before,after),/test evidence/);
   assert.throws(()=>validateReport({...report,status:'no_change'},before,after),/unexpectedly/);
+  assert.deepEqual(releaseProgress(f.options).pending.map(x=>x.revision),[after]);
+  assert.equal(f.invoke('run').status,0);assert.equal(releaseProgress(f.options).pending.length,1,'A no-change cycle does not advance the release counter');
+});
+test('a release check below the threshold starts no models and preserves an existing pause',t=>{
+  const f=fixture(t),head=f.git('rev-parse','HEAD');assert.equal(f.invoke('pause').status,0);
+  const result=spawnSync(process.execPath,[runner,'release','--project',f.project,'--state',f.state],{encoding:'utf8',windowsHide:true,timeout:20000});
+  assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/NO_RELEASE_DUE/);assert.ok(fs.existsSync(path.join(f.state,'PAUSED')));
+  assert.ok(!fs.existsSync(path.join(f.state,'runs')));assert.equal(f.git('rev-parse','HEAD'),head);
 });
 test('blocked or unfinished work pauses future scheduled calls, preserving files',t=>{
   const f=fixture(t);const r=f.invoke('run','dirty');assert.notEqual(r.status,0);

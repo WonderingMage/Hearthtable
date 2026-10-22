@@ -54,7 +54,16 @@ def main():
     subprocess.run(['git','archive','--format=zip','--output',str(source),commit],cwd=ROOT,check=True)
     manifest={'validation':a.validation,'source_sha256':digest(source),'edition':'lite','product':'Hearthtable Lite','version':version,'tag':a.tag,'commit':commit,'dirty':False,'engine':'4.5.1','protocol':protocol,'filename':windows.name,'sha256':digest(windows),'update':{'filename':update.name,'sha256':digest(update),'pack_sha256':update_manifest['sha256']},'assertions':results}
     (output/'build-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n');(output/'SHA256SUMS.txt').write_text(digest(windows)+'  '+windows.name+'\n'+digest(update)+'  '+update.name+'\n')
+    highlights=json.loads((ROOT/'docs/release-highlights.json').read_text())
+    if not isinstance(highlights,list) or not highlights or any(not isinstance(text,str) or not text.strip() or len(text)>8000 for text in highlights):raise RuntimeError('Expected readable release highlights')
+    changes='\n'.join('* '+text.replace('\n',' ') for text in highlights)
     notes=f'''# Hearthtable Lite {version} — DM-led virtual tabletop
+
+## Changes in this release
+
+{changes}
+
+## Installation and play
 
 Download **Hearthtable-Lite-{version}-Windows.zip**, extract it and run the included setup program. It installs the app and versioned editable source in **Program Files (x86)\\Hearthtable Lite**, with desktop and Start Menu shortcuts. Accept Windows' administrator prompt. Campaigns, verified Settings updates and backups stay in AppData and survive uninstall. The application is unsigned. This separate Lite edition uses its own saves and protocol {protocol}.
 

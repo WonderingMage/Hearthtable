@@ -1,5 +1,30 @@
 # Hearthtable Lite development handoff
 
+The owner now explicitly authorizes an automatic new installer release after
+every **five accepted improvements**. `tools/agent-loop/releases.mjs` keeps a
+private durable counter (new accepted cycles only; failed/no-change cycles do
+not count). On the next run after five, the parent launcher, outside workers,
+prepares an immutable versioned source commit in an external worktree, performs
+full local rendered/network/native-build validation, and pushes only a new
+Lite tag. Existing `release.yml` gates installer ZIP/update publication. Later
+runs poll without agents and verify downloaded assets/digests, source/version
+and native installer evidence before consuming the batch and fast-forwarding
+the local development branch. Fully validated drafts can be finished with the
+owner's GitHub CLI login. `release` retries/checks a due batch without models.
+The owner must install/sign into GitHub CLI on their PC; Codex login is separate.
+See `docs/agent-loop.md`. The Codex Review button is not needed; the website's
+Actions/Releases pages are a fallback. No new release or real five-cycle batch
+was started from this cloud checkout; the owner's app commits remain local.
+
+Current diagnostic follow-up: the owner saw a native Godot 4.5.1 memory-access
+error during their still-active local run. Cause/stage is unverified; Windows
+fault module/logs and the final cycle report are pending after it finishes.
+Their pasted `rg: scripts/*.gd ... error 123` is a separate Windows wildcard
+problem, not evidence for the native crash's cause. The worker prompt now uses
+directory plus `-g '*.gd'` filtering and requires unresolved crashes to block
+acceptance. Preserve work and diagnostics; do not reinstall tools, relax errors
+or assume a successful CI run fixes the physical PC's native crash.
+
 The latest instruction broadens the local loop from bug fixing to substantial
 campaign feature development, using **GPT-6 Luna (`gpt-6-luna`)** for coordinator,
 Builder, Tester and Critic. Invocation-scoped `model` and
